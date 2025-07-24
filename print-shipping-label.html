@@ -15,29 +15,30 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: white;
-            overflow: hidden; /* ป้องกัน scrollbar ของหน้าหลัก */
+            background-color: #f0f2f5; /* Changed background for better contrast */
+            overflow: hidden; /* Prevent scrollbar on the main page */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* --- ส่วนของการหมุนหน้าจอ --- */
+        /* --- Page rotation container --- */
         .rotated-container {
             width: 100vh;
             height: 100vw;
             transform-origin: top left;
-            transform: rotate(-90deg);
+            transform: rotate(-90deg) translateX(-100vh); /* Adjusted transform for correct positioning */
             position: absolute;
-            top: 100%;
+            top: 0;
             left: 0;
             
-            /* จัดกึ่งกลางจอเต็มรูปแบบ */
+            /* Center the content */
             display: flex;
             justify-content: center; 
             align-items: center;     
             
             padding: 2vmin;
             box-sizing: border-box;
+            background-color: white;
         }
 
         /* --- SVG Container --- */
@@ -46,30 +47,29 @@
             height: 100%;
         }
         
-        /* --- สไตล์ของตัวอักษรใน SVG --- */
+        /* --- SVG Text Styles --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
-            fill: black; /* สีตัวอักษร */
-            font-size: 100px; /* ขนาดเริ่มต้นสำหรับชื่อและเบอร์โทร */
-            text-anchor: middle; /* จัดให้ข้อความอยู่กึ่งกลาง */
+            fill: black; /* Text color */
+            font-size: 100px; /* Base font size for name and phone */
+            text-anchor: middle; /* Center align text */
         }
         .svg-text-bold {
             font-weight: 700;
         }
-        /* สไตล์สำหรับที่อยู่โดยเฉพาะ */
+        /* Specific style for address */
         .svg-text-address {
-            font-size: 85px; /* ลดขนาดลงเล็กน้อย */
+            font-size: 85px; /* Slightly smaller font size for address */
         }
 
-
-        /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
-        #loader-overlay {
+        /* --- Notification Overlay (Loader/Error) --- */
+        #notification-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -80,40 +80,144 @@
             padding: 1em;
             box-sizing: border-box;
         }
+        
+        #notification-box {
+            background: white;
+            padding: 2em 3em;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- Print Button --- */
+        #print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 101;
+            padding: 12px 24px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
+            transition: all 0.2s ease-in-out;
+        }
+        #print-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        #print-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body, html {
+                background-color: white; /* Ensure background is white for printing */
+            }
+            #print-button, #notification-overlay {
+                display: none !important; /* Hide button and overlay when printing */
+            }
+            .rotated-container {
+                transform: rotate(-90deg) translateX(-100vh); /* Ensure rotation is correct for print */
+                padding: 0;
+                background-color: white;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- หน้าต่างสำหรับแจ้งเตือนผู้ใช้ -->
-    <div id="loader-overlay">
-        <div id="loader-text">กำลังโหลดข้อมูล...</div>
+    <!-- Notification overlay for user feedback -->
+    <div id="notification-overlay">
+        <div id="notification-box">
+            <div id="notification-text">กำลังโหลดข้อมูล...</div>
+        </div>
     </div>
+    
+    <!-- Print button -->
+    <button id="print-button" disabled>กำลังเตรียมข้อมูล</button>
 
-    <!-- เนื้อหาหลักที่จะถูกหมุน -->
+    <!-- Main content container that will be rotated -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <!-- จุดแก้ไขสำคัญ: เปลี่ยน preserveAspectRatio เป็น xMidYMin -->
         <svg id="svg-container" preserveAspectRatio="xMidYMin meet"></svg>
     </div>
 
     <script type="module">
+        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        // --- Firebase Configuration ---
+        // Use environment variable if available, otherwise fallback to hardcoded config
+        const firebaseConfig = typeof __firebase_config !== 'undefined' 
+            ? JSON.parse(__firebase_config)
+            : {
+                apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+                authDomain: "kawanwa-stone.firebaseapp.com",
+                projectId: "kawanwa-stone",
+                storageBucket: "kawanwa-stone.appspot.com",
+                messagingSenderId: "678984987842",
+                appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+            };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        // --- UI Elements ---
+        const notificationOverlay = document.getElementById('notification-overlay');
+        const notificationText = document.getElementById('notification-text');
+        const labelContainer = document.getElementById('label-container');
+        const printButton = document.getElementById('print-button');
+
+        // --- Initialize Firebase ---
+        let db;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            const auth = getAuth(app);
+            
+            // Sign in anonymously for secure access
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User is signed in, proceed to load data.
+                    console.log("Authenticated anonymously with UID:", user.uid);
+                    loadLabelData();
+                } else {
+                    // User is signed out. Try to sign in.
+                    signInAnonymously(auth).catch((error) => {
+                        console.error("Anonymous sign-in failed:", error);
+                        showError("ไม่สามารถเชื่อมต่อกับระบบได้", "กรุณาลองรีเฟรชหน้าอีกครั้ง");
+                    });
+                }
+            });
+
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            showError("การเริ่มต้นระบบล้มเหลว", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
+        }
+
+        // --- Event Listeners ---
+        printButton.addEventListener('click', () => {
+            window.print();
+        });
         
-        // --- ฟังก์ชันตัดคำสำหรับที่อยู่ ---
+        // --- Helper Functions ---
+        function showError(title, message = '') {
+            notificationText.innerHTML = `
+                <strong style="color: red; font-size: 1.2em;">${title}</strong>
+                <p style="font-size: 0.8em; margin-top: 1em;">${message}</p>
+            `;
+            notificationOverlay.style.display = 'flex';
+            printButton.disabled = true;
+            printButton.textContent = 'เกิดข้อผิดพลาด';
+        }
+
         function wrapText(text, maxCharsPerLine) {
+            if (!text || typeof text !== 'string') return [''];
             const words = text.split(' ');
             const lines = [];
             let currentLine = '';
@@ -126,11 +230,12 @@
                     currentLine += (currentLine.length > 0 ? ' ' : '') + word;
                 }
             });
-            lines.push(currentLine.trim());
+            if (currentLine) {
+                lines.push(currentLine.trim());
+            }
             return lines;
         }
 
-        // --- ฟังก์ชันหลักในการสร้าง SVG ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
@@ -143,7 +248,7 @@
             const addressLineHeight = 100; 
             const maxCharsForAddress = 30; 
 
-            // 1. สร้างบรรทัดชื่อผู้รับ
+            // 1. Create recipient name line
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("y", currentY);
@@ -152,7 +257,7 @@
             
             currentY += lineHeight;
 
-            // 2. สร้างบรรทัดที่อยู่ที่ตัดคำแล้ว
+            // 2. Create address lines with word wrapping
             const addressLines = wrapText(address, maxCharsForAddress);
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
@@ -163,7 +268,7 @@
                 currentY += addressLineHeight;
             });
 
-            // 3. สร้างบรรทัดเบอร์โทร
+            // 3. Create phone number line
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("y", currentY);
@@ -172,63 +277,64 @@
 
             svg.appendChild(group);
 
+            // Defer viewBox calculation to ensure layout is complete
             requestAnimationFrame(() => {
                 const bbox = group.getBBox();
                 const padding = 20;
                 svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
+                
+                // Center the text group horizontally within the viewBox
+                const centerX = (bbox.width / 2) + bbox.x;
+                Array.from(group.children).forEach(textElement => {
+                    textElement.setAttribute("x", centerX);
+                });
             });
         }
 
 
-        // Function to load and display label data
+        // --- Main Function to Load and Display Data ---
         async function loadLabelData() {
-            const loaderOverlay = document.getElementById('loader-overlay');
-            const loaderText = document.getElementById('loader-text');
-            const labelContainer = document.getElementById('label-container');
-            
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
 
             if (!orderId) {
-                loaderText.innerHTML = `
-                    <strong style="color: red; font-size: 1.2em;">ไม่พบรหัสออเดอร์!</strong>
-                    <p style="font-size: 0.8em; margin-top: 1em;">กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong></p>
-                `;
+                showError(
+                    'ไม่พบรหัสออเดอร์!',
+                    'กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong>'
+                );
                 return;
             }
 
             try {
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
-                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์ในระบบ");
+                if (!orderSnap.exists()) throw new Error(`ไม่พบข้อมูลออเดอร์ '${orderId}' ในระบบ`);
                 
                 const orderData = orderSnap.data();
+                if (!orderData.customerId) throw new Error("ออเดอร์ไม่มีข้อมูลรหัสลูกค้า");
+                
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
-
-                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้าที่ผูกกับออเดอร์นี้");
+                if (!customerSnap.exists()) throw new Error(`ไม่พบข้อมูลลูกค้า '${orderData.customerId}' ที่ผูกกับออเดอร์นี้`);
 
                 const customer = customerSnap.data();
 
-                const name = customer.name || 'N/A';
+                const name = customer.name || 'ไม่มีข้อมูลชื่อ';
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                const phone = customer.phone || 'N/A';
+                const phone = customer.phone || 'ไม่มีข้อมูลเบอร์โทร';
 
                 renderContentAsSVG(name, address, phone);
 
-                loaderOverlay.style.display = 'none';
+                notificationOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
+                printButton.disabled = false;
+                printButton.textContent = 'พิมพ์ใบปะหน้า';
 
             } catch (error) {
                 console.error("Error loading label data:", error);
-                loaderText.innerHTML = `
-                    <strong style="color: red; font-size: 1.2em;">เกิดข้อผิดพลาด</strong>
-                    <p style="font-size: 0.8em; margin-top: 1em;">${error.message}</p>
-                `;
+                showError("เกิดข้อผิดพลาดในการโหลดข้อมูล", error.message);
             }
         }
-
-        loadLabelData();
     </script>
 </body>
 </html>
