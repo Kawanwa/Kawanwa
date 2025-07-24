@@ -21,44 +21,53 @@
             print-color-adjust: exact;
         }
 
-        /* --- ส่วนของการหมุนหน้าจอ --- */
+        /* --- ส่วนของการหมุนหน้าจอ (วิธีใหม่ที่ถูกต้อง) --- */
         .rotated-container {
-            width: 100vh;
-            height: 100vw;
-            transform-origin: top left;
-            transform: rotate(-90deg);
-            position: absolute;
-            top: 100%;
-            left: 0;
+            width: 100vh; /* ความกว้างเท่ากับความสูงจอ */
+            height: 100vw; /* ความสูงเท่ากับความกว้างจอ */
             
-            /* จัดกึ่งกลางจอเต็มรูปแบบ */
+            transform-origin: 0 0; /* กำหนดจุดหมุนที่มุมซ้ายบน */
+            transform: rotate(-90deg) translateY(-100%); /* หมุนและย้ายตำแหน่งให้พอดี */
+            
+            /* --- จัดตำแหน่งเนื้อหาภายใน (วิธีใหม่ที่ถูกต้อง) --- */
             display: flex;
-            justify-content: center; 
-            align-items: center;     
+            flex-direction: column;
+            /* justify-content คือแกนตั้งของจอที่หมุนแล้ว */
+            justify-content: flex-end; /* จัดให้ชิดขอบล่าง */
+            /* align-items คือแกนนอนของจอที่หมุนแล้ว */
+            align-items: center;     /* จัดให้กึ่งกลาง */
             
-            padding: 2vmin;
+            padding: 4vmin;
             box-sizing: border-box;
         }
 
-        /* --- SVG Container --- */
-        #svg-container {
-            width: 100%;
-            height: 100%;
+        /* --- ส่วนของเนื้อหา --- */
+        .content-wrapper {
+            text-align: center;
+            flex-shrink: 0;
+            max-width: 100%;
         }
-        
-        /* --- สไตล์ของตัวอักษรใน SVG --- */
-        .svg-text {
-            font-family: 'Sarabun', sans-serif;
-            fill: black; /* สีตัวอักษร */
-            font-size: 100px; /* ขนาดเริ่มต้นสำหรับชื่อและเบอร์โทร */
-            text-anchor: middle; /* จัดให้ข้อความอยู่กึ่งกลาง */
-        }
-        .svg-text-bold {
+
+        /* 1. ชื่อผู้รับ */
+        .name-line {
+            white-space: nowrap;
+            font-size: 12vmin;
+            line-height: 1.2;
             font-weight: 700;
         }
-        /* สไตล์สำหรับที่อยู่โดยเฉพาะ */
-        .svg-text-address {
-            font-size: 85px; /* ลดขนาดลงเล็กน้อย */
+        
+        /* 2. ที่อยู่ */
+        #address {
+            font-size: 10vmin; /* ลดขนาดลงเล็กน้อย */
+            line-height: 1.2;
+            white-space: normal; /* ตัดคำขึ้นบรรทัดใหม่ได้ */
+        }
+
+        /* 3. เบอร์โทร */
+        #phone {
+            font-size: 10vmin;
+            line-height: 1.2;
+            white-space: nowrap;
         }
 
 
@@ -90,8 +99,11 @@
 
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <!-- จุดแก้ไขสำคัญ: เปลี่ยน preserveAspectRatio เป็น xMidYMin -->
-        <svg id="svg-container" preserveAspectRatio="xMidYMin meet"></svg>
+        <div class="content-wrapper">
+            <div class="name-line">ผู้รับ: <span id="name"></span></div>
+            <div id="address"></div>
+            <div id="phone"></div>
+        </div>
     </div>
 
     <script type="module">
@@ -112,70 +124,23 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันตัดคำสำหรับที่อยู่ ---
-        function wrapText(text, maxCharsPerLine) {
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = '';
+        // --- ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ ---
+        function fitContentToScreen() {
+            const container = document.querySelector('.rotated-container');
+            const content = document.querySelector('.content-wrapper');
 
-            words.forEach(word => {
-                if (currentLine.length > 0 && (currentLine + ' ' + word).length > maxCharsPerLine) {
-                    lines.push(currentLine.trim());
-                    currentLine = word;
-                } else {
-                    currentLine += (currentLine.length > 0 ? ' ' : '') + word;
-                }
-            });
-            lines.push(currentLine.trim());
-            return lines;
-        }
-
-        // --- ฟังก์ชันหลักในการสร้าง SVG ---
-        function renderContentAsSVG(name, address, phone) {
-            const svgNS = "http://www.w3.org/2000/svg";
-            const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; // Clear previous content
-
-            const group = document.createElementNS(svgNS, "g");
-            
-            let currentY = 100;
-            const lineHeight = 120;
-            const addressLineHeight = 100; 
-            const maxCharsForAddress = 30; 
-
-            // 1. สร้างบรรทัดชื่อผู้รับ
-            const nameText = document.createElementNS(svgNS, "text");
-            nameText.setAttribute("class", "svg-text svg-text-bold");
-            nameText.setAttribute("y", currentY);
-            nameText.textContent = `ผู้รับ: ${name}`;
-            group.appendChild(nameText);
-            
-            currentY += lineHeight;
-
-            // 2. สร้างบรรทัดที่อยู่ที่ตัดคำแล้ว
-            const addressLines = wrapText(address, maxCharsForAddress);
-            addressLines.forEach(line => {
-                const addressText = document.createElementNS(svgNS, "text");
-                addressText.setAttribute("class", "svg-text svg-text-address");
-                addressText.setAttribute("y", currentY);
-                addressText.textContent = line;
-                group.appendChild(addressText);
-                currentY += addressLineHeight;
-            });
-
-            // 3. สร้างบรรทัดเบอร์โทร
-            const phoneText = document.createElementNS(svgNS, "text");
-            phoneText.setAttribute("class", "svg-text");
-            phoneText.setAttribute("y", currentY);
-            phoneText.textContent = `โทร. ${phone}`;
-            group.appendChild(phoneText);
-
-            svg.appendChild(group);
-
+            // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่าเบราว์เซอร์วาดภาพเสร็จแล้ว
             requestAnimationFrame(() => {
-                const bbox = group.getBBox();
-                const padding = 20;
-                svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
+                // เนื่องจากจอหมุนอยู่ เราจึงต้องเช็คความสูงของเนื้อหา (scrollHeight)
+                // กับความกว้างของกรอบ (clientWidth)
+                const containerWidth = container.clientWidth;
+                const contentHeight = content.scrollHeight;
+
+                if (contentHeight > containerWidth) {
+                    const scale = containerWidth / contentHeight;
+                    // ย่อส่วนเนื้อหาลงมาให้พอดี
+                    content.style.transform = `scale(${scale})`;
+                }
             });
         }
 
@@ -185,6 +150,9 @@
             const loaderOverlay = document.getElementById('loader-overlay');
             const loaderText = document.getElementById('loader-text');
             const labelContainer = document.getElementById('label-container');
+            const nameEl = document.getElementById('name');
+            const addressEl = document.getElementById('address');
+            const phoneEl = document.getElementById('phone');
             
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
@@ -210,14 +178,15 @@
 
                 const customer = customerSnap.data();
 
-                const name = customer.name || 'N/A';
-                const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                const phone = customer.phone || 'N/A';
-
-                renderContentAsSVG(name, address, phone);
+                nameEl.textContent = customer.name || 'N/A';
+                addressEl.textContent = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                phoneEl.textContent = `โทร. ${customer.phone || 'N/A'}`;
 
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
+                
+                // เรียกใช้ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ
+                fitContentToScreen();
 
             } catch (error) {
                 console.error("Error loading label data:", error);
