@@ -8,54 +8,44 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* General body and html styles */
         body, html {
             font-family: 'Sarabun', sans-serif;
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f2f5; /* Background for contrast when not printing */
-            overflow: hidden; /* Prevent scrollbar on the main page */
+            background-color: #f0f2f5;
+            overflow: hidden;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
-        /* --- Page rotation container --- */
         .rotated-container {
             position: absolute;
             top: 50%;
             left: 50%;
-
-            /* หมุน 90 องศา และจัดกึ่งกลาง */
             transform: rotate(-90deg) translate(-50%, -50%);
             transform-origin: center center;
-
             width: 100vh;
             height: 100vw;
-
-            /* Center the content using Flexbox */
             display: flex;
-            justify-content: center; 
-            align-items: center;     
-            
+            justify-content: center;
+            align-items: center;
             padding: 2vmin;
             box-sizing: border-box;
             background-color: white;
         }
 
-        /* --- SVG Container --- */
         #svg-container {
             width: 100%;
             height: 100%;
         }
         
-        /* --- SVG Text Styles --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
             font-size: 100px;
-            text-anchor: middle; /* Center align text */
+            text-anchor: middle;
         }
         .svg-text-bold {
             font-weight: 700;
@@ -64,7 +54,6 @@
             font-size: 85px;
         }
 
-        /* --- Notification Overlay (Loader/Error) --- */
         #notification-overlay {
             position: fixed;
             top: 0;
@@ -90,13 +79,12 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
-        /* --- Print Styles --- */
         @media print {
             body, html {
-                background-color: white; /* Ensure background is white for printing */
+                background-color: white;
             }
             #notification-overlay {
-                display: none !important; /* Hide overlay when printing */
+                display: none !important;
             }
             .rotated-container {
                 transform: rotate(-90deg) translate(-50%, -50%);
@@ -118,12 +106,12 @@
     </div>
 
     <script type="module">
-        // Import Firebase modules
+        // Firebase import
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Configuration ---
+        // Config
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config)
             : {
@@ -135,12 +123,12 @@
                 appId: "1:678984987842:web:952c3f4a8822b23590f75b"
             };
 
-        // --- UI Elements ---
+        // Elements
         const notificationOverlay = document.getElementById('notification-overlay');
         const notificationText = document.getElementById('notification-text');
         const labelContainer = document.getElementById('label-container');
 
-        // --- Initialize Firebase ---
+        // Firebase init
         let db;
         try {
             const app = initializeApp(firebaseConfig);
@@ -149,22 +137,18 @@
             
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    console.log("Authenticated anonymously with UID:", user.uid);
                     loadLabelData();
                 } else {
                     signInAnonymously(auth).catch((error) => {
-                        console.error("Anonymous sign-in failed:", error);
                         showError("ไม่สามารถเชื่อมต่อกับระบบได้", "กรุณาลองรีเฟรชหน้าอีกครั้ง");
                     });
                 }
             });
 
         } catch (error) {
-            console.error("Firebase initialization failed:", error);
             showError("การเริ่มต้นระบบล้มเหลว", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
         }
         
-        // --- Helper Functions ---
         function showError(title, message = '') {
             notificationText.innerHTML = `
                 <strong style="color: red; font-size: 1.2em;">${title}</strong>
@@ -205,7 +189,7 @@
             const addressLineHeight = 100; 
             const maxCharsForAddress = 30; 
 
-            // 1. Recipient name line
+            // Name
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("y", currentY);
@@ -214,7 +198,7 @@
             
             currentY += lineHeight;
 
-            // 2. Address lines with word wrapping
+            // Address
             const addressLines = wrapText(address, maxCharsForAddress);
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
@@ -225,7 +209,7 @@
                 currentY += addressLineHeight;
             });
 
-            // 3. Phone number line
+            // Phone
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("y", currentY);
@@ -237,16 +221,27 @@
             requestAnimationFrame(() => {
                 const bbox = group.getBBox();
                 const padding = 20;
-                svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
-                
+                const totalWidth = bbox.width + padding * 2;
+                const totalHeight = bbox.height + padding * 2;
+
+                svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${totalWidth} ${totalHeight}`);
+
                 const centerX = (bbox.width / 2) + bbox.x;
                 Array.from(group.children).forEach(textElement => {
                     textElement.setAttribute("x", centerX);
                 });
+
+                // Scale auto fit
+                const container = document.getElementById('label-container');
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                const scaleX = containerWidth / totalWidth;
+                const scaleY = containerHeight / totalHeight;
+                const scale = Math.min(scaleX, scaleY, 1);
+                group.setAttribute("transform", `scale(${scale})`);
             });
         }
 
-        // --- Main Function to Load and Display Data ---
         async function loadLabelData() {
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
@@ -262,14 +257,14 @@
             try {
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
-                if (!orderSnap.exists()) throw new Error(`ไม่พบข้อมูลออเดอร์ '${orderId}' ในระบบ`);
-                
+                if (!orderSnap.exists()) throw new Error(`ไม่พบข้อมูลออเดอร์ '${orderId}'`);
+
                 const orderData = orderSnap.data();
                 if (!orderData.customerId) throw new Error("ออเดอร์ไม่มีข้อมูลรหัสลูกค้า");
                 
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
-                if (!customerSnap.exists()) throw new Error(`ไม่พบข้อมูลลูกค้า '${orderData.customerId}' ที่ผูกกับออเดอร์นี้`);
+                if (!customerSnap.exists()) throw new Error(`ไม่พบข้อมูลลูกค้า '${orderData.customerId}'`);
 
                 const customer = customerSnap.data();
 
@@ -283,7 +278,6 @@
                 labelContainer.style.display = 'flex';
 
             } catch (error) {
-                console.error("Error loading label data:", error);
                 showError("เกิดข้อผิดพลาดในการโหลดข้อมูล", error.message);
             }
         }
