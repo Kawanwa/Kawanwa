@@ -3,64 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ใบปะหน้า</title>
+    <title>พิมพ์ใบปะหน้า</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* General body and html styles */
         body, html {
             font-family: 'Sarabun', sans-serif;
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f2f5;
-            overflow: hidden;
+            background-color: white;
+            overflow: hidden; /* ป้องกัน scrollbar ของหน้าหลัก */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
 
+        /* --- ส่วนของการหมุนหน้าจอ --- */
         .rotated-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: rotate(-90deg) translate(-50%, -50%);
-            transform-origin: center center;
             width: 100vh;
             height: 100vw;
+            transform-origin: top left;
+            transform: rotate(-90deg);
+            position: absolute;
+            top: 100%;
+            left: 0;
+            
+            /* จัดเนื้อหา (SVG) ให้อยู่เต็มพื้นที่ */
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; 
+            align-items: center;     
+            
             padding: 2vmin;
             box-sizing: border-box;
-            background-color: white;
         }
 
+        /* --- SVG Container --- */
         #svg-container {
             width: 100%;
             height: 100%;
         }
         
+        /* --- สไตล์ของตัวอักษรใน SVG --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
-            fill: black;
-            font-size: 100px;
-            text-anchor: middle;
+            fill: black; /* สีตัวอักษร */
+            font-size: 100px; /* ขนาดเริ่มต้นสำหรับชื่อและเบอร์โทร */
+            text-anchor: middle; /* จัดให้ข้อความอยู่กึ่งกลาง */
         }
         .svg-text-bold {
             font-weight: 700;
         }
+        /* สไตล์สำหรับที่อยู่โดยเฉพาะ */
         .svg-text-address {
-            font-size: 85px;
+            font-size: 85px; /* ลดขนาดลงเล็กน้อย */
         }
 
-        #notification-overlay {
+
+        /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
+        #loader-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: white;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -71,94 +80,40 @@
             padding: 1em;
             box-sizing: border-box;
         }
-        
-        #notification-box {
-            background: white;
-            padding: 2em 3em;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-
-        @media print {
-            body, html {
-                background-color: white;
-            }
-            #notification-overlay {
-                display: none !important;
-            }
-            .rotated-container {
-                transform: rotate(-90deg) translate(-50%, -50%);
-                padding: 0;
-                background-color: white;
-            }
-        }
     </style>
 </head>
 <body>
-    <div id="notification-overlay">
-        <div id="notification-box">
-            <div id="notification-text">กำลังโหลดข้อมูล...</div>
-        </div>
+    <!-- หน้าต่างสำหรับแจ้งเตือนผู้ใช้ -->
+    <div id="loader-overlay">
+        <div id="loader-text">กำลังโหลดข้อมูล...</div>
     </div>
 
+    <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
+        <!-- preserveAspectRatio="xMidYMax meet" จะจัดเนื้อหาใน SVG ให้ชิดขอบล่างและอยู่กึ่งกลางแนวนอน -->
+        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
     </div>
 
     <script type="module">
-        // Firebase import
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Config
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config)
-            : {
-                apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-                authDomain: "kawanwa-stone.firebaseapp.com",
-                projectId: "kawanwa-stone",
-                storageBucket: "kawanwa-stone.appspot.com",
-                messagingSenderId: "678984987842",
-                appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-            };
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.appspot.com",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
 
-        // Elements
-        const notificationOverlay = document.getElementById('notification-overlay');
-        const notificationText = document.getElementById('notification-text');
-        const labelContainer = document.getElementById('label-container');
-
-        // Firebase init
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            const auth = getAuth(app);
-            
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    loadLabelData();
-                } else {
-                    signInAnonymously(auth).catch((error) => {
-                        showError("ไม่สามารถเชื่อมต่อกับระบบได้", "กรุณาลองรีเฟรชหน้าอีกครั้ง");
-                    });
-                }
-            });
-
-        } catch (error) {
-            showError("การเริ่มต้นระบบล้มเหลว", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
-        }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
         
-        function showError(title, message = '') {
-            notificationText.innerHTML = `
-                <strong style="color: red; font-size: 1.2em;">${title}</strong>
-                <p style="font-size: 0.8em; margin-top: 1em;">${message}</p>
-            `;
-            notificationOverlay.style.display = 'flex';
-        }
-
+        // --- ฟังก์ชันตัดคำสำหรับที่อยู่ ---
         function wrapText(text, maxCharsPerLine) {
-            if (!text || typeof text !== 'string') return [''];
             const words = text.split(' ');
             const lines = [];
             let currentLine = '';
@@ -171,123 +126,115 @@
                     currentLine += (currentLine.length > 0 ? ' ' : '') + word;
                 }
             });
-            if (currentLine) {
-                lines.push(currentLine.trim());
-            }
+            lines.push(currentLine.trim());
             return lines;
         }
 
+        // --- ฟังก์ชันหลักในการสร้าง SVG (แก้ไขใหม่ทั้งหมด) ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; 
+            svg.innerHTML = ''; // Clear previous content
+
+            // กำหนด viewBox เริ่มต้นเพื่อให้มีระบบพิกัดที่แน่นอน
+            const viewBoxWidth = 1200;
+            const viewBoxHeight = 1500; // ให้ความสูงเยอะไว้ก่อน
+            svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
 
             const group = document.createElementNS(svgNS, "g");
-            
-            let currentY = 100;
+            // จัดตำแหน่งกลุ่มทั้งหมดให้อยู่กึ่งกลางแนวนอนของ viewBox
+            group.setAttribute("transform", `translate(${viewBoxWidth / 2}, 0)`);
+
             const lineHeight = 120;
-            const addressLineHeight = 100; 
-            const maxCharsForAddress = 30; 
+            const addressLineHeight = 100;
+            const maxCharsForAddress = 35; // เพิ่มความยาวสูงสุดเล็กน้อย
+            const bottomPadding = 20; // ระยะห่างจากขอบล่างสุด
 
-            // Name
-            const nameText = document.createElementNS(svgNS, "text");
-            nameText.setAttribute("class", "svg-text svg-text-bold");
-            nameText.setAttribute("y", currentY);
-            nameText.textContent = `ผู้รับ: ${name}`;
-            group.appendChild(nameText);
-            
-            currentY += lineHeight;
+            // กำหนดตำแหน่ง Y เริ่มต้นจากด้านล่างของ viewBox
+            let currentY = viewBoxHeight - bottomPadding;
 
-            // Address
-            const addressLines = wrapText(address, maxCharsForAddress);
-            addressLines.forEach(line => {
-                const addressText = document.createElementNS(svgNS, "text");
-                addressText.setAttribute("class", "svg-text svg-text-address");
-                addressText.setAttribute("y", currentY);
-                addressText.textContent = line;
-                group.appendChild(addressText);
-                currentY += addressLineHeight;
-            });
+            // --- วาดจากล่างขึ้นบน ---
 
-            // Phone
+            // 1. สร้างและวางตำแหน่งเบอร์โทร (บรรทัดล่างสุด)
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("y", currentY);
             phoneText.textContent = `โทร. ${phone}`;
             group.appendChild(phoneText);
 
-            svg.appendChild(group);
+            // เลื่อน Y ขึ้นไปสำหรับบรรทัดถัดไป
+            currentY -= lineHeight;
 
-            requestAnimationFrame(() => {
-                const bbox = group.getBBox();
-                const padding = 20;
-                const totalWidth = bbox.width + padding * 2;
-                const totalHeight = bbox.height + padding * 2;
-
-                svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${totalWidth} ${totalHeight}`);
-
-                // จัดตำแหน่ง X กลาง
-                const centerX = (bbox.width / 2) + bbox.x;
-                Array.from(group.children).forEach(textElement => {
-                    textElement.setAttribute("x", centerX);
-                });
-
-                // คำนวณ scale
-                const container = document.getElementById('label-container');
-                const containerWidth = container.clientHeight; // หลังหมุน แกนสลับ
-                const containerHeight = container.clientWidth;
-
-                const scaleX = containerWidth / totalWidth;
-                const scaleY = containerHeight / totalHeight;
-                const scale = Math.min(scaleX, scaleY, 1); // ไม่ขยายเกิน 100%
-
-                // Center + Scale
-                const offsetX = centerX * (1 - scale);
-                const offsetY = bbox.y * (1 - scale);
-
-                group.setAttribute("transform", `translate(${-offsetX},${-offsetY}) scale(${scale})`);
+            // 2. สร้างและวางตำแหน่งที่อยู่ (กลับด้าน array เพื่อวาดจากล่างขึ้นบน)
+            const addressLines = wrapText(address, maxCharsForAddress).reverse(); 
+            addressLines.forEach(line => {
+                const addressText = document.createElementNS(svgNS, "text");
+                addressText.setAttribute("class", "svg-text svg-text-address");
+                addressText.setAttribute("y", currentY);
+                addressText.textContent = line;
+                group.appendChild(addressText);
+                currentY -= addressLineHeight; // เลื่อน Y ขึ้น
             });
+
+            // 3. สร้างและวางตำแหน่งชื่อผู้รับ (บรรทัดบนสุด)
+            const nameText = document.createElementNS(svgNS, "text");
+            nameText.setAttribute("class", "svg-text svg-text-bold");
+            nameText.setAttribute("y", currentY);
+            nameText.textContent = `ผู้รับ: ${name}`;
+            group.appendChild(nameText);
+
+            svg.appendChild(group);
         }
 
+        // Function to load and display label data
         async function loadLabelData() {
+            const loaderOverlay = document.getElementById('loader-overlay');
+            const loaderText = document.getElementById('loader-text');
+            const labelContainer = document.getElementById('label-container');
+            
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
 
             if (!orderId) {
-                showError(
-                    'ไม่พบรหัสออเดอร์!',
-                    'กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong>'
-                );
+                loaderText.innerHTML = `
+                    <strong style="color: red; font-size: 1.2em;">ไม่พบรหัสออเดอร์!</strong>
+                    <p style="font-size: 0.8em; margin-top: 1em;">กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong></p>
+                `;
                 return;
             }
 
             try {
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
-                if (!orderSnap.exists()) throw new Error(`ไม่พบข้อมูลออเดอร์ '${orderId}'`);
-
-                const orderData = orderSnap.data();
-                if (!orderData.customerId) throw new Error("ออเดอร์ไม่มีข้อมูลรหัสลูกค้า");
+                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์ในระบบ");
                 
+                const orderData = orderSnap.data();
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
-                if (!customerSnap.exists()) throw new Error(`ไม่พบข้อมูลลูกค้า '${orderData.customerId}'`);
+
+                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้าที่ผูกกับออเดอร์นี้");
 
                 const customer = customerSnap.data();
 
-                const name = customer.name || 'ไม่มีข้อมูลชื่อ';
+                const name = customer.name || 'N/A';
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                const phone = customer.phone || 'ไม่มีข้อมูลเบอร์โทร';
+                const phone = customer.phone || 'N/A';
 
                 renderContentAsSVG(name, address, phone);
 
-                notificationOverlay.style.display = 'none';
+                loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
 
             } catch (error) {
-                showError("เกิดข้อผิดพลาดในการโหลดข้อมูล", error.message);
+                console.error("Error loading label data:", error);
+                loaderText.innerHTML = `
+                    <strong style="color: red; font-size: 1.2em;">เกิดข้อผิดพลาด</strong>
+                    <p style="font-size: 0.8em; margin-top: 1em;">${error.message}</p>
+                `;
             }
         }
+
+        loadLabelData();
     </script>
 </body>
 </html>
