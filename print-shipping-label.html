@@ -91,22 +91,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
+        // --- ฟังก์ชันตัดคำเวอร์ชันใหม่ (ทนทานขึ้น) ---
         function wrapText(text, maxCharsPerLine) {
             if (!text || typeof text !== 'string') return [];
-            const words = text.split(' ');
-            const lines = [];
-            let currentLine = '';
-
-            words.forEach(word => {
-                if (currentLine.length > 0 && (currentLine + ' ' + word).length > maxCharsPerLine) {
-                    lines.push(currentLine.trim());
-                    currentLine = word;
-                } else {
-                    currentLine += (currentLine.length > 0 ? ' ' : '') + word;
-                }
-            });
-            lines.push(currentLine.trim());
-            return lines;
+            
+            // ใช้วิธีตัดข้อความตามความยาวที่กำหนดโดยตรง
+            // ทำให้สามารถตัดคำได้แม้ไม่มีการเว้นวรรค
+            const regex = new RegExp(`.{1,${maxCharsPerLine}}`, 'g');
+            return text.match(regex) || [];
         }
 
         function renderContentAsSVG(name, address, phone) {
@@ -118,8 +110,7 @@
             const nameLineHeight = 120;
             const addressLineHeight = 100;
             const phoneLineHeight = 120;
-            // --- แก้ไขจุดที่ 1 ---
-            const maxCharsForAddress = 28; // ลดค่าลงเพื่อให้ตัดคำเร็วขึ้น
+            const maxCharsForAddress = 28; // กำหนดความยาวสูงสุดต่อบรรทัดของที่อยู่
             const topPadding = 40;
             const bottomPadding = 40;
 
@@ -219,3 +210,4 @@
     </script>
 </body>
 </html>
+
