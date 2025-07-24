@@ -37,9 +37,12 @@
             left: 0;
             
             /* จัดเนื้อหาให้อยู่กลางและสวยงาม */
-            padding: 5vmin; /* vmin ทำให้ padding สัมพันธ์กับด้านที่เล็กกว่าของจอ */
-            font-size: 3vmin;
-            line-height: 1.5;
+            padding: 4vmin; /* ปรับ padding ให้เหมาะสม */
+            
+            /* --- ปรับขนาดตัวอักษรให้ใหญ่ขึ้นมาก --- */
+            font-size: 8vmin; /* vmin ทำให้ขนาดอักษรสัมพันธ์กับด้านที่เล็กกว่าของจอ */
+            line-height: 1.2; /* ลดระยะห่างระหว่างบรรทัดเพื่อให้แน่นขึ้น */
+
             color: black;
             display: flex;
             flex-direction: column;
@@ -58,7 +61,7 @@
         /* Customer name style */
         #name {
             font-weight: 700;
-            font-size: 4vmin; /* ขยายชื่อให้ใหญ่ขึ้น */
+            font-size: 10vmin; /* ขยายชื่อให้ใหญ่และเด่นขึ้นไปอีก */
         }
 
         /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
