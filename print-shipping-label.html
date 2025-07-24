@@ -40,6 +40,7 @@
             font-family: 'Sarabun', sans-serif;
             fill: black;
             font-size: 100px;
+            /* กลับมาใช้ middle เพื่อจัดกึ่งกลางแนวนอน */
             text-anchor: middle;
         }
         .svg-text-bold {
@@ -72,7 +73,7 @@
         <div id="status-text">กำลังโหลดข้อมูล...</div>
     </div>
     <div id="label-container" class="rotated-container" style="display: none;">
-        <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
+        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
     </div>
 
     <script type="module">
@@ -115,54 +116,56 @@
             svg.innerHTML = '';
 
             const viewBoxWidth = 1200;
-            const viewBoxHeight = 1500;
-            svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
-
-            const group = document.createElementNS(svgNS, "g");
-            
-            // เราจะใช้ text-anchor="middle" และให้ x="50%" ใน text แต่ละบรรทัดแทน
-            // ดังนั้น บรรทัด transform นี้จึงไม่จำเป็นแล้ว
-            // group.setAttribute("transform", `translate(${viewBoxWidth / 2}, 0)`);
-
             const nameLineHeight = 120;
             const addressLineHeight = 100;
             const phoneLineHeight = 120;
             const maxCharsForAddress = 35;
+            const topPadding = 40;
+            const bottomPadding = 40;
 
             const nameContent = `ผู้รับ: ${name}`;
             const addressLines = wrapText(address, maxCharsForAddress);
             const phoneContent = `โทร. ${phone}`;
 
-            const totalTextBlockHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
-            let currentY = (viewBoxHeight / 2) - (totalTextBlockHeight / 2);
+            // คำนวณความสูงของ viewBox แบบไดนามิกเพื่อให้ตัวอักษรใหญ่เต็มที่
+            const contentHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
+            const dynamicViewBoxHeight = contentHeight + topPadding + bottomPadding;
+            
+            svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${dynamicViewBoxHeight}`);
 
-            // --- วาดข้อความทั้งหมดโดยกำหนด x="50%" ---
+            const group = document.createElementNS(svgNS, "g");
+            
+            // วาดจากล่างขึ้นบนเพื่อให้แม่นยำกับการจัดชิดล่าง
+            let currentY = dynamicViewBoxHeight - bottomPadding;
 
-            currentY += nameLineHeight;
-            const nameText = document.createElementNS(svgNS, "text");
-            nameText.setAttribute("class", "svg-text svg-text-bold");
-            nameText.setAttribute("x", "50%"); // จัดกึ่งกลาง
-            nameText.setAttribute("y", currentY);
-            nameText.textContent = nameContent;
-            group.appendChild(nameText);
-
-            addressLines.forEach(line => {
-                currentY += addressLineHeight;
-                const addressText = document.createElementNS(svgNS, "text");
-                addressText.setAttribute("class", "svg-text svg-text-address");
-                addressText.setAttribute("x", "50%"); // จัดกึ่งกลาง
-                addressText.setAttribute("y", currentY);
-                addressText.textContent = line;
-                group.appendChild(addressText);
-            });
-
-            currentY += phoneLineHeight;
+            // 1. วาดเบอร์โทร
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
-            phoneText.setAttribute("x", "50%"); // จัดกึ่งกลาง
+            phoneText.setAttribute("x", "50%");
             phoneText.setAttribute("y", currentY);
             phoneText.textContent = phoneContent;
             group.appendChild(phoneText);
+            
+            currentY -= phoneLineHeight;
+
+            // 2. วาดที่อยู่ (จากล่างขึ้นบน)
+            addressLines.slice().reverse().forEach(line => {
+                const addressText = document.createElementNS(svgNS, "text");
+                addressText.setAttribute("class", "svg-text svg-text-address");
+                addressText.setAttribute("x", "50%");
+                addressText.setAttribute("y", currentY);
+                addressText.textContent = line;
+                group.appendChild(addressText);
+                currentY -= addressLineHeight;
+            });
+
+            // 3. วาดชื่อ
+            const nameText = document.createElementNS(svgNS, "text");
+            nameText.setAttribute("class", "svg-text svg-text-bold");
+            nameText.setAttribute("x", "50%");
+            nameText.setAttribute("y", currentY);
+            nameText.textContent = nameContent;
+            group.appendChild(nameText);
 
             svg.appendChild(group);
         }
@@ -221,4 +224,3 @@
     </script>
 </body>
 </html>
-
