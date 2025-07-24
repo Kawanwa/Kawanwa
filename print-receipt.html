@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบเสร็จรับเงิน</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* General body and html styles */
+        body, html {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        /* Main container for the receipt - Full screen for display */
+        .receipt-container {
+            width: 100%;
+            height: 100%;
+            padding: 5vh 5vw; /* Use viewport units for responsive padding */
+            color: black;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            overflow-y: auto; /* Allow scrolling if content is long */
+        }
+        /* Receipt text styles for full-screen display */
+        .receipt {
+            font-size: 2.5vh;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2vh;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 4vh;
+        }
+        .header p {
+            margin: 0;
+            font-size: 2vh;
+        }
+        .separator {
+            border-top: 2px dashed black;
+            margin: 2vh 0;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .item-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1vh;
+        }
+        .item-list .name {
+            max-width: 80%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .total-section {
+            margin-top: 2vh;
+            font-weight: bold;
+            font-size: 3vh;
+        }
+        .total-section div {
+            display: flex;
+            justify-content: space-between;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 2vh;
+            font-size: 2vh;
+        }
+
+        /* Print-specific styles - Revert to 58mm for printing */
+        @media print {
+            body, html {
+                width: 58mm;
+                height: auto;
+                background-color: white;
+            }
+            .receipt-container {
+                width: 100%;
+                height: auto;
+                padding: 2mm;
+                overflow: visible;
+            }
+            .receipt {
+                font-size: 9pt;
+                line-height: 1.4;
+            }
+            .header {
+                margin-bottom: 10px;
+            }
+            .header h1 {
+                font-size: 12pt;
+            }
+            .header p {
+                font-size: 8pt;
+            }
+            .separator {
+                border-top: 1px dashed black;
+                margin: 8px 0;
+            }
+            .item-list li {
+                 margin-bottom: 0;
+            }
+            .total-section {
+                margin-top: 10px;
+                font-size: 10pt;
+            }
+            .footer {
+                margin-top: 10px;
+                font-size: 8pt;
+            }
+            @page {
+                size: 58mm auto;
+                margin: 2mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container">
+        <div id="loader">กำลังโหลดข้อมูล...</div>
+        <div id="receipt-content" class="receipt" style="display: none;">
+            <div class="header">
+                <h1>KAWANWA OFFICIAL</h1>
+                <p>Handmade Bracelet</p>
+            </div>
+            <div class="separator"></div>
+            <div>วันที่: <span id="order-date"></span></div>
+            <div>ลูกค้า: <span id="customer-name"></span></div>
+            <div class="separator"></div>
+            <ul id="materials-list" class="item-list"></ul>
+            <div class="separator"></div>
+            <div id="note-section" style="display: none;">
+                <p style="margin: 0;"><strong>หมายเหตุ:</strong></p>
+                <p id="note" style="margin: 0;"></p>
+                <div class="separator"></div>
+            </div>
+            <div class="total-section">
+                <div>
+                    <span>ยอดรวม</span>
+                    <span id="total-amount"></span>
+                </div>
+            </div>
+            <div class="separator"></div>
+            <div class="footer">
+                <p>ขอบคุณที่ใช้บริการครับ</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.appspot.com",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to load and display receipt data
+        async function loadReceiptData() {
+            const loader = document.getElementById('loader');
+            const receiptContent = document.getElementById('receipt-content');
+            const orderDateEl = document.getElementById('order-date');
+            const customerNameEl = document.getElementById('customer-name');
+            const materialsListEl = document.getElementById('materials-list');
+            const noteSection = document.getElementById('note-section');
+            const noteEl = document.getElementById('note');
+            const totalAmountEl = document.getElementById('total-amount');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+
+            if (!orderId) {
+                loader.textContent = "ไม่พบรหัสออเดอร์";
+                return;
+            }
+
+            try {
+                // Fetch order, customer, and bracelet data from Firestore
+                const orderRef = doc(db, "orders", orderId);
+                const orderSnap = await getDoc(orderRef);
+                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
+                
+                const orderData = orderSnap.data();
+                const customerRef = doc(db, "customers", orderData.customerId);
+                const braceletRef = doc(db, "bracelets", orderData.braceletId);
+
+                const [customerSnap, braceletSnap] = await Promise.all([
+                    getDoc(customerRef),
+                    getDoc(braceletRef)
+                ]);
+
+                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้า");
+                if (!braceletSnap.exists()) throw new Error("ไม่พบข้อมูลกำไล");
+
+                const customer = customerSnap.data();
+                const bracelet = braceletSnap.data();
+
+                // Populate the receipt with data
+                orderDateEl.textContent = orderData.orderDate.toDate().toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
+                customerNameEl.textContent = customer.name;
+                
+                materialsListEl.innerHTML = '';
+                bracelet.usedMaterials.forEach(mat => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="name">${mat.name}</span> <span>x${mat.quantityUsed}</span>`;
+                    materialsListEl.appendChild(li);
+                });
+                const liWire = document.createElement('li');
+                liWire.innerHTML = `<span class="name">${bracelet.wireType || 'ลวด'}</span> <span></span>`;
+                materialsListEl.appendChild(liWire);
+
+                if (bracelet.note) {
+                    noteSection.style.display = 'block';
+                    noteEl.textContent = bracelet.note;
+                }
+                
+                const totalAmount = orderData.totalAmount || 0;
+                totalAmountEl.textContent = `${totalAmount.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ฿`;
+
+                // Hide loader, show content, and trigger print dialog
+                loader.style.display = 'none';
+                receiptContent.style.display = 'block';
+                window.print(); // Automatically trigger print
+
+            } catch (error) {
+                console.error("Error loading receipt data:", error);
+                loader.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+            }
+        }
+
+        // Load the data when the page loads
+        loadReceiptData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>จัดการสต็อค - ระบบจัดการร้านกำไลหิน</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+        #edit-modal.hidden {
+            display: none;
+        }
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            color: #57534e; /* stone-600 */
+            border: 2px solid transparent;
+        }
+        .filter-btn.active-filter {
+            background-color: white;
+            color: #0ea5e9; /* sky-500 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-color: #7dd3fc; /* sky-300 */
+        }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <div class="container mx-auto px-4 py-10">
+        <div class="max-w-7xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+            
+            <header class="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-6 gap-4">
+                <div class="w-full">
+                    <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
+                    <h1 class="text-3xl font-bold text-stone-800">จัดการสต็อคสินค้า</h1>
+                    <p class="text-stone-600 mt-1">แสดงรายการสต็อคทั้งหมด</p>
+                </div>
+                <div class="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+                    <div class="relative flex-grow">
+                         <input type="text" id="search-input" placeholder="ค้นหาด้วยชื่อ..." 
+                                class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                         </div>
+                    </div>
+                    <a href="intake.html" class="flex-shrink-0 text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-4 py-2.5 text-center transition-colors">
+                        &#43; นำเข้าของ
+                    </a>
+                </div>
+            </header>
+            
+            <div id="filter-controls" class="flex items-center gap-2 border border-stone-200 rounded-lg p-1 bg-stone-50 mb-6">
+                <button data-filter="all" class="filter-btn active-filter">ทั้งหมด</button>
+                <button data-filter="stones" class="filter-btn">💎 หิน</button>
+                <button data-filter="decorations" class="filter-btn">✨ อุปกรณ์ตกแต่ง</button>
+            </div>
+
+            <main class="space-y-10">
+                <div id="stones-section">
+                    <h2 class="text-2xl font-bold text-stone-700 mb-4">💎 หิน</h2>
+                    <div id="stones-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div class="col-span-full text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</div>
+                    </div>
+                </div>
+                <div id="decorations-section">
+                    <h2 class="text-2xl font-bold text-stone-700 mb-4 border-t pt-8">✨ อุปกรณ์ตกแต่ง</h2>
+                    <div id="decorations-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        <div class="col-span-full text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out opacity-0">
+        <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+            <form id="edit-form" class="p-6 md:p-8">
+                <header class="flex justify-between items-start mb-6 pb-4 border-b">
+                    <h2 class="text-2xl font-bold text-stone-800">แก้ไขข้อมูลวัสดุ</h2>
+                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
+                        <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </header>
+                <input type="hidden" id="edit-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-stone-700 mb-2">รูปภาพ</label>
+                        <div class="flex items-center gap-4">
+                            <img id="edit-image-preview" src="https://placehold.co/100x100/e2e8f0/64748b?text=No+Img" class="w-24 h-24 rounded-lg object-cover bg-stone-200">
+                            <input type="file" id="edit-image" accept="image/*" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
+                        <input type="date" id="edit-importDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label for="edit-type" class="block text-sm font-medium text-stone-700 mb-1">ประเภท *</label>
+                        <select id="edit-type" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                            <option value="หิน">หิน</option>
+                            <option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="edit-name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อ *</label>
+                        <input type="text" id="edit-name" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label for="edit-size" class="block text-sm font-medium text-stone-700 mb-1">ขนาด (mm)</label>
+                        <input type="number" id="edit-size" step="0.1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label for="edit-supplier" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
+                        <input type="text" id="edit-supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label for="edit-totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
+                        <input type="number" id="edit-totalPrice" required step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label for="edit-quantity" class="block text-sm font-medium text-stone-700 mb-1">จำนวนที่รับเข้า *</label>
+                        <input type="number" id="edit-quantity" required min="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+                </div>
+                <div class="mt-6 pt-6 border-t">
+                    <button type="submit" id="submit-button" class="w-full justify-center py-2.5 px-5 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:bg-stone-400">
+                        บันทึกการเปลี่ยนแปลง
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.appspot.com",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const stonesContainer = document.getElementById('stones-container');
+        const decorationsContainer = document.getElementById('decorations-container');
+        const searchInput = document.getElementById('search-input');
+        const filterControls = document.getElementById('filter-controls');
+        const stonesSection = document.getElementById('stones-section');
+        const decorationsSection = document.getElementById('decorations-section');
+        
+        const editModal = document.getElementById('edit-modal');
+        const modalPanel = document.getElementById('modal-panel');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const editForm = document.getElementById('edit-form');
+        const editImageInput = document.getElementById('edit-image');
+        const editImagePreview = document.getElementById('edit-image-preview');
+        const submitButton = document.getElementById('submit-button');
+
+        let allMaterials = [];
+
+        const openModal = () => {
+            editModal.classList.remove('hidden');
+            setTimeout(() => {
+                editModal.classList.remove('opacity-0');
+                modalPanel.classList.remove('opacity-0', 'scale-95');
+            }, 10);
+        };
+        const closeModal = () => {
+            editModal.classList.add('opacity-0');
+            modalPanel.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                editModal.classList.add('hidden');
+                editForm.reset();
+                editImageInput.value = '';
+                editImagePreview.src = 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img';
+            }, 300);
+        };
+
+        const renderItems = (container, items) => {
+            container.innerHTML = '';
+            if (items.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-stone-500">ไม่พบรายการ</div>';
+                return;
+            }
+            items.forEach(item => {
+                const stockColorClass = item.stockRemaining <= 0 ? 'text-rose-600' : (item.stockRemaining <= 10 ? 'text-amber-600' : 'text-green-600');
+                const card = document.createElement('div');
+                card.className = 'border rounded-lg shadow-sm overflow-hidden bg-white flex flex-col';
+                card.innerHTML = `
+                    <img src="${item.imageUrl || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'}" alt="${item.name}" class="w-full h-32 object-cover bg-stone-100">
+                    <div class="p-4 flex-grow flex flex-col">
+                        <h3 class="font-bold text-stone-800">${item.name}</h3>
+                        <p class="text-sm text-stone-500 mb-2">${item.size || 'N/A'} mm</p>
+                        <div class="mt-auto pt-2">
+                            <div class="flex items-center justify-center gap-3 my-2">
+                                <button data-id="${item.id}" data-stock="${item.stockRemaining}" class="minus-btn bg-rose-100 text-rose-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-lg transition hover:bg-rose-200">-</button>
+                                <div class="text-center">
+                                    <span class="font-bold text-xl ${stockColorClass}">${item.stockRemaining}</span>
+                                    <span class="text-stone-400 text-sm">/ ${item.quantity}</span>
+                                </div>
+                                <button data-id="${item.id}" data-stock="${item.stockRemaining}" data-quantity="${item.quantity}" class="plus-btn bg-emerald-100 text-emerald-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-lg transition hover:bg-emerald-200">+</button>
+                            </div>
+                            <div class="flex items-center justify-center gap-2 mt-3 text-xs">
+                                <button data-id="${item.id}" class="edit-btn font-medium text-sky-600 hover:underline">แก้ไข</button>
+                                <span class="text-stone-300">|</span>
+                                <button data-id="${item.id}" class="delete-btn font-medium text-rose-600 hover:underline">ลบ</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        };
+
+        const filterAndRender = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filtered = allMaterials.filter(item => item.name.toLowerCase().includes(searchTerm));
+            const stones = filtered.filter(item => item.type === 'หิน');
+            const decorations = filtered.filter(item => item.type === 'อุปกรณ์ตกแต่ง');
+            renderItems(stonesContainer, stones);
+            renderItems(decorationsContainer, decorations);
+        };
+
+        const materialsRef = collection(db, "materials");
+        const q = query(materialsRef, orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            allMaterials = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            filterAndRender();
+        });
+
+        document.body.addEventListener('click', async (e) => {
+            const button = e.target.closest('button[data-id]');
+            if (!button) return;
+            const id = button.dataset.id;
+            const materialRef = doc(db, "materials", id);
+
+            if (button.classList.contains('edit-btn')) {
+                const itemToEdit = allMaterials.find(item => item.id === id);
+                if (itemToEdit) {
+                    document.getElementById('edit-id').value = id;
+                    const date = itemToEdit.importDate.toDate();
+                    document.getElementById('edit-importDate').value = date.toISOString().split('T')[0];
+                    document.getElementById('edit-type').value = itemToEdit.type;
+                    document.getElementById('edit-name').value = itemToEdit.name;
+                    document.getElementById('edit-size').value = itemToEdit.size || '';
+                    document.getElementById('edit-supplier').value = itemToEdit.supplier || '';
+                    document.getElementById('edit-totalPrice').value = itemToEdit.totalPrice;
+                    document.getElementById('edit-quantity').value = itemToEdit.quantity;
+                    editImagePreview.src = itemToEdit.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img';
+                    openModal();
+                }
+            } else if (button.classList.contains('delete-btn')) {
+                if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?')) {
+                    try {
+                        const docSnap = await getDoc(materialRef);
+                        if (docSnap.exists() && docSnap.data().imagePath) {
+                            const oldImageRef = ref(storage, docSnap.data().imagePath);
+                            await deleteObject(oldImageRef).catch(err => console.error("Error deleting old image:", err));
+                        }
+                        await deleteDoc(materialRef);
+                    } catch (err) { alert(`Error: ${err.message}`); }
+                }
+            } else if (button.classList.contains('plus-btn')) {
+                const currentStock = parseInt(button.dataset.stock, 10);
+                const maxStock = parseInt(button.dataset.quantity, 10);
+                if (currentStock < maxStock) {
+                    await updateDoc(materialRef, { stockRemaining: currentStock + 1 });
+                }
+            } else if (button.classList.contains('minus-btn')) {
+                const currentStock = parseInt(button.dataset.stock, 10);
+                if (currentStock > 0) {
+                    await updateDoc(materialRef, { stockRemaining: currentStock - 1 });
+                }
+            }
+        });
+        
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            submitButton.disabled = true;
+            submitButton.textContent = "กำลังบันทึก...";
+            const id = document.getElementById('edit-id').value;
+            if (!id) return;
+
+            const totalPrice = parseFloat(document.getElementById('edit-totalPrice').value);
+            const quantity = parseInt(document.getElementById('edit-quantity').value, 10);
+            
+            const dataToUpdate = {
+                importDate: new Date(document.getElementById('edit-importDate').value),
+                type: document.getElementById('edit-type').value,
+                name: document.getElementById('edit-name').value,
+                size: parseFloat(document.getElementById('edit-size').value) || 0,
+                supplier: document.getElementById('edit-supplier').value,
+                totalPrice: totalPrice,
+                quantity: quantity,
+                avgPricePerPiece: quantity > 0 ? totalPrice / quantity : 0,
+            };
+            
+            const imageFile = editImageInput.files[0];
+
+            try {
+                if (imageFile) {
+                    submitButton.textContent = "กำลังบีบอัดรูปภาพ...";
+                    const options = { maxSizeMB: 1, maxWidthOrHeight: 1024, useWebWorker: true };
+                    const compressedFile = await imageCompression(imageFile, options);
+                    
+                    submitButton.textContent = "กำลังอัปโหลด...";
+                    const materialToEdit = allMaterials.find(item => item.id === id);
+                    if (materialToEdit && materialToEdit.imagePath) {
+                        const oldImageRef = ref(storage, materialToEdit.imagePath);
+                        await deleteObject(oldImageRef).catch(err => console.warn("Old image not found or could not be deleted, continuing...", err));
+                    }
+                    
+                    const imagePath = `materials/${Date.now()}-${compressedFile.name}`;
+                    const newImageRef = ref(storage, imagePath);
+                    await uploadBytes(newImageRef, compressedFile);
+                    dataToUpdate.imageUrl = await getDownloadURL(newImageRef);
+                    dataToUpdate.imagePath = imagePath;
+                }
+
+                const materialRef = doc(db, "materials", id);
+                await updateDoc(materialRef, dataToUpdate);
+                closeModal();
+            } catch (error) {
+                console.error("Error updating document:", error);
+                alert("เกิดข้อผิดพลาด: " + error.message);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "บันทึกการเปลี่ยนแปลง";
+            }
+        });
+
+        searchInput.addEventListener('input', filterAndRender);
+        closeModalBtn.addEventListener('click', closeModal);
+        editModal.addEventListener('click', (e) => { if (e.target === editModal) closeModal(); });
+        
+        editImageInput.addEventListener('change', (e) => {
+             if (e.target.files[0]) { editImagePreview.src = URL.createObjectURL(e.target.files[0]); }
+        });
+
+        filterControls.addEventListener('click', (e) => {
+            const target = e.target.closest('.filter-btn');
+            if (!target) return;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+            target.classList.add('active-filter');
+
+            const filter = target.dataset.filter;
+            stonesSection.style.display = (filter === 'all' || filter === 'stones') ? 'block' : 'none';
+            decorationsSection.style.display = (filter === 'all' || filter === 'decorations') ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>
