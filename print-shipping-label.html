@@ -31,12 +31,10 @@
             top: 100%;
             left: 0;
             
-            /* --- จัดกึ่งกลางจอเต็มรูปแบบ --- */
+            /* จัดกึ่งกลางจอเต็มรูปแบบ */
             display: flex;
-            /* justify-content ตอนนี้คือแกน "แนวตั้ง" ของจอภาพ */
-            justify-content: center; /* จัดให้กึ่งกลาง */
-            /* align-items ตอนนี้คือแกน "แนวนอน" ของจอภาพ */
-            align-items: flex-end;     /* จัดให้ชิดขอบล่าง */
+            justify-content: center; 
+            align-items: center;     
             
             padding: 2vmin;
             box-sizing: border-box;
@@ -92,8 +90,8 @@
 
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <!-- จุดแก้ไขสำคัญ: เปลี่ยน preserveAspectRatio เป็น xMidYMax -->
-        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
+        <!-- จุดแก้ไขสำคัญ: เปลี่ยน preserveAspectRatio เป็น xMidYMin -->
+        <svg id="svg-container" preserveAspectRatio="xMidYMin meet"></svg>
     </div>
 
     <script type="module">
