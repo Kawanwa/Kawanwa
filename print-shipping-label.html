@@ -36,36 +36,26 @@
             justify-content: center; /* จัดกึ่งกลางแนวนอน */
             align-items: center;     /* จัดกึ่งกลางแนวตั้ง */
             
-            padding: 2vmin; /* ลด padding ลงเล็กน้อยเพื่อให้มีพื้นที่มากขึ้น */
+            padding: 2vmin;
             box-sizing: border-box;
         }
 
-        /* --- ส่วนของเนื้อหา --- */
-        .content-wrapper {
-            text-align: center; /* จัดข้อความทุกอย่างให้อยู่กลาง */
-            display: inline-block; /* ทำให้กล่องนี้มีขนาดพอดีกับเนื้อหา */
-            flex-shrink: 0; /* ป้องกันการหดตัวที่ไม่ต้องการ */
-            
-            /* กำหนดขนาดตัวอักษรเริ่มต้นให้ใหญ่มากๆ */
-            font-size: 15vmin; 
-            line-height: 1.2;
-            
-            /* กำหนดจุดหมุนสำหรับการย่อส่วน */
-            transform-origin: center center;
+        /* --- SVG Container --- */
+        #svg-container {
+            width: 100%;
+            height: 100%;
         }
-
-        /* 1. ชื่อผู้รับ: บังคับให้เป็นบรรทัดเดียวเสมอ */
-        .name-line {
-            white-space: nowrap;
+        
+        /* --- สไตล์ของตัวอักษรใน SVG --- */
+        .svg-text {
+            font-family: 'Sarabun', sans-serif;
+            fill: black; /* สีตัวอักษร */
+            font-size: 100px; /* กำหนดขนาดเริ่มต้นใหญ่ๆ ไว้ก่อน */
         }
-        #name {
+        .svg-text-bold {
             font-weight: 700;
         }
 
-        /* 3. ที่อยู่: ขนาดปกติและตัดคำเมื่อยาวเกิน */
-        #address {
-            white-space: normal;
-        }
 
         /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
         #loader-overlay {
@@ -95,11 +85,7 @@
 
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <div class="content-wrapper">
-            <div class="name-line"><strong>ผู้รับ:</strong> <span id="name"></span></div>
-            <div id="address"></div>
-            <div id="phone"></div>
-        </div>
+        <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
 
     <script type="module">
@@ -120,21 +106,59 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ (เวอร์ชันแก้ไขใหม่) ---
-        function fitContentToScreen() {
-            const container = document.getElementById('label-container');
-            const content = document.querySelector('.content-wrapper');
+        // --- ฟังก์ชันสร้างและปรับขนาด SVG (เวอร์ชันแก้ไขใหม่ทั้งหมด) ---
+        function renderContentAsSVG(name, address, phone) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.getElementById('svg-container');
+            
+            // สร้างกลุ่มสำหรับเนื้อหาทั้งหมด
+            const group = document.createElementNS(svgNS, "g");
 
-            // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่าเบราว์เซอร์วาดภาพเสร็จแล้ว
+            // 1. สร้างบรรทัดชื่อผู้รับ
+            const nameText = document.createElementNS(svgNS, "text");
+            nameText.setAttribute("class", "svg-text");
+            nameText.setAttribute("x", "0");
+            nameText.setAttribute("y", "100"); // y เริ่มต้น
+            
+            const nameLabel = document.createElementNS(svgNS, "tspan");
+            nameLabel.setAttribute("class", "svg-text-bold");
+            nameLabel.textContent = "ผู้รับ: ";
+
+            const nameValue = document.createElementNS(svgNS, "tspan");
+            nameValue.setAttribute("class", "svg-text-bold");
+            nameValue.textContent = name;
+
+            nameText.appendChild(nameLabel);
+            nameText.appendChild(nameValue);
+            group.appendChild(nameText);
+
+            // 2. สร้างบรรทัดที่อยู่
+            const addressText = document.createElementNS(svgNS, "text");
+            addressText.setAttribute("class", "svg-text");
+            addressText.setAttribute("x", "0");
+            addressText.setAttribute("y", "220"); // y บรรทัดถัดไป
+            addressText.textContent = address;
+            group.appendChild(addressText);
+
+            // 3. สร้างบรรทัดเบอร์โทร
+            const phoneText = document.createElementNS(svgNS, "text");
+            phoneText.setAttribute("class", "svg-text");
+            phoneText.setAttribute("x", "0");
+            phoneText.setAttribute("y", "340"); // y บรรทัดสุดท้าย
+            phoneText.textContent = `โทร. ${phone}`;
+            group.appendChild(phoneText);
+
+            // นำกลุ่มเนื้อหาใส่ใน SVG
+            svg.appendChild(group);
+
+            // ใช้ requestAnimationFrame เพื่อรอให้เบราว์เซอร์วาดภาพเสร็จ
             requestAnimationFrame(() => {
-                const containerWidth = container.clientWidth;
-                const contentHeight = content.scrollHeight;
+                // คำนวณขนาดของเนื้อหาทั้งหมด
+                const bbox = group.getBBox();
                 
-                // ถ้่าเนื้อหาสูงกว่ากรอบ ให้คำนวณอัตราส่วนเพื่อย่อ
-                if (contentHeight > containerWidth) {
-                    const scale = containerWidth / contentHeight;
-                    content.style.transform = `scale(${scale})`;
-                }
+                // ตั้งค่า viewBox ให้พอดีกับเนื้อหา พร้อมเพิ่ม padding เล็กน้อย
+                const padding = 20;
+                svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
             });
         }
 
@@ -144,9 +168,6 @@
             const loaderOverlay = document.getElementById('loader-overlay');
             const loaderText = document.getElementById('loader-text');
             const labelContainer = document.getElementById('label-container');
-            const nameEl = document.getElementById('name');
-            const addressEl = document.getElementById('address');
-            const phoneEl = document.getElementById('phone');
             
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
@@ -172,15 +193,15 @@
 
                 const customer = customerSnap.data();
 
-                nameEl.textContent = customer.name || 'N/A';
-                addressEl.textContent = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                phoneEl.textContent = `โทร. ${customer.phone || 'N/A'}`;
+                const name = customer.name || 'N/A';
+                const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                const phone = customer.phone || 'N/A';
+
+                // --- เรียกใช้ฟังก์ชัน SVG ใหม่ ---
+                renderContentAsSVG(name, address, phone);
 
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
-                
-                // --- เรียกใช้ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ ---
-                fitContentToScreen();
 
             } catch (error) {
                 console.error("Error loading label data:", error);
