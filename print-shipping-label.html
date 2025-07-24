@@ -16,7 +16,7 @@
             width: 100%;
             height: 100%;
             background-color: white;
-            overflow: hidden; /* จำเป็นต้องมี เพื่อซ่อน scrollbar ของหน้าหลัก */
+            overflow: hidden; /* ป้องกัน scrollbar ของหน้าหลัก */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -31,56 +31,43 @@
             top: 100%;
             left: 0;
             
+            /* --- จุดแก้ไขสำคัญ: จัดกึ่งกลางจอเต็มรูปแบบ --- */
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            justify-content: center; /* จัดกึ่งกลางแนวนอน */
+            align-items: center;     /* จัดกึ่งกลางแนวตั้ง */
             
             padding: 4vmin;
             box-sizing: border-box;
         }
 
-        /* --- ส่วนของเนื้อหาที่แก้ไขใหม่ทั้งหมด --- */
+        /* --- ส่วนของเนื้อหา --- */
         .content-wrapper {
-            /* กำหนดให้กล่องนี้มีความสูงเต็มพื้นที่ที่ได้รับ */
-            height: 100%; 
-            display: flex;
-            flex-direction: column;
-            
-            /* --- จุดแก้ไขสำคัญ: ทำให้เลื่อนได้ --- */
-            overflow-y: auto;  /* เพิ่ม scrollbar แนวตั้งเมื่อเนื้อหาล้น */
-            
-            /* บอกให้เบราว์เซอร์เตรียมพร้อมสำหรับการเปลี่ยนแปลง ซึ่งช่วยแก้บั๊กการแสดงผลได้ */
-            will-change: transform; 
+            text-align: center; /* จัดข้อความทุกอย่างให้อยู่กลาง */
+            display: inline-block; /* ทำให้กล่องนี้มีขนาดพอดีกับเนื้อหา */
+            flex-shrink: 0; /* ป้องกันการหดตัวที่ไม่ต้องการ */
         }
 
         /* 1. ชื่อผู้รับ: บังคับให้เป็นบรรทัดเดียวเสมอ */
         .name-line {
             white-space: nowrap;
-            font-size: 12vmin;
             line-height: 1.2;
-            flex-shrink: 0; /* ไม่ให้บรรทัดนี้หดตัว */
         }
         .name-line strong {
              font-weight: 700;
         }
         #name {
             font-weight: 700;
-            font-size: 15vmin;
         }
 
         /* 3. ที่อยู่: ขนาดปกติและตัดคำเมื่อยาวเกิน */
         #address {
-            font-size: 12vmin;
             line-height: 1.2;
             white-space: normal;
-            flex-shrink: 0;
         }
 
         /* 2. เบอร์โทร: อยู่บรรทัดของตัวเอง */
         #phone {
-            font-size: 12vmin;
             line-height: 1.2;
-            flex-shrink: 0;
         }
 
 
@@ -136,6 +123,24 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        
+        // --- ฟังก์ชันปรับขนาดตัวอักษรอัตโนมัติ ---
+        function adjustFontSize() {
+            const container = document.getElementById('label-container');
+            const content = document.querySelector('.content-wrapper');
+            
+            let fontSize = 20; // เริ่มต้นด้วยขนาดใหญ่มากๆ (หน่วยเป็น vmin)
+            container.style.fontSize = fontSize + 'vmin';
+
+            // วนลูปเพื่อลดขนาด font จนกว่าเนื้อหาจะพอดีกับหน้าจอ
+            // เนื่องจากจอหมุนอยู่ เราจึงต้องเช็คความสูงของเนื้อหา (scrollHeight)
+            // กับความกว้างของกล่องที่หมุน (clientWidth)
+            while (content.scrollHeight > container.clientWidth && fontSize > 1) {
+                fontSize -= 0.5; // ลดขนาดลงทีละนิด
+                container.style.fontSize = fontSize + 'vmin';
+            }
+        }
+
 
         // Function to load and display label data
         async function loadLabelData() {
@@ -176,6 +181,9 @@
 
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
+                
+                // --- เรียกใช้ฟังก์ชันปรับขนาดตัวอักษรหลังจากข้อมูลแสดงแล้ว ---
+                adjustFontSize();
 
             } catch (error) {
                 console.error("Error loading label data:", error);
