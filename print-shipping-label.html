@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* --- การตั้งค่าพื้นฐาน --- */
         body, html {
             font-family: 'Sarabun', sans-serif;
             margin: 0;
@@ -23,8 +22,6 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* --- คอนเทนเนอร์หลักที่ใช้หมุนหน้าจอ --- */
         .rotated-container {
             width: 100vh;
             height: 100vw;
@@ -35,14 +32,10 @@
             padding: 2vmin;
             box-sizing: border-box;
         }
-
-        /* --- SVG Container (ลบกรอบเส้นประออก) --- */
         #svg-container {
             width: 100%;
             height: 100%;
         }
-        
-        /* --- สไตล์ของตัวอักษรใน SVG --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
@@ -55,8 +48,6 @@
         .svg-text-address {
             font-size: 85px;
         }
-
-        /* --- หน้าต่างแจ้งเตือน --- */
         #status-overlay {
             position: fixed;
             top: 0;
@@ -80,17 +71,14 @@
     <div id="status-overlay">
         <div id="status-text">กำลังโหลดข้อมูล...</div>
     </div>
-
     <div id="label-container" class="rotated-container" style="display: none;">
         <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
 
     <script type="module">
-        // --- นำเข้า Firebase modules ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- ตั้งค่า Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
             authDomain: "kawanwa-stone.firebaseapp.com",
@@ -100,11 +88,9 @@
             appId: "1:678984987842:web:952c3f4a8822b23590f75b"
         };
 
-        // --- เริ่มต้น Firebase ---
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันตัดคำสำหรับที่อยู่ ---
         function wrapText(text, maxCharsPerLine) {
             if (!text || typeof text !== 'string') return [];
             const words = text.split(' ');
@@ -123,60 +109,57 @@
             return lines;
         }
 
-        // --- ฟังก์ชันหลักในการสร้าง SVG (ปรับปรุงใหม่เพื่อจัดกึ่งกลาง) ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; // ล้างข้อมูลเก่า
+            svg.innerHTML = '';
 
             const viewBoxWidth = 1200;
             const viewBoxHeight = 1500;
             svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
 
             const group = document.createElementNS(svgNS, "g");
-            group.setAttribute("transform", `translate(${viewBoxWidth / 2}, 0)`);
+            
+            // เราจะใช้ text-anchor="middle" และให้ x="50%" ใน text แต่ละบรรทัดแทน
+            // ดังนั้น บรรทัด transform นี้จึงไม่จำเป็นแล้ว
+            // group.setAttribute("transform", `translate(${viewBoxWidth / 2}, 0)`);
 
-            // --- กำหนดค่าต่างๆ ---
             const nameLineHeight = 120;
             const addressLineHeight = 100;
             const phoneLineHeight = 120;
             const maxCharsForAddress = 35;
 
-            // --- เตรียมข้อมูล ---
             const nameContent = `ผู้รับ: ${name}`;
             const addressLines = wrapText(address, maxCharsForAddress);
             const phoneContent = `โทร. ${phone}`;
 
-            // --- คำนวณความสูงรวมของบล็อกข้อความทั้งหมด ---
             const totalTextBlockHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
-
-            // --- คำนวณหาตำแหน่ง Y เริ่มต้นเพื่อให้บล็อกอยู่กึ่งกลางแนวตั้ง ---
             let currentY = (viewBoxHeight / 2) - (totalTextBlockHeight / 2);
 
-            // --- เริ่มวาดจากบนลงล่าง ---
+            // --- วาดข้อความทั้งหมดโดยกำหนด x="50%" ---
 
-            // 1. วาดชื่อผู้รับ
-            currentY += nameLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของชื่อ
+            currentY += nameLineHeight;
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
+            nameText.setAttribute("x", "50%"); // จัดกึ่งกลาง
             nameText.setAttribute("y", currentY);
             nameText.textContent = nameContent;
             group.appendChild(nameText);
 
-            // 2. วาดที่อยู่
             addressLines.forEach(line => {
-                currentY += addressLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของที่อยู่แต่ละบรรทัด
+                currentY += addressLineHeight;
                 const addressText = document.createElementNS(svgNS, "text");
                 addressText.setAttribute("class", "svg-text svg-text-address");
+                addressText.setAttribute("x", "50%"); // จัดกึ่งกลาง
                 addressText.setAttribute("y", currentY);
                 addressText.textContent = line;
                 group.appendChild(addressText);
             });
 
-            // 3. วาดเบอร์โทร
-            currentY += phoneLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของเบอร์โทร
+            currentY += phoneLineHeight;
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
+            phoneText.setAttribute("x", "50%"); // จัดกึ่งกลาง
             phoneText.setAttribute("y", currentY);
             phoneText.textContent = phoneContent;
             group.appendChild(phoneText);
@@ -184,7 +167,6 @@
             svg.appendChild(group);
         }
 
-        // --- ฟังก์ชันโหลดข้อมูลและแสดงผล ---
         async function loadAndDisplayLabel() {
             const statusOverlay = document.getElementById('status-overlay');
             const statusText = document.getElementById('status-text');
@@ -234,7 +216,6 @@
             }
         }
 
-        // เริ่มทำงานเมื่อหน้าเว็บโหลดเสร็จ
         window.onload = loadAndDisplayLabel;
 
     </script>
