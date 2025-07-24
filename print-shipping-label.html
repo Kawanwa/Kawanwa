@@ -31,10 +31,10 @@
             top: 100%;
             left: 0;
             
-            /* --- จัดกึ่งกลางจอเต็มรูปแบบ --- */
+            /* --- จุดแก้ไข: จัดชิดขอบล่าง --- */
             display: flex;
             justify-content: center; /* จัดกึ่งกลางแนวนอน */
-            align-items: center;     /* จัดกึ่งกลางแนวตั้ง */
+            align-items: flex-end;     /* จัดชิดขอบล่าง (ของจอ) */
             
             padding: 2vmin;
             box-sizing: border-box;
@@ -50,11 +50,15 @@
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black; /* สีตัวอักษร */
-            font-size: 100px; /* กำหนดขนาดเริ่มต้นใหญ่ๆ ไว้ก่อน */
+            font-size: 100px; /* ขนาดเริ่มต้นสำหรับชื่อและเบอร์โทร */
             text-anchor: middle; /* จัดให้ข้อความอยู่กึ่งกลาง */
         }
         .svg-text-bold {
             font-weight: 700;
+        }
+        /* --- จุดแก้ไข: สไตล์สำหรับที่อยู่โดยเฉพาะ --- */
+        .svg-text-address {
+            font-size: 85px; /* ลดขนาดลงเล็กน้อย */
         }
 
 
@@ -125,7 +129,7 @@
             return lines;
         }
 
-        // --- ฟังก์ชันหลักในการสร้าง SVG (เวอร์ชันแก้ไขใหม่ทั้งหมด) ---
+        // --- ฟังก์ชันหลักในการสร้าง SVG ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
@@ -135,9 +139,10 @@
             
             let currentY = 100;
             const lineHeight = 120;
-            const maxCharsForAddress = 25; // กำหนดความยาวสูงสุดสำหรับ "ที่อยู่" เท่านั้น
+            const addressLineHeight = 100; // ลดระยะห่างบรรทัดของที่อยู่
+            const maxCharsForAddress = 30; // เพิ่มความยาวสูงสุดของที่อยู่เล็กน้อย
 
-            // 1. สร้างบรรทัดชื่อผู้รับ (แสดงชื่อเต็มเสมอ ไม่มีการตัด)
+            // 1. สร้างบรรทัดชื่อผู้รับ
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("y", currentY);
@@ -150,11 +155,12 @@
             const addressLines = wrapText(address, maxCharsForAddress);
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
-                addressText.setAttribute("class", "svg-text");
+                // --- จุดแก้ไข: ใช้คลาสสำหรับที่อยู่โดยเฉพาะ ---
+                addressText.setAttribute("class", "svg-text svg-text-address");
                 addressText.setAttribute("y", currentY);
                 addressText.textContent = line;
                 group.appendChild(addressText);
-                currentY += lineHeight;
+                currentY += addressLineHeight; // ใช้ระยะห่างบรรทัดของที่อยู่
             });
 
             // 3. สร้างบรรทัดเบอร์โทร
