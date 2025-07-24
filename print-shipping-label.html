@@ -23,42 +23,56 @@
 
         /* --- ส่วนของการหมุนหน้าจอ --- */
         .rotated-container {
-            /* กำหนดขนาดให้กว้างเท่าความสูงจอ และสูงเท่าความกว้างจอ */
             width: 100vh;
             height: 100vw;
-
-            /* หมุน -90 องศา (ทวนเข็ม) โดยใช้มุมซ้ายบนเป็นจุดหมุน */
             transform-origin: top left;
             transform: rotate(-90deg);
-
-            /* ย้ายตำแหน่งมาให้พอดีจอ */
             position: absolute;
             top: 100%;
             left: 0;
             
-            /* --- ส่วนของการจัดตำแหน่งที่แก้ไขใหม่ --- */
             display: flex;
-            flex-direction: column;
             justify-content: center;     /* จัดกึ่งกลางแนวนอน (ของจอ) */
             align-items: flex-start;   /* จัดให้ชิดขอบล่าง (ของจอ) */
             
             padding: 4vmin;
-            font-size: 12vmin;
-            line-height: 1.2; 
-            color: black;
             box-sizing: border-box;
         }
 
-        /* จัดให้ข้อความแต่ละบรรทัดชิดซ้าย (ของบล็อกข้อความ) */
+        /* --- ส่วนของเนื้อหาที่แก้ไขใหม่ --- */
         .content-wrapper {
             text-align: left; 
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Customer name style */
+        /* 1. ชื่อผู้รับ: บังคับให้เป็นบรรทัดเดียวเสมอ */
+        .name-line {
+            white-space: nowrap; /* ไม่ให้ตัดขึ้นบรรทัดใหม่ */
+            font-size: 12vmin;
+            line-height: 1.2;
+        }
+        .name-line strong {
+             font-weight: 700;
+        }
         #name {
             font-weight: 700;
             font-size: 15vmin;
         }
+
+        /* 3. ที่อยู่: ขนาดปกติและตัดคำเมื่อยาวเกิน */
+        #address {
+            font-size: 12vmin;
+            line-height: 1.2;
+            white-space: normal; /* อนุญาตให้ตัดคำขึ้นบรรทัดใหม่ */
+        }
+
+        /* 2. เบอร์โทร: อยู่บรรทัดของตัวเอง */
+        #phone {
+            font-size: 12vmin;
+            line-height: 1.2;
+        }
+
 
         /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
         #loader-overlay {
@@ -89,8 +103,9 @@
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
         <div class="content-wrapper">
-            <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
+            <div class="name-line"><strong>ผู้รับ:</strong> <span id="name"></span></div>
             <div id="address"></div>
+            <div id="phone"></div>
         </div>
     </div>
 
@@ -119,6 +134,7 @@
             const labelContainer = document.getElementById('label-container');
             const nameEl = document.getElementById('name');
             const addressEl = document.getElementById('address');
+            const phoneEl = document.getElementById('phone'); // เพิ่มตัวแปรสำหรับเบอร์โทร
             
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
@@ -144,11 +160,10 @@
 
                 const customer = customerSnap.data();
 
+                // --- ส่วนของการใส่ข้อมูลที่แก้ไขใหม่ ---
                 nameEl.textContent = customer.name || 'N/A';
-                
-                const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                const phone = customer.phone || 'N/A';
-                addressEl.textContent = `${address}\nโทร. ${phone}`;
+                addressEl.textContent = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                phoneEl.textContent = `โทร. ${customer.phone || 'N/A'}`;
 
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
