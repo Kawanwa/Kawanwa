@@ -16,77 +16,81 @@
             width: 100%;
             height: 100%;
             background-color: white;
+            overflow: hidden; /* ป้องกัน scrollbar ที่ไม่ต้องการ */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
-        /* Main container for the label - Full screen for display */
-        .label-container {
-            width: 100%;
-            height: 100%;
-            padding: 5vh 5vw; /* Use viewport units for responsive padding */
-            font-size: 3vh;   /* Use viewport units for responsive font size */
+
+        /* --- ส่วนของการหมุนหน้าจอ --- */
+        .rotated-container {
+            /* กำหนดขนาดให้กว้างเท่าความสูงจอ และสูงเท่าความกว้างจอ */
+            width: 100vh;
+            height: 100vw;
+
+            /* หมุน -90 องศา (ทวนเข็ม) โดยใช้มุมซ้ายบนเป็นจุดหมุน */
+            transform-origin: top left;
+            transform: rotate(-90deg);
+
+            /* ย้ายตำแหน่งมาให้พอดีจอ */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            
+            /* จัดเนื้อหาให้อยู่กลางและสวยงาม */
+            padding: 5vmin; /* vmin ทำให้ padding สัมพันธ์กับด้านที่เล็กกว่าของจอ */
+            font-size: 3vmin;
             line-height: 1.5;
             color: black;
             display: flex;
             flex-direction: column;
             justify-content: center;
             box-sizing: border-box;
-            overflow: hidden;
         }
+
         /* Address section */
         #address {
             flex-grow: 1;
             overflow: hidden;
-            padding: 2vh 0;
-            white-space: pre-line; /* Respect newlines in the address */
+            padding: 2vmin 0;
+            white-space: pre-line; /* ทำให้ \n ขึ้นบรรทัดใหม่ได้ */
         }
+
         /* Customer name style */
         #name {
             font-weight: 700;
-            font-size: 4vh; /* Larger font for name on screen */
+            font-size: 4vmin; /* ขยายชื่อให้ใหญ่ขึ้น */
         }
-        
-        /* Print-specific styles - Revert to 58mm x 25mm for printing */
-        @media print {
-            body, html {
-                width: 58mm;
-                height: 25mm;
-                padding: 0;
-                margin: 0;
-            }
-            .label-container {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                padding: 1.5mm; /* Revert padding for printing */
-                font-size: 8pt;   /* Revert font size for printing */
-                line-height: 1.3; /* Revert line-height for printing */
-                margin: 0;
-            }
-            #address {
-                padding: 1mm 0; /* Revert padding for printing */
-            }
-            #name {
-                font-size: 9pt; /* Revert font size for printing */
-            }
-            /* Define the page size for the printer */
-            @page {
-                size: 58mm 25mm;
-                margin: 0;
-            }
+
+        /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+            padding: 1em;
+            box-sizing: border-box;
         }
     </style>
 </head>
 <body>
+    <!-- หน้าต่างสำหรับแจ้งเตือนผู้ใช้ -->
+    <div id="loader-overlay">
+        <div id="loader-text">กำลังโหลดข้อมูล...</div>
+    </div>
 
-    <div id="label-container" class="label-container">
-        <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
-        <div id="content-wrapper" style="display: none; height: 100%; display: flex; flex-direction: column;">
-            <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
-            <div id="address"></div>
-        </div>
+    <!-- เนื้อหาหลักที่จะถูกหมุน -->
+    <div id="label-container" class="rotated-container" style="display: none;">
+        <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
+        <div id="address"></div>
     </div>
 
     <script type="module">
@@ -109,30 +113,35 @@
 
         // Function to load and display label data
         async function loadLabelData() {
-            const loader = document.getElementById('loader');
-            const contentWrapper = document.getElementById('content-wrapper');
+            const loaderOverlay = document.getElementById('loader-overlay');
+            const loaderText = document.getElementById('loader-text');
+            const labelContainer = document.getElementById('label-container');
             const nameEl = document.getElementById('name');
             const addressEl = document.getElementById('address');
             
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
 
+            // --- ส่วนตรวจสอบ URL ที่ปรับปรุงใหม่ ---
             if (!orderId) {
-                loader.textContent = "ไม่พบรหัสออเดอร์";
-                return;
+                loaderText.innerHTML = `
+                    <strong style="color: red; font-size: 1.2em;">ไม่พบรหัสออเดอร์!</strong>
+                    <p style="font-size: 0.8em; margin-top: 1em;">กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong></p>
+                `;
+                return; // หยุดทำงานทันทีถ้าไม่มี orderId
             }
 
             try {
                 // Fetch order and customer data from Firestore
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
-                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
+                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์ในระบบ");
                 
                 const orderData = orderSnap.data();
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
 
-                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้า");
+                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้าที่ผูกกับออเดอร์นี้");
 
                 const customer = customerSnap.data();
 
@@ -144,14 +153,17 @@
                 const phone = customer.phone || 'N/A';
                 addressEl.textContent = `${address}\nโทร. ${phone}`;
 
-                // Hide loader, show content, and trigger print dialog
-                loader.style.display = 'none';
-                contentWrapper.style.display = 'flex';
-                window.print(); // Automatically trigger print
+                // --- ถ้าสำเร็จ: ซ่อนหน้าต่างแจ้งเตือน และแสดงข้อมูล ---
+                loaderOverlay.style.display = 'none';
+                labelContainer.style.display = 'flex';
 
             } catch (error) {
+                // --- ถ้าเกิดข้อผิดพลาด: แสดงข้อผิดพลาดบนหน้าจอ ---
                 console.error("Error loading label data:", error);
-                loader.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+                loaderText.innerHTML = `
+                    <strong style="color: red; font-size: 1.2em;">เกิดข้อผิดพลาด</strong>
+                    <p style="font-size: 0.8em; margin-top: 1em;">${error.message}</p>
+                `;
             }
         }
 
