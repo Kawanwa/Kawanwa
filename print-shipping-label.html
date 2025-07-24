@@ -31,12 +31,12 @@
             top: 100%;
             left: 0;
             
-            /* --- จุดแก้ไขสำคัญ: จัดกึ่งกลางจอเต็มรูปแบบ --- */
+            /* --- จัดกึ่งกลางจอเต็มรูปแบบ --- */
             display: flex;
             justify-content: center; /* จัดกึ่งกลางแนวนอน */
             align-items: center;     /* จัดกึ่งกลางแนวตั้ง */
             
-            padding: 4vmin;
+            padding: 2vmin; /* ลด padding ลงเล็กน้อยเพื่อให้มีพื้นที่มากขึ้น */
             box-sizing: border-box;
         }
 
@@ -45,15 +45,18 @@
             text-align: center; /* จัดข้อความทุกอย่างให้อยู่กลาง */
             display: inline-block; /* ทำให้กล่องนี้มีขนาดพอดีกับเนื้อหา */
             flex-shrink: 0; /* ป้องกันการหดตัวที่ไม่ต้องการ */
+            
+            /* กำหนดขนาดตัวอักษรเริ่มต้นให้ใหญ่มากๆ */
+            font-size: 15vmin; 
+            line-height: 1.2;
+            
+            /* กำหนดจุดหมุนสำหรับการย่อส่วน */
+            transform-origin: center center;
         }
 
         /* 1. ชื่อผู้รับ: บังคับให้เป็นบรรทัดเดียวเสมอ */
         .name-line {
             white-space: nowrap;
-            line-height: 1.2;
-        }
-        .name-line strong {
-             font-weight: 700;
         }
         #name {
             font-weight: 700;
@@ -61,15 +64,8 @@
 
         /* 3. ที่อยู่: ขนาดปกติและตัดคำเมื่อยาวเกิน */
         #address {
-            line-height: 1.2;
             white-space: normal;
         }
-
-        /* 2. เบอร์โทร: อยู่บรรทัดของตัวเอง */
-        #phone {
-            line-height: 1.2;
-        }
-
 
         /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
         #loader-overlay {
@@ -124,21 +120,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันปรับขนาดตัวอักษรอัตโนมัติ ---
-        function adjustFontSize() {
+        // --- ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ (เวอร์ชันแก้ไขใหม่) ---
+        function fitContentToScreen() {
             const container = document.getElementById('label-container');
             const content = document.querySelector('.content-wrapper');
-            
-            let fontSize = 20; // เริ่มต้นด้วยขนาดใหญ่มากๆ (หน่วยเป็น vmin)
-            container.style.fontSize = fontSize + 'vmin';
 
-            // วนลูปเพื่อลดขนาด font จนกว่าเนื้อหาจะพอดีกับหน้าจอ
-            // เนื่องจากจอหมุนอยู่ เราจึงต้องเช็คความสูงของเนื้อหา (scrollHeight)
-            // กับความกว้างของกล่องที่หมุน (clientWidth)
-            while (content.scrollHeight > container.clientWidth && fontSize > 1) {
-                fontSize -= 0.5; // ลดขนาดลงทีละนิด
-                container.style.fontSize = fontSize + 'vmin';
-            }
+            // ใช้ requestAnimationFrame เพื่อให้แน่ใจว่าเบราว์เซอร์วาดภาพเสร็จแล้ว
+            requestAnimationFrame(() => {
+                const containerWidth = container.clientWidth;
+                const contentHeight = content.scrollHeight;
+                
+                // ถ้่าเนื้อหาสูงกว่ากรอบ ให้คำนวณอัตราส่วนเพื่อย่อ
+                if (contentHeight > containerWidth) {
+                    const scale = containerWidth / contentHeight;
+                    content.style.transform = `scale(${scale})`;
+                }
+            });
         }
 
 
@@ -182,8 +179,8 @@
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
                 
-                // --- เรียกใช้ฟังก์ชันปรับขนาดตัวอักษรหลังจากข้อมูลแสดงแล้ว ---
-                adjustFontSize();
+                // --- เรียกใช้ฟังก์ชันปรับขนาดเนื้อหาให้พอดีจอ ---
+                fitContentToScreen();
 
             } catch (error) {
                 console.error("Error loading label data:", error);
