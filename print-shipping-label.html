@@ -51,6 +51,7 @@
             font-family: 'Sarabun', sans-serif;
             fill: black; /* สีตัวอักษร */
             font-size: 100px; /* กำหนดขนาดเริ่มต้นใหญ่ๆ ไว้ก่อน */
+            text-anchor: middle; /* จัดให้ข้อความอยู่กึ่งกลาง */
         }
         .svg-text-bold {
             font-weight: 700;
@@ -106,57 +107,67 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันสร้างและปรับขนาด SVG (เวอร์ชันแก้ไขใหม่ทั้งหมด) ---
+        // --- ฟังก์ชันตัดคำสำหรับที่อยู่ ---
+        function wrapText(text, maxCharsPerLine) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if (currentLine.length > 0 && (currentLine + ' ' + word).length > maxCharsPerLine) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine += (currentLine.length > 0 ? ' ' : '') + word;
+                }
+            });
+            lines.push(currentLine.trim());
+            return lines;
+        }
+
+        // --- ฟังก์ชันหลักในการสร้าง SVG (เวอร์ชันแก้ไขใหม่ทั้งหมด) ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            
-            // สร้างกลุ่มสำหรับเนื้อหาทั้งหมด
+            svg.innerHTML = ''; // Clear previous content
+
             const group = document.createElementNS(svgNS, "g");
-
-            // 1. สร้างบรรทัดชื่อผู้รับ
-            const nameText = document.createElementNS(svgNS, "text");
-            nameText.setAttribute("class", "svg-text");
-            nameText.setAttribute("x", "0");
-            nameText.setAttribute("y", "100"); // y เริ่มต้น
             
-            const nameLabel = document.createElementNS(svgNS, "tspan");
-            nameLabel.setAttribute("class", "svg-text-bold");
-            nameLabel.textContent = "ผู้รับ: ";
+            let currentY = 100;
+            const lineHeight = 120;
+            const maxCharsForAddress = 25; // กำหนดความยาวสูงสุดสำหรับ "ที่อยู่" เท่านั้น
 
-            const nameValue = document.createElementNS(svgNS, "tspan");
-            nameValue.setAttribute("class", "svg-text-bold");
-            nameValue.textContent = name;
-
-            nameText.appendChild(nameLabel);
-            nameText.appendChild(nameValue);
+            // 1. สร้างบรรทัดชื่อผู้รับ (แสดงชื่อเต็มเสมอ ไม่มีการตัด)
+            const nameText = document.createElementNS(svgNS, "text");
+            nameText.setAttribute("class", "svg-text svg-text-bold");
+            nameText.setAttribute("y", currentY);
+            nameText.textContent = `ผู้รับ: ${name}`;
             group.appendChild(nameText);
+            
+            currentY += lineHeight;
 
-            // 2. สร้างบรรทัดที่อยู่
-            const addressText = document.createElementNS(svgNS, "text");
-            addressText.setAttribute("class", "svg-text");
-            addressText.setAttribute("x", "0");
-            addressText.setAttribute("y", "220"); // y บรรทัดถัดไป
-            addressText.textContent = address;
-            group.appendChild(addressText);
+            // 2. สร้างบรรทัดที่อยู่ที่ตัดคำแล้ว
+            const addressLines = wrapText(address, maxCharsForAddress);
+            addressLines.forEach(line => {
+                const addressText = document.createElementNS(svgNS, "text");
+                addressText.setAttribute("class", "svg-text");
+                addressText.setAttribute("y", currentY);
+                addressText.textContent = line;
+                group.appendChild(addressText);
+                currentY += lineHeight;
+            });
 
             // 3. สร้างบรรทัดเบอร์โทร
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
-            phoneText.setAttribute("x", "0");
-            phoneText.setAttribute("y", "340"); // y บรรทัดสุดท้าย
+            phoneText.setAttribute("y", currentY);
             phoneText.textContent = `โทร. ${phone}`;
             group.appendChild(phoneText);
 
-            // นำกลุ่มเนื้อหาใส่ใน SVG
             svg.appendChild(group);
 
-            // ใช้ requestAnimationFrame เพื่อรอให้เบราว์เซอร์วาดภาพเสร็จ
             requestAnimationFrame(() => {
-                // คำนวณขนาดของเนื้อหาทั้งหมด
                 const bbox = group.getBBox();
-                
-                // ตั้งค่า viewBox ให้พอดีกับเนื้อหา พร้อมเพิ่ม padding เล็กน้อย
                 const padding = 20;
                 svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
             });
@@ -197,7 +208,6 @@
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'N/A';
 
-                // --- เรียกใช้ฟังก์ชัน SVG ใหม่ ---
                 renderContentAsSVG(name, address, phone);
 
                 loaderOverlay.style.display = 'none';
