@@ -19,22 +19,19 @@
             overflow: hidden; /* ป้องกันการเลื่อนหน้าจอ */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
-            
-            /* ทำให้ body เป็น flex container เพื่อจัดลูกให้อยู่กึ่งกลาง */
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* --- คอนเทนเนอร์หลักที่ใช้หมุนหน้าจอ (ปรับปรุงใหม่) --- */
+        /* --- คอนเทนเนอร์หลักที่ใช้หมุนหน้าจอ --- */
         .rotated-container {
             width: 100vh; /* ความกว้างเท่ากับความสูงของจอ */
             height: 100vw; /* ความสูงเท่ากับความกว้างของจอ */
-            
-            /* เหลือแค่การหมุนอย่างเดียวพอ */
+            transform-origin: top left;
             transform: rotate(-90deg);
+            position: absolute;
+            top: 100%;
+            left: 0;
             
-            /* จัดให้ SVG อยู่เต็มพื้นที่ (เหมือนเดิม) */
+            /* จัดให้ SVG อยู่เต็มพื้นที่ */
             display: flex;
             justify-content: center; 
             align-items: center;     
@@ -50,7 +47,7 @@
             border: 2px dashed #ccc; /* เพิ่มเส้นขอบเพื่อให้เห็นพื้นที่ชัดเจน */
         }
         
-        /* --- สไตล์ของตัวอักษรใน SVG (เหมือนเดิม) --- */
+        /* --- สไตล์ของตัวอักษรใน SVG --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
@@ -64,7 +61,7 @@
             font-size: 85px; /* ลดขนาดสำหรับที่อยู่ */
         }
 
-        /* --- หน้าต่างแจ้งเตือน (เหมือนเดิม) --- */
+        /* --- หน้าต่างแจ้งเตือน --- */
         #status-overlay {
             position: fixed;
             top: 0;
@@ -85,11 +82,20 @@
     </style>
 </head>
 <body>
+    <!-- หน้าต่างสำหรับแจ้งเตือนสถานะ -->
     <div id="status-overlay">
         <div id="status-text">กำลังโหลดข้อมูล...</div>
     </div>
 
+    <!-- เนื้อหาหลักที่จะถูกหมุน (ซ่อนไว้ก่อน) -->
     <div id="label-container" class="rotated-container" style="display: none;">
+        <!-- 
+            preserveAspectRatio="xMidYMax meet" 
+            คือหัวใจสำคัญ:
+            - xMid: จัดเนื้อหาให้อยู่กึ่งกลางแนวนอน
+            - YMax: จัดเนื้อหาให้ชิดขอบล่างสุด (Max Y)
+            - meet: ปรับขนาดเนื้อหาให้พอดีกับกรอบโดยไม่เสียสัดส่วน
+        -->
         <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
     </div>
 
