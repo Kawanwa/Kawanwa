@@ -36,34 +36,28 @@
             top: 100%;
             left: 0;
             
-            /* จัดเนื้อหาให้อยู่กลางและสวยงาม */
-            padding: 4vmin; /* ปรับ padding ให้เหมาะสม */
-            
-            /* --- ปรับขนาดตัวอักษรให้ใหญ่ขึ้นมาก x 1.5 --- */
-            font-size: 12vmin; /* 8 * 1.5 = 12 */
-            line-height: 1.2; 
-
-            color: black;
+            /* --- ส่วนของการจัดตำแหน่งที่แก้ไขใหม่ --- */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* จัดกึ่งกลางแนวตั้ง (ของจอที่หมุนแล้ว) */
-            align-items: center;     /* จัดกึ่งกลางแนวนอน (ของจอที่หมุนแล้ว) */
-            text-align: center;      /* จัดข้อความในแต่ละบรรทัดให้กลาง */
+            justify-content: center;     /* จัดกึ่งกลางแนวนอน (ของจอ) */
+            align-items: flex-start;   /* จัดให้ชิดขอบล่าง (ของจอ) */
+            
+            padding: 4vmin;
+            font-size: 12vmin;
+            line-height: 1.2; 
+            color: black;
             box-sizing: border-box;
         }
 
-        /* Address section */
-        #address {
-            flex-grow: 1;
-            overflow: hidden;
-            padding: 2vmin 0;
-            white-space: pre-line; /* ทำให้ \n ขึ้นบรรทัดใหม่ได้ */
+        /* จัดให้ข้อความแต่ละบรรทัดชิดซ้าย (ของบล็อกข้อความ) */
+        .content-wrapper {
+            text-align: left; 
         }
 
         /* Customer name style */
         #name {
             font-weight: 700;
-            font-size: 15vmin; /* 10 * 1.5 = 15 */
+            font-size: 15vmin;
         }
 
         /* --- หน้าต่างแจ้งเตือน (Loader/Error) --- */
@@ -94,8 +88,10 @@
 
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
-        <div id="address"></div>
+        <div class="content-wrapper">
+            <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
+            <div id="address"></div>
+        </div>
     </div>
 
     <script type="module">
@@ -127,17 +123,15 @@
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
 
-            // --- ส่วนตรวจสอบ URL ที่ปรับปรุงใหม่ ---
             if (!orderId) {
                 loaderText.innerHTML = `
                     <strong style="color: red; font-size: 1.2em;">ไม่พบรหัสออเดอร์!</strong>
                     <p style="font-size: 0.8em; margin-top: 1em;">กรุณาตรวจสอบให้แน่ใจว่า URL ของคุณมีรหัสออเดอร์ต่อท้าย<br>ตัวอย่าง: <strong>.../file.html?orderId=ABC-12345</strong></p>
                 `;
-                return; // หยุดทำงานทันทีถ้าไม่มี orderId
+                return;
             }
 
             try {
-                // Fetch order and customer data from Firestore
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
                 if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์ในระบบ");
@@ -150,20 +144,16 @@
 
                 const customer = customerSnap.data();
 
-                // Populate the label with data
                 nameEl.textContent = customer.name || 'N/A';
                 
-                // Combine address and phone number
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'N/A';
                 addressEl.textContent = `${address}\nโทร. ${phone}`;
 
-                // --- ถ้าสำเร็จ: ซ่อนหน้าต่างแจ้งเตือน และแสดงข้อมูล ---
                 loaderOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
 
             } catch (error) {
-                // --- ถ้าเกิดข้อผิดพลาด: แสดงข้อผิดพลาดบนหน้าจอ ---
                 console.error("Error loading label data:", error);
                 loaderText.innerHTML = `
                     <strong style="color: red; font-size: 1.2em;">เกิดข้อผิดพลาด</strong>
@@ -172,7 +162,6 @@
             }
         }
 
-        // Load the data when the page loads
         loadLabelData();
     </script>
 </body>
