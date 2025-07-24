@@ -40,7 +40,6 @@
             font-family: 'Sarabun', sans-serif;
             fill: black;
             font-size: 100px;
-            /* กลับมาใช้ middle เพื่อจัดกึ่งกลางแนวนอน */
             text-anchor: middle;
         }
         .svg-text-bold {
@@ -115,6 +114,7 @@
             const svg = document.getElementById('svg-container');
             svg.innerHTML = '';
 
+            // --- กำหนดค่าการจัดวาง ---
             const viewBoxWidth = 1200;
             const nameLineHeight = 120;
             const addressLineHeight = 100;
@@ -123,11 +123,12 @@
             const topPadding = 40;
             const bottomPadding = 40;
 
+            // --- เตรียมข้อมูล ---
             const nameContent = `ผู้รับ: ${name}`;
             const addressLines = wrapText(address, maxCharsForAddress);
             const phoneContent = `โทร. ${phone}`;
 
-            // คำนวณความสูงของ viewBox แบบไดนามิกเพื่อให้ตัวอักษรใหญ่เต็มที่
+            // --- คำนวณความสูงของ viewBox แบบไดนามิก ---
             const contentHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
             const dynamicViewBoxHeight = contentHeight + topPadding + bottomPadding;
             
@@ -135,7 +136,7 @@
 
             const group = document.createElementNS(svgNS, "g");
             
-            // วาดจากล่างขึ้นบนเพื่อให้แม่นยำกับการจัดชิดล่าง
+            // --- เริ่มวาดจากล่างขึ้นบนเพื่อให้แม่นยำกับ YMax ---
             let currentY = dynamicViewBoxHeight - bottomPadding;
 
             // 1. วาดเบอร์โทร
