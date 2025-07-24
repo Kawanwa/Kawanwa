@@ -16,49 +16,44 @@
             width: 100%;
             height: 100%;
             background-color: white;
-            overflow: hidden; /* ป้องกันการเลื่อนหน้าจอ */
+            overflow: hidden;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         /* --- คอนเทนเนอร์หลักที่ใช้หมุนหน้าจอ --- */
         .rotated-container {
-            width: 100vh; /* ความกว้างเท่ากับความสูงของจอ */
-            height: 100vw; /* ความสูงเท่ากับความกว้างของจอ */
-            transform-origin: top left;
+            width: 100vh;
+            height: 100vw;
             transform: rotate(-90deg);
-            position: absolute;
-            top: 100%;
-            left: 0;
-            
-            /* จัดให้ SVG อยู่เต็มพื้นที่ */
             display: flex;
             justify-content: center; 
             align-items: center;     
-            
-            padding: 2vmin; /* ระยะห่างจากขอบเล็กน้อย */
+            padding: 2vmin;
             box-sizing: border-box;
         }
 
-        /* --- SVG Container --- */
+        /* --- SVG Container (ลบกรอบเส้นประออก) --- */
         #svg-container {
             width: 100%;
             height: 100%;
-            border: 2px dashed #ccc; /* เพิ่มเส้นขอบเพื่อให้เห็นพื้นที่ชัดเจน */
         }
         
         /* --- สไตล์ของตัวอักษรใน SVG --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
-            font-size: 100px; /* ขนาดเริ่มต้น */
-            text-anchor: middle; /* จัดกึ่งกลางแนวนอน */
+            font-size: 100px;
+            text-anchor: middle;
         }
         .svg-text-bold {
             font-weight: 700;
         }
         .svg-text-address {
-            font-size: 85px; /* ลดขนาดสำหรับที่อยู่ */
+            font-size: 85px;
         }
 
         /* --- หน้าต่างแจ้งเตือน --- */
@@ -82,21 +77,12 @@
     </style>
 </head>
 <body>
-    <!-- หน้าต่างสำหรับแจ้งเตือนสถานะ -->
     <div id="status-overlay">
         <div id="status-text">กำลังโหลดข้อมูล...</div>
     </div>
 
-    <!-- เนื้อหาหลักที่จะถูกหมุน (ซ่อนไว้ก่อน) -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <!-- 
-            preserveAspectRatio="xMidYMax meet" 
-            คือหัวใจสำคัญ:
-            - xMid: จัดเนื้อหาให้อยู่กึ่งกลางแนวนอน
-            - YMax: จัดเนื้อหาให้ชิดขอบล่างสุด (Max Y)
-            - meet: ปรับขนาดเนื้อหาให้พอดีกับกรอบโดยไม่เสียสัดส่วน
-        -->
-        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
+        <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
 
     <script type="module">
@@ -137,59 +123,63 @@
             return lines;
         }
 
-        // --- ฟังก์ชันหลักในการสร้าง SVG (ตรรกะใหม่: วาดจากล่างขึ้นบน) ---
+        // --- ฟังก์ชันหลักในการสร้าง SVG (ปรับปรุงใหม่เพื่อจัดกึ่งกลาง) ---
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
             svg.innerHTML = ''; // ล้างข้อมูลเก่า
 
-            // 1. กำหนดระบบพิกัด (viewBox)
             const viewBoxWidth = 1200;
-            const viewBoxHeight = 1500; // ให้ความสูงเยอะๆ ไว้ก่อน
+            const viewBoxHeight = 1500;
             svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
 
             const group = document.createElementNS(svgNS, "g");
-            // จัดตำแหน่งกลุ่มทั้งหมดให้อยู่กึ่งกลางแนวนอนของ viewBox
             group.setAttribute("transform", `translate(${viewBoxWidth / 2}, 0)`);
 
-            // 2. กำหนดค่าต่างๆ
-            const lineHeight = 120;
+            // --- กำหนดค่าต่างๆ ---
+            const nameLineHeight = 120;
             const addressLineHeight = 100;
+            const phoneLineHeight = 120;
             const maxCharsForAddress = 35;
-            const bottomPadding = 50; // ระยะห่างจากขอบล่างสุด
 
-            // 3. เริ่มคำนวณตำแหน่ง Y จากด้านล่างสุดของ viewBox
-            let currentY = viewBoxHeight - bottomPadding;
+            // --- เตรียมข้อมูล ---
+            const nameContent = `ผู้รับ: ${name}`;
+            const addressLines = wrapText(address, maxCharsForAddress);
+            const phoneContent = `โทร. ${phone}`;
 
-            // --- เริ่มวาดจากล่างขึ้นบน ---
+            // --- คำนวณความสูงรวมของบล็อกข้อความทั้งหมด ---
+            const totalTextBlockHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
 
-            // 3.1 วาดเบอร์โทร (บรรทัดล่างสุด)
-            const phoneText = document.createElementNS(svgNS, "text");
-            phoneText.setAttribute("class", "svg-text");
-            phoneText.setAttribute("y", currentY);
-            phoneText.textContent = `โทร. ${phone}`;
-            group.appendChild(phoneText);
+            // --- คำนวณหาตำแหน่ง Y เริ่มต้นเพื่อให้บล็อกอยู่กึ่งกลางแนวตั้ง ---
+            let currentY = (viewBoxHeight / 2) - (totalTextBlockHeight / 2);
 
-            // 3.2 เลื่อนตำแหน่ง Y ขึ้นสำหรับบรรทัดถัดไป
-            currentY -= lineHeight;
+            // --- เริ่มวาดจากบนลงล่าง ---
 
-            // 3.3 วาดที่อยู่ (กลับด้าน array เพื่อวาดจากล่างขึ้นบน)
-            const addressLines = wrapText(address, maxCharsForAddress).reverse(); 
+            // 1. วาดชื่อผู้รับ
+            currentY += nameLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของชื่อ
+            const nameText = document.createElementNS(svgNS, "text");
+            nameText.setAttribute("class", "svg-text svg-text-bold");
+            nameText.setAttribute("y", currentY);
+            nameText.textContent = nameContent;
+            group.appendChild(nameText);
+
+            // 2. วาดที่อยู่
             addressLines.forEach(line => {
+                currentY += addressLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของที่อยู่แต่ละบรรทัด
                 const addressText = document.createElementNS(svgNS, "text");
                 addressText.setAttribute("class", "svg-text svg-text-address");
                 addressText.setAttribute("y", currentY);
                 addressText.textContent = line;
                 group.appendChild(addressText);
-                currentY -= addressLineHeight; // เลื่อน Y ขึ้น
             });
 
-            // 3.4 วาดชื่อผู้รับ (บรรทัดบนสุด)
-            const nameText = document.createElementNS(svgNS, "text");
-            nameText.setAttribute("class", "svg-text svg-text-bold");
-            nameText.setAttribute("y", currentY);
-            nameText.textContent = `ผู้รับ: ${name}`;
-            group.appendChild(nameText);
+            // 3. วาดเบอร์โทร
+            currentY += phoneLineHeight; // เลื่อนตำแหน่ง Y ไปยัง baseline ของเบอร์โทร
+            const phoneText = document.createElementNS(svgNS, "text");
+            phoneText.setAttribute("class", "svg-text");
+            phoneText.setAttribute("y", currentY);
+            phoneText.textContent = phoneContent;
+            group.appendChild(phoneText);
 
             svg.appendChild(group);
         }
@@ -208,7 +198,6 @@
                     throw new Error("ไม่พบรหัสออเดอร์ใน URL!<br>ตัวอย่าง: ...?orderId=ABC-123");
                 }
 
-                // ดึงข้อมูล Order
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
                 if (!orderSnap.exists()) {
@@ -220,7 +209,6 @@
                     throw new Error("ออเดอร์นี้ไม่มีข้อมูลรหัสลูกค้า");
                 }
 
-                // ดึงข้อมูล Customer
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
                 if (!customerSnap.exists()) {
@@ -228,16 +216,12 @@
                 }
 
                 const customer = customerSnap.data();
-
-                // เตรียมข้อมูลเพื่อแสดงผล
                 const name = customer.name || 'ไม่มีชื่อ';
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'ไม่มีเบอร์โทร';
 
-                // เรียกฟังก์ชันวาด SVG
                 renderContentAsSVG(name, address, phone);
 
-                // แสดงผล
                 statusOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
 
@@ -256,3 +240,4 @@
     </script>
 </body>
 </html>
+
