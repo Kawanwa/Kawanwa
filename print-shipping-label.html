@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>พิมพ์ใบปะหน้า</title>
+    <title>ใบปะหน้า</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f2f5; /* Changed background for better contrast */
+            background-color: #f0f2f5; /* Background for contrast when not printing */
             overflow: hidden; /* Prevent scrollbar on the main page */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -26,12 +26,12 @@
             width: 100vh;
             height: 100vw;
             transform-origin: top left;
-            transform: rotate(-90deg) translateX(-100vh); /* Adjusted transform for correct positioning */
+            transform: rotate(-90deg) translateX(-100vh);
             position: absolute;
             top: 0;
             left: 0;
             
-            /* Center the content */
+            /* Center the content using Flexbox */
             display: flex;
             justify-content: center; 
             align-items: center;     
@@ -50,16 +50,15 @@
         /* --- SVG Text Styles --- */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
-            fill: black; /* Text color */
-            font-size: 100px; /* Base font size for name and phone */
+            fill: black;
+            font-size: 100px;
             text-anchor: middle; /* Center align text */
         }
         .svg-text-bold {
             font-weight: 700;
         }
-        /* Specific style for address */
         .svg-text-address {
-            font-size: 85px; /* Slightly smaller font size for address */
+            font-size: 85px;
         }
 
         /* --- Notification Overlay (Loader/Error) --- */
@@ -88,44 +87,16 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
-        /* --- Print Button --- */
-        #print-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 101;
-            padding: 12px 24px;
-            font-family: 'Sarabun', sans-serif;
-            font-size: 16px;
-            font-weight: 700;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0, 123, 255, 0.4);
-            transition: all 0.2s ease-in-out;
-        }
-        #print-button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        #print-button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
         /* --- Print Styles --- */
         @media print {
             body, html {
                 background-color: white; /* Ensure background is white for printing */
             }
-            #print-button, #notification-overlay {
-                display: none !important; /* Hide button and overlay when printing */
+            #notification-overlay {
+                display: none !important; /* Hide overlay when printing */
             }
             .rotated-container {
-                transform: rotate(-90deg) translateX(-100vh); /* Ensure rotation is correct for print */
+                transform: rotate(-90deg) translateX(-100vh);
                 padding: 0;
                 background-color: white;
             }
@@ -133,17 +104,12 @@
     </style>
 </head>
 <body>
-    <!-- Notification overlay for user feedback -->
     <div id="notification-overlay">
         <div id="notification-box">
             <div id="notification-text">กำลังโหลดข้อมูล...</div>
         </div>
     </div>
-    
-    <!-- Print button -->
-    <button id="print-button" disabled>กำลังเตรียมข้อมูล</button>
 
-    <!-- Main content container that will be rotated -->
     <div id="label-container" class="rotated-container" style="display: none;">
         <svg id="svg-container" preserveAspectRatio="xMidYMin meet"></svg>
     </div>
@@ -155,7 +121,6 @@
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Firebase Configuration ---
-        // Use environment variable if available, otherwise fallback to hardcoded config
         const firebaseConfig = typeof __firebase_config !== 'undefined' 
             ? JSON.parse(__firebase_config)
             : {
@@ -171,7 +136,6 @@
         const notificationOverlay = document.getElementById('notification-overlay');
         const notificationText = document.getElementById('notification-text');
         const labelContainer = document.getElementById('label-container');
-        const printButton = document.getElementById('print-button');
 
         // --- Initialize Firebase ---
         let db;
@@ -180,14 +144,11 @@
             db = getFirestore(app);
             const auth = getAuth(app);
             
-            // Sign in anonymously for secure access
             onAuthStateChanged(auth, (user) => {
                 if (user) {
-                    // User is signed in, proceed to load data.
                     console.log("Authenticated anonymously with UID:", user.uid);
                     loadLabelData();
                 } else {
-                    // User is signed out. Try to sign in.
                     signInAnonymously(auth).catch((error) => {
                         console.error("Anonymous sign-in failed:", error);
                         showError("ไม่สามารถเชื่อมต่อกับระบบได้", "กรุณาลองรีเฟรชหน้าอีกครั้ง");
@@ -199,11 +160,6 @@
             console.error("Firebase initialization failed:", error);
             showError("การเริ่มต้นระบบล้มเหลว", "ไม่สามารถเชื่อมต่อกับฐานข้อมูลได้");
         }
-
-        // --- Event Listeners ---
-        printButton.addEventListener('click', () => {
-            window.print();
-        });
         
         // --- Helper Functions ---
         function showError(title, message = '') {
@@ -212,8 +168,6 @@
                 <p style="font-size: 0.8em; margin-top: 1em;">${message}</p>
             `;
             notificationOverlay.style.display = 'flex';
-            printButton.disabled = true;
-            printButton.textContent = 'เกิดข้อผิดพลาด';
         }
 
         function wrapText(text, maxCharsPerLine) {
@@ -239,7 +193,7 @@
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; // Clear previous content
+            svg.innerHTML = ''; 
 
             const group = document.createElementNS(svgNS, "g");
             
@@ -248,7 +202,7 @@
             const addressLineHeight = 100; 
             const maxCharsForAddress = 30; 
 
-            // 1. Create recipient name line
+            // 1. Recipient name line
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("y", currentY);
@@ -257,7 +211,7 @@
             
             currentY += lineHeight;
 
-            // 2. Create address lines with word wrapping
+            // 2. Address lines with word wrapping
             const addressLines = wrapText(address, maxCharsForAddress);
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
@@ -268,7 +222,7 @@
                 currentY += addressLineHeight;
             });
 
-            // 3. Create phone number line
+            // 3. Phone number line
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("y", currentY);
@@ -277,20 +231,17 @@
 
             svg.appendChild(group);
 
-            // Defer viewBox calculation to ensure layout is complete
             requestAnimationFrame(() => {
                 const bbox = group.getBBox();
                 const padding = 20;
                 svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${bbox.width + (padding * 2)} ${bbox.height + (padding * 2)}`);
                 
-                // Center the text group horizontally within the viewBox
                 const centerX = (bbox.width / 2) + bbox.x;
                 Array.from(group.children).forEach(textElement => {
                     textElement.setAttribute("x", centerX);
                 });
             });
         }
-
 
         // --- Main Function to Load and Display Data ---
         async function loadLabelData() {
@@ -327,8 +278,6 @@
 
                 notificationOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
-                printButton.disabled = false;
-                printButton.textContent = 'พิมพ์ใบปะหน้า';
 
             } catch (error) {
                 console.error("Error loading label data:", error);
@@ -338,3 +287,4 @@
     </script>
 </body>
 </html>
+
