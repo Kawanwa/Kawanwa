@@ -226,19 +226,26 @@
 
                 svg.setAttribute("viewBox", `${bbox.x - padding} ${bbox.y - padding} ${totalWidth} ${totalHeight}`);
 
+                // จัดตำแหน่ง X กลาง
                 const centerX = (bbox.width / 2) + bbox.x;
                 Array.from(group.children).forEach(textElement => {
                     textElement.setAttribute("x", centerX);
                 });
 
-                // Scale auto fit
+                // คำนวณ scale
                 const container = document.getElementById('label-container');
-                const containerWidth = container.offsetWidth;
-                const containerHeight = container.offsetHeight;
+                const containerWidth = container.clientHeight; // หลังหมุน แกนสลับ
+                const containerHeight = container.clientWidth;
+
                 const scaleX = containerWidth / totalWidth;
                 const scaleY = containerHeight / totalHeight;
-                const scale = Math.min(scaleX, scaleY, 1);
-                group.setAttribute("transform", `scale(${scale})`);
+                const scale = Math.min(scaleX, scaleY, 1); // ไม่ขยายเกิน 100%
+
+                // Center + Scale
+                const offsetX = centerX * (1 - scale);
+                const offsetY = bbox.y * (1 - scale);
+
+                group.setAttribute("transform", `translate(${-offsetX},${-offsetY}) scale(${scale})`);
             });
         }
 
