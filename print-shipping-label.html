@@ -16,7 +16,7 @@
             width: 100%;
             height: 100%;
             background-color: white;
-            overflow: hidden; /* ป้องกัน scrollbar ที่ไม่ต้องการ */
+            overflow: hidden; /* ยังคงซ่อน scrollbar ของหน้าหลักไว้ */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
         }
@@ -32,8 +32,8 @@
             left: 0;
             
             display: flex;
-            justify-content: center;     /* จัดกึ่งกลางแนวนอน (ของจอ) */
-            align-items: flex-start;   /* จัดให้ชิดขอบล่าง (ของจอ) */
+            justify-content: center;
+            align-items: flex-start;
             
             padding: 4vmin;
             box-sizing: border-box;
@@ -41,14 +41,18 @@
 
         /* --- ส่วนของเนื้อหาที่แก้ไขใหม่ --- */
         .content-wrapper {
-            text-align: left; 
+            text-align: left;
             display: flex;
             flex-direction: column;
+            
+            /* --- จุดแก้ไขสำคัญ: ทำให้เลื่อนได้ --- */
+            overflow-y: auto;  /* เพิ่ม scrollbar แนวตั้งเมื่อเนื้อหาล้น */
+            max-height: 100%;  /* จำกัดความสูงสูงสุดให้เท่ากับกรอบที่หมุนอยู่ */
         }
 
         /* 1. ชื่อผู้รับ: บังคับให้เป็นบรรทัดเดียวเสมอ */
         .name-line {
-            white-space: nowrap; /* ไม่ให้ตัดขึ้นบรรทัดใหม่ */
+            white-space: nowrap;
             font-size: 12vmin;
             line-height: 1.2;
         }
@@ -64,7 +68,7 @@
         #address {
             font-size: 12vmin;
             line-height: 1.2;
-            white-space: normal; /* อนุญาตให้ตัดคำขึ้นบรรทัดใหม่ */
+            white-space: normal;
         }
 
         /* 2. เบอร์โทร: อยู่บรรทัดของตัวเอง */
@@ -134,7 +138,7 @@
             const labelContainer = document.getElementById('label-container');
             const nameEl = document.getElementById('name');
             const addressEl = document.getElementById('address');
-            const phoneEl = document.getElementById('phone'); // เพิ่มตัวแปรสำหรับเบอร์โทร
+            const phoneEl = document.getElementById('phone');
             
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
@@ -160,7 +164,6 @@
 
                 const customer = customerSnap.data();
 
-                // --- ส่วนของการใส่ข้อมูลที่แก้ไขใหม่ ---
                 nameEl.textContent = customer.name || 'N/A';
                 addressEl.textContent = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 phoneEl.textContent = `โทร. ${customer.phone || 'N/A'}`;
