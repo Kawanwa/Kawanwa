@@ -31,10 +31,10 @@
             top: 100%;
             left: 0;
             
-            /* --- จุดแก้ไข: จัดชิดขอบล่าง --- */
+            /* จัดกึ่งกลางจอเต็มรูปแบบ */
             display: flex;
-            justify-content: center; /* จัดกึ่งกลางแนวนอน */
-            align-items: flex-end;     /* จัดชิดขอบล่าง (ของจอ) */
+            justify-content: center; 
+            align-items: center;     
             
             padding: 2vmin;
             box-sizing: border-box;
@@ -56,7 +56,7 @@
         .svg-text-bold {
             font-weight: 700;
         }
-        /* --- จุดแก้ไข: สไตล์สำหรับที่อยู่โดยเฉพาะ --- */
+        /* สไตล์สำหรับที่อยู่โดยเฉพาะ */
         .svg-text-address {
             font-size: 85px; /* ลดขนาดลงเล็กน้อย */
         }
@@ -90,7 +90,8 @@
 
     <!-- เนื้อหาหลักที่จะถูกหมุน -->
     <div id="label-container" class="rotated-container" style="display: none;">
-        <svg id="svg-container" preserveAspectRatio="xMidYMid meet"></svg>
+        <!-- จุดแก้ไขสำคัญ: เปลี่ยน preserveAspectRatio เป็น xMidYMax -->
+        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
     </div>
 
     <script type="module">
@@ -139,8 +140,8 @@
             
             let currentY = 100;
             const lineHeight = 120;
-            const addressLineHeight = 100; // ลดระยะห่างบรรทัดของที่อยู่
-            const maxCharsForAddress = 30; // เพิ่มความยาวสูงสุดของที่อยู่เล็กน้อย
+            const addressLineHeight = 100; 
+            const maxCharsForAddress = 30; 
 
             // 1. สร้างบรรทัดชื่อผู้รับ
             const nameText = document.createElementNS(svgNS, "text");
@@ -155,12 +156,11 @@
             const addressLines = wrapText(address, maxCharsForAddress);
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
-                // --- จุดแก้ไข: ใช้คลาสสำหรับที่อยู่โดยเฉพาะ ---
                 addressText.setAttribute("class", "svg-text svg-text-address");
                 addressText.setAttribute("y", currentY);
                 addressText.textContent = line;
                 group.appendChild(addressText);
-                currentY += addressLineHeight; // ใช้ระยะห่างบรรทัดของที่อยู่
+                currentY += addressLineHeight;
             });
 
             // 3. สร้างบรรทัดเบอร์โทร
