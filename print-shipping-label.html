@@ -48,7 +48,9 @@
         #content-wrapper {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Key for separating top/bottom content */
+            justify-content: center; /* Vertically center content */
+            align-items: center;     /* Horizontally center content */
+            text-align: center;      /* Ensure text inside is centered */
             height: 100%;
         }
         
@@ -59,7 +61,7 @@
         
         #phone {
             font-weight: 700;
-            text-align: center;
+            margin-top: 2vh; /* Add space between address and phone */
         }
 
 
@@ -94,7 +96,7 @@
             #phone {
                 font-size: 8pt;
                 font-weight: 700;
-                text-align: left;
+                margin-top: 1.5mm; /* Adjust space for print */
             }
             
             @page {
@@ -114,14 +116,12 @@
 
     <div id="label-container" class="label-container">
         <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
-        <!-- This wrapper now uses Flexbox to space content out -->
         <div id="content-wrapper" style="display: none;">
-            <!-- Top part: Recipient info -->
+            <!-- Content is now centered by the wrapper -->
             <div id="recipient-info">
                 <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
                 <div id="address"></div>
             </div>
-            <!-- Bottom part: Phone number -->
             <div id="phone-container">
                 <span id="phone"></span>
             </div>
@@ -149,7 +149,6 @@
             const loader = document.getElementById('loader');
             const contentWrapper = document.getElementById('content-wrapper');
             const nameEl = document.getElementById('name');
-            // Get new elements
             const addressEl = document.getElementById('address');
             const phoneEl = document.getElementById('phone');
             
@@ -177,7 +176,6 @@
                 // Populate the label with data
                 nameEl.textContent = customer.name || 'N/A';
                 
-                // ** UPDATED: Separate address and phone **
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'N/A';
                 
@@ -186,7 +184,7 @@
 
                 // Hide loader, show content, and trigger print dialog
                 loader.style.display = 'none';
-                contentWrapper.style.display = 'flex'; // Use flex to enable spacing
+                contentWrapper.style.display = 'flex';
                 window.print();
 
             } catch (error) {
