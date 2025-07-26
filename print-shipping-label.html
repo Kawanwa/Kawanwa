@@ -36,11 +36,11 @@
             width: 100%;
             height: 100%;
         }
-        /* Removed font-size from CSS, as it's now controlled by JS for better scaling */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
             text-anchor: middle;
+            dominant-baseline: middle; /* Helps with vertical alignment */
         }
         .svg-text-bold {
             font-weight: 700;
@@ -77,7 +77,6 @@
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Firebase Config ---
-        // หมายเหตุ: เพื่อความปลอดภัย ควรย้าย Config ไปไว้ใน Environment Variables ในระบบจริง
         const firebaseConfig = {
             apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
             authDomain: "kawanwa-stone.firebaseapp.com",
@@ -103,7 +102,7 @@
         }
 
         /**
-         * สร้างและแสดงผลข้อมูลผู้รับเป็น SVG ภายในคอนเทนเนอร์ที่กำหนด
+         * สร้างและแสดงผลข้อมูลผู้รับเป็น SVG โดยปรับขนาดตัวอักษรให้เต็มพื้นที่อัตโนมัติ
          * @param {string} name - ชื่อผู้รับ
          * @param {string} address - ที่อยู่ผู้รับ
          * @param {string} phone - เบอร์โทรศัพท์ผู้รับ
@@ -111,79 +110,84 @@
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; // เคลียร์เนื้อหาเก่าทิ้งก่อน
+            svg.innerHTML = ''; // เคลียร์เนื้อหาเก่า
 
-            // ใช้ viewBox ที่มีอัตราส่วนคงที่ (เหมือนฉลาก 4x6 นิ้ว) เพื่อการปรับขนาดที่คาดเดาได้
-            const viewBoxWidth = 400;
-            const viewBoxHeight = 600;
+            // กำหนด viewBox เพื่อสร้างระบบพิกัดที่คงที่
+            const viewBoxWidth = 1000;
+            const viewBoxHeight = 1500; // อัตราส่วนเหมือนฉลากแนวตั้ง
             svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
-            
-            // จัดเนื้อหาให้อยู่กึ่งกลางเสมอ และปรับขนาดให้พอดีกับพื้นที่ (meet)
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            const centerX = viewBoxWidth / 2;
-            const fontFamily = "'Sarabun', sans-serif";
+            // สร้าง Group <g> เพื่อรวมข้อความทั้งหมดไว้ด้วยกัน จะทำให้ง่ายต่อการปรับขนาดและตำแหน่ง
+            const group = document.createElementNS(svgNS, "g");
 
-            // --- กำหนดขนาดฟอนต์และระยะห่างที่เหมาะสมกับ viewBox ใหม่ ---
-            const nameFontSize = 32;
-            const addressFontSize = 26;
-            const phoneFontSize = 28;
-            const lineSpacing = 10; // ระยะห่างระหว่างบล็อกข้อความ (ชื่อ, ที่อยู่, โทรศัพท์)
-            const addressLineGap = 5; // ระยะห่างระหว่างบรรทัดของที่อยู่
-
-            // --- ตัดคำสำหรับที่อยู่ ---
-            const maxCharsForAddress = 18; // ปรับจำนวนตัวอักษรให้เหมาะกับความกว้างใหม่
+            // --- 1. เตรียมข้อมูลและค่าเริ่มต้น ---
+            const nameContent = `ผู้รับ: ${name}`;
+            const phoneContent = `โทร. ${phone}`;
+            const maxCharsForAddress = 30; // **ปรับปรุง:** เพิ่มความยาวสูงสุดของที่อยู่ต่อบรรทัด
             const addressLines = wrapText(address, maxCharsForAddress);
 
-            // --- คำนวณความสูงรวมของเนื้อหาทั้งหมดเพื่อจัดให้อยู่กึ่งกลางแนวตั้ง ---
-            const nameHeight = nameFontSize;
-            const addressHeight = (addressLines.length * addressFontSize) + (Math.max(0, addressLines.length - 1) * addressLineGap);
-            const phoneHeight = phoneFontSize;
-            const totalContentHeight = nameHeight + addressHeight + phoneHeight + (2 * lineSpacing);
+            // กำหนดขนาดฟอนต์และระยะห่าง (แบบสัมพัทธ์) สำหรับการคำนวณเบื้องต้น
+            const initialNameSize = 80;
+            const initialAddressSize = 60;
+            const initialPhoneSize = 70;
+            const lineSpacing = 1.2; // ตัวคูณระยะห่างระหว่างบรรทัด
+            
+            let currentY = 0;
 
-            // --- คำนวณตำแหน่ง Y เริ่มต้นเพื่อให้บล็อกเนื้อหาอยู่กึ่งกลาง ---
-            let currentY = (viewBoxHeight - totalContentHeight) / 2;
+            // --- 2. สร้าง Text Elements ทั้งหมดและวางใน Group <g> ---
+            const centerX = viewBoxWidth / 2;
 
-            // --- 1. สร้างและแสดงชื่อผู้รับ ---
-            currentY += nameHeight; // เลื่อน Y ไปยัง baseline ของข้อความ
+            // ชื่อผู้รับ
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("x", centerX);
             nameText.setAttribute("y", currentY);
-            nameText.setAttribute("font-size", nameFontSize);
-            nameText.textContent = `ผู้รับ: ${name}`;
-            svg.appendChild(nameText);
+            nameText.setAttribute("font-size", initialNameSize);
+            nameText.textContent = nameContent;
+            group.appendChild(nameText);
+            currentY += initialNameSize * lineSpacing;
 
-            currentY += lineSpacing; // เพิ่มระยะห่างหลังชื่อ
-
-            // --- 2. สร้างและแสดงที่อยู่ (วนลูปสร้างแต่ละบรรทัด) ---
+            // ที่อยู่
             addressLines.forEach(line => {
-                currentY += addressFontSize;
                 const addressText = document.createElementNS(svgNS, "text");
                 addressText.setAttribute("class", "svg-text");
                 addressText.setAttribute("x", centerX);
                 addressText.setAttribute("y", currentY);
-                addressText.setAttribute("font-size", addressFontSize);
+                addressText.setAttribute("font-size", initialAddressSize);
                 addressText.textContent = line;
-                svg.appendChild(addressText);
-                currentY += addressLineGap; // เพิ่มระยะห่างระหว่างบรรทัด
+                group.appendChild(addressText);
+                currentY += initialAddressSize * lineSpacing;
             });
-            
-            if (addressLines.length > 0) {
-                currentY -= addressLineGap; // ลบระยะห่างสุดท้ายออก
-            }
 
-            currentY += lineSpacing; // เพิ่มระยะห่างหลังที่อยู่
-
-            // --- 3. สร้างและแสดงเบอร์โทรศัพท์ ---
-            currentY += phoneHeight;
+            // เบอร์โทร
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("x", centerX);
             phoneText.setAttribute("y", currentY);
-            phoneText.setAttribute("font-size", phoneFontSize);
-            phoneText.textContent = `โทร. ${phone}`;
-            svg.appendChild(phoneText);
+            phoneText.setAttribute("font-size", initialPhoneSize);
+            phoneText.textContent = phoneContent;
+            group.appendChild(phoneText);
+            
+            svg.appendChild(group);
+
+            // --- 3. คำนวณและปรับขนาด Group ให้พอดีกับ ViewBox ---
+            const padding = 50; // ระยะขอบที่ต้องการเว้นไว้
+            const bbox = group.getBBox(); // วัดขนาดของ Group ทั้งหมด
+
+            // คำนวณอัตราส่วนการย่อ/ขยาย
+            const scaleX = (viewBoxWidth - padding * 2) / bbox.width;
+            const scaleY = (viewBoxHeight - padding * 2) / bbox.height;
+            const scale = Math.min(scaleX, scaleY); // ใช้อัตราส่วนที่น้อยกว่าเพื่อไม่ให้ล้นขอบ
+
+            // คำนวณตำแหน่งใหม่เพื่อจัดกึ่งกลางหลังการปรับขนาด
+            const newWidth = bbox.width * scale;
+            const newHeight = bbox.height * scale;
+            const translateX = (viewBoxWidth - newWidth) / 2 - (bbox.x * scale);
+            const translateY = (viewBoxHeight - newHeight) / 2 - (bbox.y * scale);
+            
+            // ใช้ transform เพื่อปรับขนาดและตำแหน่งของ Group ทั้งหมดในครั้งเดียว
+            group.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
         }
         
         /**
@@ -221,13 +225,11 @@
 
                 const customer = customerSnap.data();
                 const name = customer.name || 'ไม่มีชื่อ';
-                // ใช้ที่อยู่ในการจัดส่งของออเดอร์ก่อน ถ้าไม่มีก็ใช้ที่อยู่หลักของลูกค้า
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'ไม่มีเบอร์โทร';
 
                 renderContentAsSVG(name, address, phone);
 
-                // ซ่อนหน้าต่างสถานะและแสดงฉลาก
                 statusOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
 
@@ -245,4 +247,3 @@
     </script>
 </body>
 </html>
-
