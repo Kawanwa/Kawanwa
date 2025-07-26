@@ -45,35 +45,47 @@
             font-weight: 700;
             font-size: 4vh; /* Larger font for name on screen */
         }
-        
-        /* Print-specific styles - Revert to 58mm x 25mm for printing */
+
+        /* Print-specific styles - CHANGED FOR VERTICAL LAYOUT */
         @media print {
+            /* 1. สลับความกว้าง-สูงของหน้ากระดาษให้เป็นแนวตั้ง */
             body, html {
-                width: 58mm;
-                height: 25mm;
+                width: 25mm;
+                height: 58mm;
                 padding: 0;
                 margin: 0;
+                overflow: hidden;
             }
             .label-container {
+                box-sizing: border-box; /* ต้องมีเพื่อให้ padding ถูกต้อง */
                 position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                padding: 1.5mm; /* Revert padding for printing */
-                font-size: 8pt;   /* Revert font size for printing */
-                line-height: 1.3; /* Revert line-height for printing */
-                margin: 0;
+
+                /* 2. กำหนดขนาดของเนื้อหาให้เท่ากับฉลากแนวนอนเดิม */
+                width: 58mm;
+                height: 25mm;
+
+                /* 3. หมุนเนื้อหาทั้งกล่อง -90 องศา (ทวนเข็มนาฬิกา) */
+                transform: rotate(-90deg);
+                transform-origin: center;
+
+                /* 4. จัดตำแหน่งกล่องที่หมุนแล้วให้อยู่ตรงกลาง */
+                top: 16.5mm;  /* (58mm - 25mm) / 2 */
+                left: -16.5mm; /* -(58mm - 25mm) / 2 */
+
+                /* --- Revert styles for printing --- */
+                padding: 1.5mm;
+                font-size: 8pt;
+                line-height: 1.3;
             }
             #address {
-                padding: 1mm 0; /* Revert padding for printing */
+                padding: 1mm 0;
             }
             #name {
-                font-size: 9pt; /* Revert font size for printing */
+                font-size: 9pt;
             }
-            /* Define the page size for the printer */
+            /* 5. กำหนดขนาดหน้าพิมพ์ (สำคัญมาก) */
             @page {
-                size: 58mm 25mm;
+                size: 25mm 58mm; /* ตั้งค่ากระดาษเป็นแนวตั้ง */
                 margin: 0;
             }
         }
@@ -160,3 +172,4 @@
     </script>
 </body>
 </html>
+
