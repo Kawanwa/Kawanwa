@@ -15,7 +15,6 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            /* Change background to white to remove the 'box' effect */
             background-color: white; 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -30,31 +29,27 @@
             background-color: white;
             box-sizing: border-box;
             
-            /* Make preview larger to fill more of the screen */
-            width: 95vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
-            height: 41.2vh; /* รักษาอัตราส่วน: 95 * (25/58) */
+            /* Use most of the screen for the preview area */
+            width: 95vh;
+            height: 41.2vh;
 
             transform: rotate(-90deg);
-
-            /* Adjust font and layout for the larger preview */
-            padding: 2vh;
-            font-size: 3vh; /* Increased font size */
-            line-height: 1.5; /* Increased line height */
             color: black;
             
-            /* Removed border and shadow */
+            /* Font size will be set by JavaScript */
+            line-height: 1.3;
         }
 
         #content-wrapper {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Key for separating top/bottom content */
+            justify-content: space-between;
             height: 100%;
+            padding: 1vh; /* Add some internal padding */
         }
         
         #name {
             font-weight: 700;
-            font-size: 3.5vh; /* Increased name font size */
         }
         
         #phone {
@@ -63,7 +58,7 @@
         }
 
 
-        /* --- PRINT-ONLY STYLES --- */
+        /* --- PRINT-ONLY STYLES (UNAFFECTED BY JS) --- */
         @media print {
             body, html {
                 background-color: white;
@@ -75,12 +70,9 @@
                 height: 25mm;
                 
                 /* Reset padding and font-size to absolute units for print */
-                padding: 1.5mm;
-                font-size: 8pt;
-                line-height: 1.3;
-
-                border: none;
-                box-shadow: none;
+                padding: 1.5mm !important;
+                font-size: 8pt !important;
+                line-height: 1.3 !important;
                 
                 position: absolute;
                 top: 16.5mm;
@@ -88,14 +80,13 @@
             }
             
             #name {
-                /* Reset font-size for print */
-                font-size: 9pt;
+                font-size: 9pt !important;
             }
             
             #phone {
-                font-size: 8pt;
-                font-weight: 700;
-                text-align: left;
+                font-size: 8pt !important;
+                font-weight: 700 !important;
+                text-align: left !important;
             }
             
             @page {
@@ -104,7 +95,6 @@
             }
         }
 
-        /* Counter-rotate the loader text to make it readable on screen */
         #loader {
            transform: rotate(90deg);
            font-size: 16px;
@@ -115,14 +105,11 @@
 
     <div id="label-container" class="label-container">
         <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
-        <!-- This wrapper now uses Flexbox to space content out -->
         <div id="content-wrapper" style="display: none;">
-            <!-- Top part: Recipient info -->
             <div id="recipient-info">
                 <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
                 <div id="address"></div>
             </div>
-            <!-- Bottom part: Phone number -->
             <div id="phone-container">
                 <span id="phone"></span>
             </div>
@@ -146,11 +133,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        /**
+         * NEW FUNCTION: Dynamically adjusts font size for the screen preview
+         * to make the recipient's name as large as possible.
+         */
+        function adjustFontSize() {
+            const labelContainer = document.getElementById('label-container');
+            const nameEl = document.getElementById('name');
+            const addressEl = document.getElementById('address');
+            const phoneEl = document.getElementById('phone');
+
+            // The available "width" for our text is the container's height (due to rotation)
+            const availableSpace = labelContainer.clientHeight * 0.95; // Use 95% to be safe
+
+            let fontSize = 150; // Start with a large font size
+            nameEl.style.fontSize = fontSize + 'px';
+
+            // Loop and decrease font size until the name fits perfectly
+            while (nameEl.scrollWidth > availableSpace && fontSize > 10) {
+                fontSize--;
+                nameEl.style.fontSize = fontSize + 'px';
+            }
+
+            // Now, set the other elements' font sizes relative to the name's final size
+            const addressFontSize = fontSize * 0.8;
+            addressEl.style.fontSize = addressFontSize + 'px';
+            phoneEl.style.fontSize = addressFontSize + 'px';
+            
+            // Also adjust line height for better spacing
+            addressEl.style.lineHeight = 1.4;
+        }
+
         async function loadLabelData() {
             const loader = document.getElementById('loader');
             const contentWrapper = document.getElementById('content-wrapper');
             const nameEl = document.getElementById('name');
-            // Get new elements
             const addressEl = document.getElementById('address');
             const phoneEl = document.getElementById('phone');
             
@@ -175,19 +192,19 @@
 
                 const customer = customerSnap.data();
 
-                // Populate the label with data
                 nameEl.textContent = customer.name || 'N/A';
-                
-                // ** UPDATED: Separate address and phone **
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'N/A';
                 
                 addressEl.textContent = address;
                 phoneEl.textContent = `โทร. ${phone}`;
-
-                // Hide loader, show content, and trigger print dialog
+                
                 loader.style.display = 'none';
-                contentWrapper.style.display = 'flex'; // Use flex to enable spacing
+                contentWrapper.style.display = 'flex';
+                
+                // ** Call the new function to auto-size the font for the preview **
+                adjustFontSize();
+
                 window.print();
 
             } catch (error) {
