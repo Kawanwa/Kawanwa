@@ -15,7 +15,8 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #f0f0f0; /* Light grey background for contrast */
+            /* Change background to white to remove the 'box' effect */
+            background-color: white; 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
             display: flex;
@@ -29,20 +30,19 @@
             background-color: white;
             box-sizing: border-box;
             
-            /* Make preview larger using viewport units */
-            width: 90vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
-            height: 39vh; /* รักษาอัตราส่วน: 90 * (25/58) */
+            /* Make preview larger to fill more of the screen */
+            width: 95vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
+            height: 41.2vh; /* รักษาอัตราส่วน: 95 * (25/58) */
 
             transform: rotate(-90deg);
 
             /* Adjust font and layout for the larger preview */
             padding: 2vh;
-            font-size: 2.8vh;
-            line-height: 1.4;
+            font-size: 3vh; /* Increased font size */
+            line-height: 1.5; /* Increased line height */
             color: black;
             
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            /* Removed border and shadow */
         }
 
         #content-wrapper {
@@ -54,7 +54,7 @@
         
         #name {
             font-weight: 700;
-            font-size: 3.2vh; /* Adjust name font size for preview */
+            font-size: 3.5vh; /* Increased name font size */
         }
         
         #phone {
@@ -88,6 +88,7 @@
             }
             
             #name {
+                /* Reset font-size for print */
                 font-size: 9pt;
             }
             
