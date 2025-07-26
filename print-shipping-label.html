@@ -26,32 +26,25 @@
 
         /* --- STYLES FOR SCREEN PREVIEW --- */
         .label-container {
-            background-color: white;
-            box-sizing: border-box;
-            
-            /* Make preview container fill the screen's height */
-            width: 100vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
-            height: 43.1vh; /* รักษาอัตราส่วน: 100 * (25/58) */
-
+            /* This container simply rotates its content */
             transform: rotate(-90deg);
-
-            /* Adjust font and layout for the larger preview */
-            padding: 3vh;
-            font-size: 5vh; /* Dramatically increased font size */
-            line-height: 1.4; 
+            /* Font size will be set by JavaScript */
+            line-height: 1.3;
             color: black;
+            /* Prevent any wrapping */
+            white-space: nowrap;
         }
 
         #content-wrapper {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            height: 100%;
+            padding: 1vh; /* Add some internal padding */
+            border: 1px solid white; /* Invisible border to help with sizing */
         }
         
         #name {
             font-weight: 700;
-            font-size: 6vh; /* Dramatically increased name font size */
         }
         
         #phone {
@@ -67,29 +60,37 @@
                 display: block;
             }
             .label-container {
+                /* Important: Re-enable wrapping for print if needed, though unlikely */
+                white-space: normal !important;
                 /* OVERRIDE with exact mm dimensions for printing */
-                width: 58mm;
-                height: 25mm;
+                width: 58mm !important;
+                height: 25mm !important;
                 
                 /* Reset padding and font-size to absolute units for print */
-                padding: 1.5mm;
-                font-size: 8pt;
-                line-height: 1.3;
+                padding: 1.5mm !important;
+                font-size: 8pt !important;
+                line-height: 1.3 !important;
                 
-                position: absolute;
-                top: 16.5mm;
-                left: -16.5mm;
+                position: absolute !important;
+                top: 16.5mm !important;
+                left: -16.5mm !important;
+                transform: rotate(-90deg) !important;
             }
             
+            #content-wrapper {
+                height: 100% !important;
+                padding: 0 !important;
+            }
+
             #name {
                 /* Reset font-size for print */
-                font-size: 9pt;
+                font-size: 9pt !important;
             }
             
             #phone {
-                font-size: 8pt;
-                font-weight: 700;
-                text-align: left;
+                font-size: 8pt !important;
+                font-weight: 700 !important;
+                text-align: left !important;
             }
             
             @page {
@@ -98,7 +99,6 @@
             }
         }
 
-        /* Counter-rotate the loader text to make it readable on screen */
         #loader {
            transform: rotate(90deg);
            font-size: 16px;
@@ -110,12 +110,10 @@
     <div id="label-container" class="label-container">
         <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
         <div id="content-wrapper" style="display: none;">
-            <!-- Top part: Recipient info -->
             <div id="recipient-info">
                 <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
                 <div id="address"></div>
             </div>
-            <!-- Bottom part: Phone number -->
             <div id="phone-container">
                 <span id="phone"></span>
             </div>
@@ -138,6 +136,38 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        /**
+         * NEW FUNCTION: Dynamically adjusts font size for the screen preview
+         * to make all content fit the screen without wrapping.
+         */
+        function adjustFontSize() {
+            const container = document.querySelector('.label-container');
+            if (!container) return;
+
+            container.style.fontSize = '10px'; // Start with a small base
+
+            // Because the container is rotated, its visual width is the screen's height,
+            // and its visual height is the screen's width.
+            const availableWidth = window.innerHeight * 0.98; // Use 98% of screen height
+            const availableHeight = window.innerWidth * 0.98; // Use 98% of screen width
+
+            let fontSize = 10;
+            // Loop to find the best font size
+            while (true) {
+                container.style.fontSize = (fontSize + 1) + 'px';
+                
+                // Check if the content's rendered size exceeds the available space
+                if (container.scrollWidth > availableWidth || container.scrollHeight > availableHeight) {
+                    // It overflowed, so the previous font size was the correct one.
+                    container.style.fontSize = fontSize + 'px';
+                    break; // Exit loop
+                }
+                
+                fontSize++;
+                if (fontSize > 300) break; // Safety break to prevent infinite loops
+            }
+        }
 
         async function loadLabelData() {
             const loader = document.getElementById('loader');
@@ -173,9 +203,15 @@
                 
                 addressEl.textContent = address;
                 phoneEl.textContent = `โทร. ${phone}`;
-
+                
                 loader.style.display = 'none';
                 contentWrapper.style.display = 'flex';
+                
+                // ** Call the new function to auto-size the font for the preview **
+                adjustFontSize();
+                // Adjust again on window resize for responsiveness
+                window.onresize = adjustFontSize;
+
                 window.print();
 
             } catch (error) {
