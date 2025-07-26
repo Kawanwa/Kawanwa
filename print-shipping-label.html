@@ -23,8 +23,8 @@
             align-items: center;
         }
         .rotated-container {
-            width: 100vh;
-            height: 100vw;
+            width: 100vh; /* Use viewport height for width */
+            height: 100vw; /* Use viewport width for height */
             transform: rotate(-90deg);
             display: flex;
             justify-content: center; 
@@ -36,17 +36,14 @@
             width: 100%;
             height: 100%;
         }
+        /* Removed font-size from CSS, as it's now controlled by JS for better scaling */
         .svg-text {
             font-family: 'Sarabun', sans-serif;
             fill: black;
-            font-size: 100px;
             text-anchor: middle;
         }
         .svg-text-bold {
             font-weight: 700;
-        }
-        .svg-text-address {
-            font-size: 85px;
         }
         #status-overlay {
             position: fixed;
@@ -72,13 +69,15 @@
         <div id="status-text">กำลังโหลดข้อมูล...</div>
     </div>
     <div id="label-container" class="rotated-container" style="display: none;">
-        <svg id="svg-container" preserveAspectRatio="xMidYMax meet"></svg>
+        <svg id="svg-container"></svg>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // --- Firebase Config ---
+        // หมายเหตุ: เพื่อความปลอดภัย ควรย้าย Config ไปไว้ใน Environment Variables ในระบบจริง
         const firebaseConfig = {
             apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
             authDomain: "kawanwa-stone.firebaseapp.com",
@@ -91,71 +90,105 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        // --- ฟังก์ชันตัดคำเวอร์ชันใหม่ (ทนทานขึ้น) ---
+        /**
+         * ตัดข้อความภาษาไทยตามจำนวนตัวอักษรที่กำหนด
+         * @param {string} text - ข้อความที่ต้องการตัด
+         * @param {number} maxCharsPerLine - จำนวนตัวอักษรสูงสุดต่อบรรทัด
+         * @returns {string[]} - อาร์เรย์ของข้อความที่ถูกตัดแล้ว
+         */
         function wrapText(text, maxCharsPerLine) {
             if (!text || typeof text !== 'string') return [];
-            
-            // ใช้วิธีตัดข้อความตามความยาวที่กำหนดโดยตรง
-            // ทำให้สามารถตัดคำได้แม้ไม่มีการเว้นวรรค
             const regex = new RegExp(`.{1,${maxCharsPerLine}}`, 'g');
             return text.match(regex) || [];
         }
 
+        /**
+         * สร้างและแสดงผลข้อมูลผู้รับเป็น SVG ภายในคอนเทนเนอร์ที่กำหนด
+         * @param {string} name - ชื่อผู้รับ
+         * @param {string} address - ที่อยู่ผู้รับ
+         * @param {string} phone - เบอร์โทรศัพท์ผู้รับ
+         */
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = '';
+            svg.innerHTML = ''; // เคลียร์เนื้อหาเก่าทิ้งก่อน
 
-            const viewBoxWidth = 1200;
-            const nameLineHeight = 120;
-            const addressLineHeight = 100;
-            const phoneLineHeight = 120;
-            const maxCharsForAddress = 28; // กำหนดความยาวสูงสุดต่อบรรทัดของที่อยู่
-            const topPadding = 40;
-            const bottomPadding = 40;
+            // ใช้ viewBox ที่มีอัตราส่วนคงที่ (เหมือนฉลาก 4x6 นิ้ว) เพื่อการปรับขนาดที่คาดเดาได้
+            const viewBoxWidth = 400;
+            const viewBoxHeight = 600;
+            svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
+            
+            // จัดเนื้อหาให้อยู่กึ่งกลางเสมอ และปรับขนาดให้พอดีกับพื้นที่ (meet)
+            svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            const nameContent = `ผู้รับ: ${name}`;
+            const centerX = viewBoxWidth / 2;
+            const fontFamily = "'Sarabun', sans-serif";
+
+            // --- กำหนดขนาดฟอนต์และระยะห่างที่เหมาะสมกับ viewBox ใหม่ ---
+            const nameFontSize = 32;
+            const addressFontSize = 26;
+            const phoneFontSize = 28;
+            const lineSpacing = 10; // ระยะห่างระหว่างบล็อกข้อความ (ชื่อ, ที่อยู่, โทรศัพท์)
+            const addressLineGap = 5; // ระยะห่างระหว่างบรรทัดของที่อยู่
+
+            // --- ตัดคำสำหรับที่อยู่ ---
+            const maxCharsForAddress = 18; // ปรับจำนวนตัวอักษรให้เหมาะกับความกว้างใหม่
             const addressLines = wrapText(address, maxCharsForAddress);
-            const phoneContent = `โทร. ${phone}`;
 
-            const contentHeight = nameLineHeight + (addressLines.length * addressLineHeight) + phoneLineHeight;
-            const dynamicViewBoxHeight = contentHeight + topPadding + bottomPadding;
-            
-            svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${dynamicViewBoxHeight}`);
+            // --- คำนวณความสูงรวมของเนื้อหาทั้งหมดเพื่อจัดให้อยู่กึ่งกลางแนวตั้ง ---
+            const nameHeight = nameFontSize;
+            const addressHeight = (addressLines.length * addressFontSize) + (Math.max(0, addressLines.length - 1) * addressLineGap);
+            const phoneHeight = phoneFontSize;
+            const totalContentHeight = nameHeight + addressHeight + phoneHeight + (2 * lineSpacing);
 
-            const group = document.createElementNS(svgNS, "g");
-            
-            let currentY = dynamicViewBoxHeight - bottomPadding;
+            // --- คำนวณตำแหน่ง Y เริ่มต้นเพื่อให้บล็อกเนื้อหาอยู่กึ่งกลาง ---
+            let currentY = (viewBoxHeight - totalContentHeight) / 2;
 
-            const phoneText = document.createElementNS(svgNS, "text");
-            phoneText.setAttribute("class", "svg-text");
-            phoneText.setAttribute("x", "50%");
-            phoneText.setAttribute("y", currentY);
-            phoneText.textContent = phoneContent;
-            group.appendChild(phoneText);
-            
-            currentY -= phoneLineHeight;
-
-            addressLines.slice().reverse().forEach(line => {
-                const addressText = document.createElementNS(svgNS, "text");
-                addressText.setAttribute("class", "svg-text svg-text-address");
-                addressText.setAttribute("x", "50%");
-                addressText.setAttribute("y", currentY);
-                addressText.textContent = line;
-                group.appendChild(addressText);
-                currentY -= addressLineHeight;
-            });
-
+            // --- 1. สร้างและแสดงชื่อผู้รับ ---
+            currentY += nameHeight; // เลื่อน Y ไปยัง baseline ของข้อความ
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
-            nameText.setAttribute("x", "50%");
+            nameText.setAttribute("x", centerX);
             nameText.setAttribute("y", currentY);
-            nameText.textContent = nameContent;
-            group.appendChild(nameText);
+            nameText.setAttribute("font-size", nameFontSize);
+            nameText.textContent = `ผู้รับ: ${name}`;
+            svg.appendChild(nameText);
 
-            svg.appendChild(group);
+            currentY += lineSpacing; // เพิ่มระยะห่างหลังชื่อ
+
+            // --- 2. สร้างและแสดงที่อยู่ (วนลูปสร้างแต่ละบรรทัด) ---
+            addressLines.forEach(line => {
+                currentY += addressFontSize;
+                const addressText = document.createElementNS(svgNS, "text");
+                addressText.setAttribute("class", "svg-text");
+                addressText.setAttribute("x", centerX);
+                addressText.setAttribute("y", currentY);
+                addressText.setAttribute("font-size", addressFontSize);
+                addressText.textContent = line;
+                svg.appendChild(addressText);
+                currentY += addressLineGap; // เพิ่มระยะห่างระหว่างบรรทัด
+            });
+            
+            if (addressLines.length > 0) {
+                currentY -= addressLineGap; // ลบระยะห่างสุดท้ายออก
+            }
+
+            currentY += lineSpacing; // เพิ่มระยะห่างหลังที่อยู่
+
+            // --- 3. สร้างและแสดงเบอร์โทรศัพท์ ---
+            currentY += phoneHeight;
+            const phoneText = document.createElementNS(svgNS, "text");
+            phoneText.setAttribute("class", "svg-text");
+            phoneText.setAttribute("x", centerX);
+            phoneText.setAttribute("y", currentY);
+            phoneText.setAttribute("font-size", phoneFontSize);
+            phoneText.textContent = `โทร. ${phone}`;
+            svg.appendChild(phoneText);
         }
-
+        
+        /**
+         * โหลดข้อมูลจาก Firestore และแสดงผลบนฉลาก
+         */
         async function loadAndDisplayLabel() {
             const statusOverlay = document.getElementById('status-overlay');
             const statusText = document.getElementById('status-text');
@@ -188,11 +221,13 @@
 
                 const customer = customerSnap.data();
                 const name = customer.name || 'ไม่มีชื่อ';
+                // ใช้ที่อยู่ในการจัดส่งของออเดอร์ก่อน ถ้าไม่มีก็ใช้ที่อยู่หลักของลูกค้า
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'ไม่มีเบอร์โทร';
 
                 renderContentAsSVG(name, address, phone);
 
+                // ซ่อนหน้าต่างสถานะและแสดงฉลาก
                 statusOverlay.style.display = 'none';
                 labelContainer.style.display = 'flex';
 
