@@ -88,12 +88,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         
-        /**
-         * ตัดข้อความภาษาไทยตามจำนวนตัวอักษรที่กำหนด
-         * @param {string} text - ข้อความที่ต้องการตัด
-         * @param {number} maxCharsPerLine - จำนวนตัวอักษรสูงสุดต่อบรรทัด
-         * @returns {string[]} - อาร์เรย์ของข้อความที่ถูกตัดแล้ว
-         */
         function wrapText(text, maxCharsPerLine) {
             if (!text || typeof text !== 'string') return [];
             const regex = new RegExp(`.{1,${maxCharsPerLine}}`, 'g');
@@ -101,7 +95,7 @@
         }
 
         /**
-         * **ปรับปรุง (ขั้นตอนที่ 1):** สร้างและแสดงผล SVG โดยเน้นการจัดวางกึ่งกลางที่เสถียร
+         * **ปรับปรุง (ขั้นตอนที่ 3):** สร้าง SVG, จัดกึ่งกลาง และขยายให้พอดีทั้งแนวตั้งและแนวนอน
          * @param {string} name - ชื่อผู้รับ
          * @param {string} address - ที่อยู่ผู้รับ
          * @param {string} phone - เบอร์โทรศัพท์ผู้รับ
@@ -109,93 +103,85 @@
         function renderContentAsSVG(name, address, phone) {
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.getElementById('svg-container');
-            svg.innerHTML = ''; // เคลียร์เนื้อหาเก่า
+            svg.innerHTML = '';
 
-            // กำหนด viewBox เพื่อสร้างระบบพิกัดคงที่ (เหมือนกระดาษ)
             const viewBoxWidth = 400;
             const viewBoxHeight = 600;
             svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
-            
-            // **หัวใจสำคัญ:** preserveAspectRatio จะทำให้ SVG ปรับขนาดตัวเองให้พอดีและอยู่กึ่งกลางเสมอ
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            // --- 1. เตรียมข้อมูลและกำหนดค่าพื้นฐาน ---
+            const group = document.createElementNS(svgNS, "g");
+
             const nameContent = `ผู้รับ: ${name}`;
             const phoneContent = `โทร. ${phone}`;
-            const maxCharsForAddress = 22; // จำนวนอักษรสำหรับที่อยู่
+            const maxCharsForAddress = 35;
             const addressLines = wrapText(address, maxCharsForAddress);
 
-            // กำหนดขนาดฟอนต์และระยะห่างที่เหมาะสมกับ viewBox
-            const nameFontSize = 28;
-            const addressFontSize = 24;
-            const phoneFontSize = 26;
-            const lineSpacing = 8; // ระยะห่างระหว่างบรรทัดของที่อยู่
-            const blockSpacing = 15; // ระยะห่างระหว่างบล็อก (ชื่อ, ที่อยู่, โทร)
-
-            // --- 2. คำนวณความสูงรวมของเนื้อหาทั้งหมด ---
-            const nameHeight = nameFontSize;
-            const addressHeight = (addressLines.length * addressFontSize) + (Math.max(0, addressLines.length - 1) * lineSpacing);
-            const phoneHeight = phoneFontSize;
-            const totalContentHeight = nameHeight + addressHeight + phoneHeight + (2 * blockSpacing);
-
-            // --- 3. คำนวณตำแหน่ง Y เริ่มต้นเพื่อให้บล็อกเนื้อหาทั้งหมดอยู่กึ่งกลางแนวตั้ง ---
-            let currentY = (viewBoxHeight - totalContentHeight) / 2;
-            const centerX = viewBoxWidth / 2;
-
-            // --- 4. สร้างและวาง Element ทีละส่วน ---
+            const nameFontSize = 30;
+            const addressFontSize = 25;
+            const phoneFontSize = 28;
+            const lineSpacing = 1.2;
             
-            // ชื่อผู้รับ
-            currentY += nameFontSize; // เลื่อน Y ไปยัง baseline ของข้อความ
+            let currentY = 0;
+            const centerX = 0;
+
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("x", centerX);
             nameText.setAttribute("y", currentY);
             nameText.setAttribute("font-size", nameFontSize);
-            nameText.setAttribute("dominant-baseline", "middle"); // จัดกลางแนวตั้งของตัวอักษร
             nameText.textContent = nameContent;
-            svg.appendChild(nameText);
+            group.appendChild(nameText);
+            currentY += nameFontSize * lineSpacing;
 
-            currentY += blockSpacing; // เว้นวรรค
-
-            // ที่อยู่
             addressLines.forEach(line => {
-                currentY += addressFontSize / 2; // เลื่อนไปครึ่งหนึ่งของความสูง
                 const addressText = document.createElementNS(svgNS, "text");
                 addressText.setAttribute("class", "svg-text");
                 addressText.setAttribute("x", centerX);
                 addressText.setAttribute("y", currentY);
                 addressText.setAttribute("font-size", addressFontSize);
-                addressText.setAttribute("dominant-baseline", "middle");
                 addressText.textContent = line;
-                svg.appendChild(addressText);
-                currentY += (addressFontSize / 2) + lineSpacing; // เลื่อนลงมาอีกครึ่ง + ระยะห่าง
+                group.appendChild(addressText);
+                currentY += addressFontSize * lineSpacing;
             });
-            currentY -= lineSpacing; // ลบระยะห่างสุดท้ายออก
-            
-            currentY += blockSpacing; // เว้นวรรค
 
-            // เบอร์โทรศัพท์
-            currentY += phoneFontSize / 2;
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("x", centerX);
             phoneText.setAttribute("y", currentY);
             phoneText.setAttribute("font-size", phoneFontSize);
-            phoneText.setAttribute("dominant-baseline", "middle");
             phoneText.textContent = phoneContent;
-            svg.appendChild(phoneText);
+            group.appendChild(phoneText);
+            
+            svg.appendChild(group);
+
+            // --- คำนวณและปรับขนาด Group ให้พอดีกับ ViewBox ---
+            const paddingX = 20; // ระยะขอบซ้าย-ขวา
+            const paddingY = 40; // ระยะขอบบน-ล่าง
+            const bbox = group.getBBox();
+
+            // คำนวณอัตราส่วนสำหรับแกน X และ Y
+            const scaleX = (viewBoxWidth - paddingX * 2) / bbox.width;
+            const scaleY = (viewBoxHeight - paddingY * 2) / bbox.height;
+
+            // **หัวใจสำคัญ:** ใช้อัตราส่วนที่น้อยกว่า เพื่อให้แน่ใจว่าพอดีทั้งสองแกน
+            const scale = Math.min(scaleX, scaleY);
+
+            // คำนวณตำแหน่งใหม่เพื่อจัดกึ่งกลาง
+            const newWidth = bbox.width * scale;
+            const newHeight = bbox.height * scale;
+            const translateX = (viewBoxWidth - newWidth) / 2 - (bbox.x * scale);
+            const translateY = (viewBoxHeight - newHeight) / 2 - (bbox.y * scale);
+            
+            group.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
         }
         
-        /**
-         * โหลดข้อมูลจาก Firestore และแสดงผลบนฉลาก
-         */
         async function loadAndDisplayLabel() {
             const statusOverlay = document.getElementById('status-overlay');
             const statusText = document.getElementById('status-text');
             const labelContainer = document.getElementById('label-container');
             
             try {
-                // รอให้ฟอนต์โหลดเสร็จก่อนเริ่มทำงาน (สำคัญมาก)
                 await document.fonts.ready;
 
                 const urlParams = new URLSearchParams(window.location.search);
