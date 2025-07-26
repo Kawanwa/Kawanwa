@@ -15,79 +15,71 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: white;
+            background-color: #f0f0f0; /* Light grey background for contrast */
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
+            /* Center the preview on the screen */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
-        /* Main container for the label - Full screen for display */
+
+        /* --- STYLES FOR BOTH SCREEN PREVIEW AND PRINT --- */
         .label-container {
-            width: 100%;
-            height: 100%;
-            padding: 5vh 5vw; /* Use viewport units for responsive padding */
-            font-size: 3vh;   /* Use viewport units for responsive font size */
-            line-height: 1.5;
+            background-color: white;
+            box-sizing: border-box;
+            
+            /* Define the label's true dimensions */
+            width: 58mm;
+            height: 25mm;
+
+            /* Rotate the entire container */
+            transform: rotate(-90deg);
+
+            /* Font and layout settings */
+            padding: 1.5mm;
+            font-size: 8pt;
+            line-height: 1.3;
             color: black;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            box-sizing: border-box;
-            overflow: hidden;
+
+            /* Add a border for the screen preview */
+            border: 1px solid #333;
         }
-        /* Address section */
-        #address {
-            flex-grow: 1;
-            overflow: hidden;
-            padding: 2vh 0;
-            white-space: pre-line; /* Respect newlines in the address */
-        }
-        /* Customer name style */
+
         #name {
             font-weight: 700;
-            font-size: 4vh; /* Larger font for name on screen */
+            font-size: 9pt;
         }
 
-        /* Print-specific styles - CHANGED FOR VERTICAL LAYOUT */
+        /* --- PRINT-ONLY STYLES --- */
         @media print {
-            /* 1. สลับความกว้าง-สูงของหน้ากระดาษให้เป็นแนวตั้ง */
             body, html {
-                width: 25mm;
-                height: 58mm;
-                padding: 0;
-                margin: 0;
-                overflow: hidden;
+                background-color: white;
+                display: block; /* Reset centering for print */
             }
             .label-container {
-                box-sizing: border-box; /* ต้องมีเพื่อให้ padding ถูกต้อง */
+                border: none; /* Hide border when printing */
+                
+                /* This positioning is crucial for printing correctly on vertical paper */
                 position: absolute;
-
-                /* 2. กำหนดขนาดของเนื้อหาให้เท่ากับฉลากแนวนอนเดิม */
-                width: 58mm;
-                height: 25mm;
-
-                /* 3. หมุนเนื้อหาทั้งกล่อง -90 องศา (ทวนเข็มนาฬิกา) */
-                transform: rotate(-90deg);
-                transform-origin: center;
-
-                /* 4. จัดตำแหน่งกล่องที่หมุนแล้วให้อยู่ตรงกลาง */
                 top: 16.5mm;  /* (58mm - 25mm) / 2 */
                 left: -16.5mm; /* -(58mm - 25mm) / 2 */
-
-                /* --- Revert styles for printing --- */
-                padding: 1.5mm;
-                font-size: 8pt;
-                line-height: 1.3;
             }
-            #address {
-                padding: 1mm 0;
-            }
-            #name {
-                font-size: 9pt;
-            }
-            /* 5. กำหนดขนาดหน้าพิมพ์ (สำคัญมาก) */
+            
             @page {
-                size: 25mm 58mm; /* ตั้งค่ากระดาษเป็นแนวตั้ง */
+                /* Define paper size as vertical */
+                size: 25mm 58mm;
                 margin: 0;
             }
+        }
+
+        /* Counter-rotate the loader text to make it readable on screen */
+        #loader {
+           transform: rotate(90deg);
         }
     </style>
 </head>
@@ -102,6 +94,7 @@
     </div>
 
     <script type="module">
+        // The script part remains the same
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -172,4 +165,3 @@
     </script>
 </body>
 </html>
-
