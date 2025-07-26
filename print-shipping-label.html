@@ -66,7 +66,7 @@
 </head>
 <body>
     <div id="status-overlay">
-        <div id="status-text">กำลังโหลดข้อมูล...</div>
+        <div id="status-text">กำลังโหลดข้อมูลและฟอนต์...</div>
     </div>
     <div id="label-container" class="rotated-container" style="display: none;">
         <svg id="svg-container"></svg>
@@ -112,33 +112,26 @@
             const svg = document.getElementById('svg-container');
             svg.innerHTML = ''; // เคลียร์เนื้อหาเก่า
 
-            // กำหนด viewBox เพื่อสร้างระบบพิกัดที่คงที่
             const viewBoxWidth = 1000;
-            const viewBoxHeight = 1500; // อัตราส่วนเหมือนฉลากแนวตั้ง
+            const viewBoxHeight = 1500;
             svg.setAttribute("viewBox", `0 0 ${viewBoxWidth} ${viewBoxHeight}`);
             svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
 
-            // สร้าง Group <g> เพื่อรวมข้อความทั้งหมดไว้ด้วยกัน จะทำให้ง่ายต่อการปรับขนาดและตำแหน่ง
             const group = document.createElementNS(svgNS, "g");
 
-            // --- 1. เตรียมข้อมูลและค่าเริ่มต้น ---
             const nameContent = `ผู้รับ: ${name}`;
             const phoneContent = `โทร. ${phone}`;
-            const maxCharsForAddress = 30; // **ปรับปรุง:** เพิ่มความยาวสูงสุดของที่อยู่ต่อบรรทัด
+            const maxCharsForAddress = 30;
             const addressLines = wrapText(address, maxCharsForAddress);
 
-            // กำหนดขนาดฟอนต์และระยะห่าง (แบบสัมพัทธ์) สำหรับการคำนวณเบื้องต้น
             const initialNameSize = 80;
             const initialAddressSize = 60;
             const initialPhoneSize = 70;
-            const lineSpacing = 1.2; // ตัวคูณระยะห่างระหว่างบรรทัด
+            const lineSpacing = 1.2;
             
             let currentY = 0;
-
-            // --- 2. สร้าง Text Elements ทั้งหมดและวางใน Group <g> ---
             const centerX = viewBoxWidth / 2;
 
-            // ชื่อผู้รับ
             const nameText = document.createElementNS(svgNS, "text");
             nameText.setAttribute("class", "svg-text svg-text-bold");
             nameText.setAttribute("x", centerX);
@@ -148,7 +141,6 @@
             group.appendChild(nameText);
             currentY += initialNameSize * lineSpacing;
 
-            // ที่อยู่
             addressLines.forEach(line => {
                 const addressText = document.createElementNS(svgNS, "text");
                 addressText.setAttribute("class", "svg-text");
@@ -160,7 +152,6 @@
                 currentY += initialAddressSize * lineSpacing;
             });
 
-            // เบอร์โทร
             const phoneText = document.createElementNS(svgNS, "text");
             phoneText.setAttribute("class", "svg-text");
             phoneText.setAttribute("x", centerX);
@@ -171,22 +162,18 @@
             
             svg.appendChild(group);
 
-            // --- 3. คำนวณและปรับขนาด Group ให้พอดีกับ ViewBox ---
-            const padding = 50; // ระยะขอบที่ต้องการเว้นไว้
-            const bbox = group.getBBox(); // วัดขนาดของ Group ทั้งหมด
+            const padding = 50;
+            const bbox = group.getBBox();
 
-            // คำนวณอัตราส่วนการย่อ/ขยาย
             const scaleX = (viewBoxWidth - padding * 2) / bbox.width;
             const scaleY = (viewBoxHeight - padding * 2) / bbox.height;
-            const scale = Math.min(scaleX, scaleY); // ใช้อัตราส่วนที่น้อยกว่าเพื่อไม่ให้ล้นขอบ
+            const scale = Math.min(scaleX, scaleY);
 
-            // คำนวณตำแหน่งใหม่เพื่อจัดกึ่งกลางหลังการปรับขนาด
             const newWidth = bbox.width * scale;
             const newHeight = bbox.height * scale;
             const translateX = (viewBoxWidth - newWidth) / 2 - (bbox.x * scale);
             const translateY = (viewBoxHeight - newHeight) / 2 - (bbox.y * scale);
             
-            // ใช้ transform เพื่อปรับขนาดและตำแหน่งของ Group ทั้งหมดในครั้งเดียว
             group.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
         }
         
@@ -199,6 +186,9 @@
             const labelContainer = document.getElementById('label-container');
             
             try {
+                // **การแก้ไข:** รอให้ฟอนต์โหลดเสร็จก่อนเริ่มทำงาน
+                await document.fonts.ready;
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const orderId = urlParams.get('orderId');
 
@@ -206,6 +196,7 @@
                     throw new Error("ไม่พบรหัสออเดอร์ใน URL!<br>ตัวอย่าง: ...?orderId=ABC-123");
                 }
 
+                statusText.textContent = 'กำลังโหลดข้อมูลออเดอร์...';
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
                 if (!orderSnap.exists()) {
@@ -217,6 +208,7 @@
                     throw new Error("ออเดอร์นี้ไม่มีข้อมูลรหัสลูกค้า");
                 }
 
+                statusText.textContent = 'กำลังโหลดข้อมูลลูกค้า...';
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
                 if (!customerSnap.exists()) {
