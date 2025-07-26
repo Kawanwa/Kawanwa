@@ -15,7 +15,6 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            /* Change background to white to remove the 'box' effect */
             background-color: white; 
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -30,31 +29,29 @@
             background-color: white;
             box-sizing: border-box;
             
-            /* Make preview larger to fill more of the screen */
-            width: 95vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
-            height: 41.2vh; /* รักษาอัตราส่วน: 95 * (25/58) */
+            /* Make preview container fill the screen's height */
+            width: 100vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
+            height: 43.1vh; /* รักษาอัตราส่วน: 100 * (25/58) */
 
             transform: rotate(-90deg);
 
             /* Adjust font and layout for the larger preview */
-            padding: 2vh;
-            font-size: 3vh; /* Increased font size */
-            line-height: 1.5; /* Increased line height */
+            padding: 3vh;
+            font-size: 5vh; /* Dramatically increased font size */
+            line-height: 1.4; 
             color: black;
-            
-            /* Removed border and shadow */
         }
 
         #content-wrapper {
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Key for separating top/bottom content */
+            justify-content: space-between;
             height: 100%;
         }
         
         #name {
             font-weight: 700;
-            font-size: 3.5vh; /* Increased name font size */
+            font-size: 6vh; /* Dramatically increased name font size */
         }
         
         #phone {
@@ -63,7 +60,7 @@
         }
 
 
-        /* --- PRINT-ONLY STYLES --- */
+        /* --- PRINT-ONLY STYLES (REMAINS CORRECT) --- */
         @media print {
             body, html {
                 background-color: white;
@@ -78,9 +75,6 @@
                 padding: 1.5mm;
                 font-size: 8pt;
                 line-height: 1.3;
-
-                border: none;
-                box-shadow: none;
                 
                 position: absolute;
                 top: 16.5mm;
@@ -115,7 +109,6 @@
 
     <div id="label-container" class="label-container">
         <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
-        <!-- This wrapper now uses Flexbox to space content out -->
         <div id="content-wrapper" style="display: none;">
             <!-- Top part: Recipient info -->
             <div id="recipient-info">
@@ -150,7 +143,6 @@
             const loader = document.getElementById('loader');
             const contentWrapper = document.getElementById('content-wrapper');
             const nameEl = document.getElementById('name');
-            // Get new elements
             const addressEl = document.getElementById('address');
             const phoneEl = document.getElementById('phone');
             
@@ -175,19 +167,15 @@
 
                 const customer = customerSnap.data();
 
-                // Populate the label with data
                 nameEl.textContent = customer.name || 'N/A';
-                
-                // ** UPDATED: Separate address and phone **
                 const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
                 const phone = customer.phone || 'N/A';
                 
                 addressEl.textContent = address;
                 phoneEl.textContent = `โทร. ${phone}`;
 
-                // Hide loader, show content, and trigger print dialog
                 loader.style.display = 'none';
-                contentWrapper.style.display = 'flex'; // Use flex to enable spacing
+                contentWrapper.style.display = 'flex';
                 window.print();
 
             } catch (error) {
