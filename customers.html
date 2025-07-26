@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จัดการข้อมูลลูกค้า - ระบบจัดการร้านกำไลหิน</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Kanit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -20,13 +18,16 @@
         #customer-modal.hidden {
             display: none;
         }
+        /* Style for disabled dropdowns */
+        select:disabled {
+            background-color: #f3f4f6; /* bg-gray-100 */
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body class="bg-stone-100">
 
-    <!-- Main Container -->
     <div class="container mx-auto px-4 py-10">
-        <!-- Customer List Card -->
         <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
              <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <div class="w-full">
@@ -51,9 +52,8 @@
         </div>
     </div>
 
-    <!-- Customer Modal (Popup) with Animation Classes -->
     <div id="customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out opacity-0">
-        <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
+        <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
             <form id="customer-form" class="p-6 md:p-8">
                 <header class="flex justify-between items-start mb-6 pb-4 border-b">
                     <div>
@@ -66,26 +66,52 @@
                 </header>
                 
                 <input type="hidden" id="customerId" name="customerId">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                     <div>
                         <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อลูกค้า *</label>
                         <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
                     </div>
                     <div>
-                        <label for="contactChannel" class="block text-sm font-medium text-stone-700 mb-1">ช่องทางการติดต่อ</label>
-                        <input type="text" id="contactChannel" name="contactChannel" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                    </div>
-                    <div>
                         <label for="phone" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทร</label>
                         <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
                     </div>
-                    <div class="md:col-span-2">
-                        <label for="shippingAddress" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่สำหรับการจัดส่ง</label>
-                        <textarea id="shippingAddress" name="shippingAddress" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></textarea>
+                     <div>
+                        <label for="contactChannel" class="block text-sm font-medium text-stone-700 mb-1">ช่องทางการติดต่อ</label>
+                        <input type="text" id="contactChannel" name="contactChannel" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
                     </div>
                     <div class="md:col-span-2">
                         <label for="note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ</label>
                         <input type="text" id="note" name="note" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                    </div>
+
+                    <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4 border-t pt-5 mt-4">
+                        <h3 class="col-span-full text-lg font-medium text-stone-800 mb-2">ที่อยู่สำหรับการจัดส่ง</h3>
+                        <div class="md:col-span-2 lg:col-span-3">
+                            <label for="address_details" class="block text-sm font-medium text-stone-700 mb-1">บ้านเลขที่, หมู่บ้าน, อาคาร, ซอย, ถนน</label>
+                            <input type="text" id="address_details" name="address_details" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label for="address_province" class="block text-sm font-medium text-stone-700 mb-1">จังหวัด *</label>
+                            <select id="address_province" name="address_province" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-white">
+                                <option value="">-- เลือกจังหวัด --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="address_district" class="block text-sm font-medium text-stone-700 mb-1">เขต/อำเภอ *</label>
+                            <select id="address_district" name="address_district" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-white" disabled>
+                                <option value="">-- เลือกเขต/อำเภอ --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="address_subdistrict" class="block text-sm font-medium text-stone-700 mb-1">แขวง/ตำบล *</label>
+                            <select id="address_subdistrict" name="address_subdistrict" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-white" disabled>
+                                <option value="">-- เลือกแขวง/ตำบล --</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-start-1">
+                            <label for="address_postcode" class="block text-sm font-medium text-stone-700 mb-1">รหัสไปรษณีย์</label>
+                            <input type="text" id="address_postcode" name="address_postcode" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 bg-stone-100" readonly>
+                        </div>
                     </div>
                 </div>
                 <div class="mt-6 pt-6 border-t flex items-center gap-4">
@@ -100,7 +126,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, setDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -117,10 +142,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- DOM Elements ---
         const customerListContainer = document.getElementById('customer-list-container');
         const searchInput = document.getElementById('search-input');
         const addCustomerBtn = document.getElementById('add-customer-btn');
-        
         const modal = document.getElementById('customer-modal');
         const modalPanel = document.getElementById('modal-panel');
         const closeModalBtn = document.getElementById('close-modal-btn');
@@ -130,9 +155,95 @@
         const formTitle = document.getElementById('form-title');
         const formSubtitle = document.getElementById('form-subtitle');
         const submitButton = document.getElementById('submit-button');
-        
-        let allCustomers = [];
+        // Address fields
+        const addressDetails = document.getElementById('address_details');
+        const addressProvince = document.getElementById('address_province');
+        const addressDistrict = document.getElementById('address_district');
+        const addressSubdistrict = document.getElementById('address_subdistrict');
+        const addressPostcode = document.getElementById('address_postcode');
 
+        let allCustomers = [];
+        let thaiAddressData = [];
+
+        // --- Address Data Handling ---
+        async function fetchAddressData() {
+            try {
+                // In a real project, you would host this JSON file on your server or a CDN.
+                // For this example, we are using a publicly available gist.
+                const response = await fetch('https://gist.githubusercontent.com/ChaiyapatOam/f23a180c54170423089859a43a3734e0/raw/5c3e67c8bbe1fc66100341772496277e497fc61d/thailand-address-database.json');
+                if (!response.ok) throw new Error('Network response was not ok');
+                thaiAddressData = await response.json();
+                populateProvinces();
+            } catch (error) {
+                console.error("Failed to fetch address data:", error);
+                alert("ไม่สามารถโหลดข้อมูลที่อยู่ได้");
+            }
+        }
+
+        function populateProvinces() {
+            addressProvince.innerHTML = '<option value="">-- เลือกจังหวัด --</option>';
+            thaiAddressData.forEach(province => {
+                addressProvince.innerHTML += `<option value="${province.province}">${province.province}</option>`;
+            });
+        }
+
+        addressProvince.addEventListener('change', () => {
+            const selectedProvince = addressProvince.value;
+            // Reset subsequent fields
+            addressDistrict.innerHTML = '<option value="">-- เลือกเขต/อำเภอ --</option>';
+            addressSubdistrict.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+            addressPostcode.value = '';
+            addressDistrict.disabled = true;
+            addressSubdistrict.disabled = true;
+
+            if (selectedProvince) {
+                const provinceData = thaiAddressData.find(p => p.province === selectedProvince);
+                if (provinceData) {
+                    provinceData.amphoe.forEach(district => {
+                        addressDistrict.innerHTML += `<option value="${district.amphoe}">${district.amphoe}</option>`;
+                    });
+                    addressDistrict.disabled = false;
+                }
+            }
+        });
+
+        addressDistrict.addEventListener('change', () => {
+            const selectedProvince = addressProvince.value;
+            const selectedDistrict = addressDistrict.value;
+            // Reset subsequent fields
+            addressSubdistrict.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+            addressPostcode.value = '';
+            addressSubdistrict.disabled = true;
+            
+            if (selectedProvince && selectedDistrict) {
+                const provinceData = thaiAddressData.find(p => p.province === selectedProvince);
+                const districtData = provinceData?.amphoe.find(d => d.amphoe === selectedDistrict);
+                if (districtData) {
+                     districtData.tambon.forEach(subdistrict => {
+                        addressSubdistrict.innerHTML += `<option value="${subdistrict.tambon}">${subdistrict.tambon}</option>`;
+                    });
+                    addressSubdistrict.disabled = false;
+                }
+            }
+        });
+
+        addressSubdistrict.addEventListener('change', () => {
+            const selectedProvince = addressProvince.value;
+            const selectedDistrict = addressDistrict.value;
+            const selectedSubdistrict = addressSubdistrict.value;
+            addressPostcode.value = '';
+
+            if (selectedProvince && selectedDistrict && selectedSubdistrict) {
+                const provinceData = thaiAddressData.find(p => p.province === selectedProvince);
+                const districtData = provinceData?.amphoe.find(d => d.amphoe === selectedDistrict);
+                const subdistrictData = districtData?.tambon.find(s => s.tambon === selectedSubdistrict);
+                if (subdistrictData) {
+                    addressPostcode.value = subdistrictData.zipcode;
+                }
+            }
+        });
+
+        // --- Modal Handling ---
         const openModal = () => {
             modal.classList.remove('hidden');
             setTimeout(() => {
@@ -141,16 +252,28 @@
             }, 10);
         };
 
+        const resetAddressFields = () => {
+             // Reset form fields
+            customerForm.reset();
+            // Specifically reset and disable address dropdowns
+            addressDistrict.innerHTML = '<option value="">-- เลือกเขต/อำเภอ --</option>';
+            addressDistrict.disabled = true;
+            addressSubdistrict.innerHTML = '<option value="">-- เลือกแขวง/ตำบล --</option>';
+            addressSubdistrict.disabled = true;
+            addressPostcode.value = '';
+        }
+
         const closeModal = () => {
             modal.classList.add('opacity-0');
             modalPanel.classList.add('opacity-0', 'scale-95');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                customerForm.reset();
+                resetAddressFields();
                 customerIdField.value = '';
             }, 300);
         };
 
+        // --- Customer Data (CRUD) ---
         const renderCustomers = (customersToRender) => {
             customerListContainer.innerHTML = '';
             if (customersToRender.length === 0) {
@@ -173,7 +296,6 @@
                 const row = document.createElement('tr');
                 row.className = 'bg-white border-b hover:bg-stone-50';
                 const createdDate = customer.createdDate?.toDate().toLocaleDateString('th-TH') || 'N/A';
-                // *** UPDATED THIS SECTION ***
                 row.innerHTML = `
                     <td class="px-6 py-4 font-medium text-stone-900">
                         ${customer.name}
@@ -199,13 +321,7 @@
             renderCustomers(filtered);
         };
 
-        const customersRef = collection(db, "customers");
-        const q = query(customersRef, orderBy("createdDate", "desc"));
-        onSnapshot(q, (snapshot) => {
-            allCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            filterAndRender();
-        });
-
+        // --- Event Listeners ---
         addCustomerBtn.addEventListener('click', () => {
             formTitle.textContent = 'เพิ่มลูกค้าใหม่';
             formSubtitle.textContent = 'กรอกข้อมูลเพื่อบันทึกลูกค้า';
@@ -216,20 +332,26 @@
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtnInModal.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
+            if (e.target === modal) closeModal();
         });
 
         customerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            submitButton.disabled = true;
             const customerId = customerIdField.value;
+
             const customerData = {
                 name: document.getElementById('name').value,
                 contactChannel: document.getElementById('contactChannel').value,
                 phone: document.getElementById('phone').value,
-                shippingAddress: document.getElementById('shippingAddress').value,
                 note: document.getElementById('note').value,
+                shippingAddress: {
+                    details: addressDetails.value,
+                    province: addressProvince.value,
+                    district: addressDistrict.value,
+                    subdistrict: addressSubdistrict.value,
+                    postcode: addressPostcode.value
+                }
             };
 
             try {
@@ -243,6 +365,8 @@
             } catch (error) {
                 console.error("Error saving customer: ", error);
                 alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+            } finally {
+                submitButton.disabled = false;
             }
         });
 
@@ -263,12 +387,33 @@
             } else if (targetElement.classList.contains('edit-btn')) {
                 const customerToEdit = allCustomers.find(c => c.id === id);
                 if (customerToEdit) {
+                    // Reset form first
+                    resetAddressFields();
+
+                    // Populate basic fields
                     customerIdField.value = customerToEdit.id;
                     document.getElementById('name').value = customerToEdit.name;
                     document.getElementById('contactChannel').value = customerToEdit.contactChannel || '';
                     document.getElementById('phone').value = customerToEdit.phone || '';
-                    document.getElementById('shippingAddress').value = customerToEdit.shippingAddress || '';
                     document.getElementById('note').value = customerToEdit.note || '';
+
+                    // Populate address fields if they exist
+                    if (customerToEdit.shippingAddress) {
+                        const addr = customerToEdit.shippingAddress;
+                        addressDetails.value = addr.details || '';
+                        
+                        // Set province and trigger change to populate districts
+                        addressProvince.value = addr.province || '';
+                        addressProvince.dispatchEvent(new Event('change'));
+
+                        // Set district and trigger change to populate subdistricts
+                        addressDistrict.value = addr.district || '';
+                        addressDistrict.dispatchEvent(new Event('change'));
+
+                        // Set subdistrict and postcode
+                        addressSubdistrict.value = addr.subdistrict || '';
+                        addressPostcode.value = addr.postcode || '';
+                    }
 
                     formTitle.textContent = 'แก้ไขข้อมูลลูกค้า';
                     formSubtitle.textContent = `กำลังแก้ไข: ${customerToEdit.name}`;
@@ -276,6 +421,17 @@
                     openModal();
                 }
             }
+        });
+
+        // --- Initial Load ---
+        fetchAddressData(); // Load address data on start
+        const q = query(collection(db, "customers"), orderBy("createdDate", "desc"));
+        onSnapshot(q, (snapshot) => {
+            allCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            filterAndRender();
+        }, error => {
+            console.error("Error fetching customers: ", error);
+            customerListContainer.innerHTML = '<p class="text-center py-10 text-red-500">เกิดข้อผิดพลาดในการโหลดข้อมูลลูกค้า</p>';
         });
     </script>
 </body>
