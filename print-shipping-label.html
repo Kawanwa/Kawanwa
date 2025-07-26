@@ -25,34 +25,36 @@
             overflow: hidden;
         }
 
-        /* --- STYLES FOR BOTH SCREEN PREVIEW AND PRINT --- */
+        /* --- STYLES FOR SCREEN PREVIEW --- */
         .label-container {
             background-color: white;
             box-sizing: border-box;
             
-            /* Define the label's true dimensions */
-            width: 58mm;
-            height: 25mm;
+            /* 1. Define screen preview size using viewport units */
+            /* The container's width becomes the visual height after rotation */
+            width: 85vh; /* ความสูงของใบปะหน้าบนหน้าจอ */
+            height: 36.6vh; /* รักษาอัตราส่วน: 85 * (25/58) */
 
             /* Rotate the entire container */
             transform: rotate(-90deg);
 
-            /* Font and layout settings */
-            padding: 1.5mm;
-            font-size: 8pt;
-            line-height: 1.3;
+            /* Adjust font and layout for the larger preview */
+            padding: 1.5vh;
+            font-size: 2.5vh;
+            line-height: 1.4;
             color: black;
             display: flex;
             flex-direction: column;
             justify-content: center;
 
-            /* Add a border for the screen preview */
-            border: 1px solid #333;
+            /* Add a border and shadow for the screen preview */
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
         #name {
             font-weight: 700;
-            font-size: 9pt;
+            font-size: 3vh; /* Adjust name font size for preview */
         }
 
         /* --- PRINT-ONLY STYLES --- */
@@ -62,12 +64,28 @@
                 display: block; /* Reset centering for print */
             }
             .label-container {
-                border: none; /* Hide border when printing */
+                /* 2. OVERRIDE with exact mm dimensions for printing */
+                width: 58mm;
+                height: 25mm;
                 
-                /* This positioning is crucial for printing correctly on vertical paper */
+                /* Reset padding and font-size to absolute units for print */
+                padding: 1.5mm;
+                font-size: 8pt;
+                line-height: 1.3;
+
+                /* Reset visual styles for print */
+                border: none;
+                box-shadow: none;
+                
+                /* This positioning is crucial for printing correctly */
                 position: absolute;
-                top: 16.5mm;  /* (58mm - 25mm) / 2 */
-                left: -16.5mm; /* -(58mm - 25mm) / 2 */
+                top: 16.5mm;
+                left: -16.5mm;
+            }
+            
+            #name {
+                /* Reset font-size for print */
+                font-size: 9pt;
             }
             
             @page {
@@ -80,6 +98,7 @@
         /* Counter-rotate the loader text to make it readable on screen */
         #loader {
            transform: rotate(90deg);
+           font-size: 16px; /* Give loader a fixed size */
         }
     </style>
 </head>
