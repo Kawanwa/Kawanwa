@@ -26,13 +26,9 @@
 
         /* --- STYLES FOR SCREEN PREVIEW --- */
         .label-container {
-            /* This container simply rotates its content */
             transform: rotate(-90deg);
-            /* Font size will be set by JavaScript */
             line-height: 1.3;
             color: black;
-            /* Prevent any wrapping */
-            white-space: nowrap;
         }
 
         #content-wrapper {
@@ -43,13 +39,23 @@
             border: 1px solid white; /* Invisible border to help with sizing */
         }
         
+        /* This is the line with the recipient's name */
+        #name-line {
+            white-space: nowrap; /* Keep name on a single line */
+        }
+        
         #name {
             font-weight: 700;
+        }
+        
+        #address {
+            white-space: normal; /* Allow address to wrap */
         }
         
         #phone {
             font-weight: 700;
             text-align: center;
+            white-space: nowrap; /* Keep phone on a single line */
         }
 
 
@@ -60,17 +66,12 @@
                 display: block;
             }
             .label-container {
-                /* Important: Re-enable wrapping for print if needed, though unlikely */
                 white-space: normal !important;
-                /* OVERRIDE with exact mm dimensions for printing */
                 width: 58mm !important;
                 height: 25mm !important;
-                
-                /* Reset padding and font-size to absolute units for print */
                 padding: 1.5mm !important;
                 font-size: 8pt !important;
                 line-height: 1.3 !important;
-                
                 position: absolute !important;
                 top: 16.5mm !important;
                 left: -16.5mm !important;
@@ -83,7 +84,6 @@
             }
 
             #name {
-                /* Reset font-size for print */
                 font-size: 9pt !important;
             }
             
@@ -111,7 +111,7 @@
         <div id="loader">กำลังโหลดข้อมูลผู้รับ...</div>
         <div id="content-wrapper" style="display: none;">
             <div id="recipient-info">
-                <div><strong>ผู้รับ:</strong> <span id="name"></span></div>
+                <div id="name-line"><strong>ผู้รับ:</strong> <span id="name"></span></div>
                 <div id="address"></div>
             </div>
             <div id="phone-container">
@@ -143,7 +143,9 @@
          */
         function adjustFontSize() {
             const container = document.querySelector('.label-container');
-            if (!container) return;
+            const contentWrapper = document.querySelector('#content-wrapper');
+            const nameLine = document.querySelector('#name-line');
+            if (!container || !contentWrapper || !nameLine) return;
 
             container.style.fontSize = '10px'; // Start with a small base
 
@@ -157,8 +159,10 @@
             while (true) {
                 container.style.fontSize = (fontSize + 1) + 'px';
                 
-                // Check if the content's rendered size exceeds the available space
-                if (container.scrollWidth > availableWidth || container.scrollHeight > availableHeight) {
+                // Check two conditions:
+                // 1. The name line must not be wider than the available space.
+                // 2. The entire content block must not be taller than the available space.
+                if (nameLine.scrollWidth > availableWidth || contentWrapper.scrollHeight > availableHeight) {
                     // It overflowed, so the previous font size was the correct one.
                     container.style.fontSize = fontSize + 'px';
                     break; // Exit loop
