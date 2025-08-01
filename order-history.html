@@ -300,6 +300,8 @@
                         <td class="px-4 py-4 text-center whitespace-nowrap">
                             <a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a>
                             <button data-order-id="${order.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไขด่วน</button>
+                            <!-- NEW: Move Order Button -->
+                            <button data-order-id="${order.id}" class="move-btn font-medium text-orange-600 hover:underline ml-3">เลื่อนเดือน</button>
                             <button data-order-id="${order.id}" data-bracelet-id="${order.braceletId}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button>
                         </td>`;
                     tbody.appendChild(row);
@@ -363,6 +365,39 @@
                     orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`;
                 });
             };
+
+            // NEW: Function to move an order to the next month
+            async function moveOrderToNextMonth(orderId) {
+                if (!confirm('คุณต้องการเลื่อนออเดอร์นี้ไปเดือนถัดไปใช่หรือไม่?\nวันที่จะถูกเปลี่ยนเป็นวันแรกของเดือนถัดไป')) {
+                    return;
+                }
+
+                try {
+                    const orderRef = doc(db, "orders", orderId);
+                    const orderSnap = await getDoc(orderRef);
+
+                    if (!orderSnap.exists()) {
+                        throw new Error("ไม่พบออเดอร์ที่ต้องการเลื่อน");
+                    }
+
+                    const currentOrderDate = orderSnap.data().orderDate.toDate();
+                    
+                    // Calculate the first day of the next month from its current date
+                    const nextMonthDate = new Date(currentOrderDate.getFullYear(), currentOrderDate.getMonth() + 1, 1);
+
+                    // Update the document in Firestore
+                    await updateDoc(orderRef, {
+                        orderDate: Timestamp.fromDate(nextMonthDate)
+                    });
+
+                    alert(`ออเดอร์ได้ถูกย้ายไปที่เดือน ${new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(nextMonthDate)} เรียบร้อยแล้ว`);
+                    // The onSnapshot listener will handle the UI update automatically.
+
+                } catch (error) {
+                    console.error("Error moving order: ", error);
+                    alert("เกิดข้อผิดพลาดในการเลื่อนออเดอร์: " + error.message);
+                }
+            }
 
             async function deleteOrder(orderId, braceletId) {
                 if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์นี้? การกระทำนี้จะคืนสต็อคสินค้าและไม่สามารถย้อนกลับได้')) {
@@ -463,7 +498,14 @@
                     const orderId = button.dataset.orderId;
                     const braceletId = button.dataset.braceletId;
                     await deleteOrder(orderId, braceletId);
-                } else if (target.closest('th[data-sort-key]')) {
+                } 
+                // NEW: Event listener for the move button
+                else if (target.closest('.move-btn')) {
+                    const button = target.closest('.move-btn');
+                    const orderId = button.dataset.orderId;
+                    await moveOrderToNextMonth(orderId);
+                } 
+                else if (target.closest('th[data-sort-key]')) {
                     const sortKey = target.closest('th[data-sort-key]').dataset.sortKey;
                     if (currentSort.key === sortKey) {
                         currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
