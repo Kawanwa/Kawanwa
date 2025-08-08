@@ -14,11 +14,10 @@
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        #message-box {
-            transition: opacity 0.5s ease-in-out;
+        body { font-family: 'Kanit', sans-serif; }
+        .form-section {
+            transition: opacity 0.3s ease-in-out, max-height 0.3s ease-in-out;
+            overflow: hidden;
         }
     </style>
 </head>
@@ -29,70 +28,95 @@
             
             <header class="mb-8 border-b pb-4">
                  <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-4 inline-block">&larr; กลับไปหน้าหลัก</a>
-                <h1 class="text-3xl font-bold text-stone-800">บันทึกการรับเข้า</h1>
-                <p class="text-stone-600 mt-1">กรอกข้อมูลหินและอุปกรณ์ที่ซื้อมาใหม่</p>
+                <h1 class="text-3xl font-bold text-stone-800">บันทึกการรับเข้า / เพิ่มสต็อค</h1>
+                <p class="text-stone-600 mt-1">กรอกข้อมูลเพื่อบันทึกของใหม่ หรือเพิ่มสต็อคของเดิม</p>
             </header>
 
-            <div id="message-box" class="hidden p-4 mb-4 rounded-md text-white"></div>
+            <!-- NEW: Intake Mode Selector -->
+            <div class="mb-6">
+                <fieldset class="flex gap-6">
+                    <legend class="sr-only">เลือกโหมดการบันทึก</legend>
+                    <div>
+                        <input type="radio" name="intakeMode" value="existing" id="mode-existing" class="peer hidden" checked>
+                        <label for="mode-existing" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-sky-500 peer-checked:ring-2 peer-checked:ring-sky-500">
+                            <p class="font-semibold text-stone-700">เพิ่มสต็อคให้ของที่มีอยู่แล้ว</p>
+                            <p class="text-sm text-stone-500">สำหรับซื้อของชนิดเดิมมาเพิ่ม</p>
+                        </label>
+                    </div>
+                    <div>
+                        <input type="radio" name="intakeMode" value="new" id="mode-new" class="peer hidden">
+                        <label for="mode-new" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500">
+                            <p class="font-semibold text-stone-700">บันทึกเป็นของใหม่</p>
+                            <p class="text-sm text-stone-500">สำหรับของที่ไม่เคยมีในสต็อค</p>
+                        </label>
+                    </div>
+                </fieldset>
+            </div>
 
             <form id="intake-form">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    <div>
-                        <label for="importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
-                        <input type="date" id="importDate" name="importDate" required
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                <!-- Section for EXISTING items -->
+                <div id="existing-item-section" class="form-section">
+                    <div class="space-y-6 p-4 border-l-4 border-sky-300 bg-sky-50 rounded-r-lg">
+                        <div>
+                            <label for="existing-item-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกรายการจากสต็อค *</label>
+                            <select id="existing-item-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
+                                <option value="">-- กำลังโหลดรายการ --</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
 
-                    <div>
-                        <label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภท *</label>
-                        <select id="type" name="type" required
-                                class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                            <option value="หิน">หิน</option>
-                            <option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</option>
-                        </select>
+                <!-- Section for NEW items -->
+                <div id="new-item-section" class="form-section hidden opacity-0 max-h-0">
+                     <div class="space-y-6 p-4 border-l-4 border-emerald-300 bg-emerald-50 rounded-r-lg">
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภท *</label>
+                            <select id="type" name="type" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <option value="หิน">หิน</option>
+                                <option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อ *</label>
+                                <input type="text" id="name" name="name" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="size" class="block text-sm font-medium text-stone-700 mb-1">ขนาด (mm)</label>
+                                <input type="number" id="size" name="size" step="0.1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="image" class="block text-sm font-medium text-stone-700 mb-1">รูปภาพ</label>
+                            <input type="file" id="image" name="image" accept="image/*" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                        </div>
                     </div>
+                </div>
 
-                    <div class="md:col-span-2">
-                        <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อ (เช่น หินไหมทอง, ตัวคั่นเงิน) *</label>
-                        <input type="text" id="name" name="name" required
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    </div>
-
-                    <div>
-                        <label for="size" class="block text-sm font-medium text-stone-700 mb-1">ขนาด (mm)</label>
-                        <input type="number" id="size" name="size" step="0.1"
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    </div>
-
-                    <div>
-                        <label for="supplier" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
-                        <input type="text" id="supplier" name="supplier"
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    </div>
-
-                    <div>
-                        <label for="totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
-                        <input type="number" id="totalPrice" name="totalPrice" required step="0.01"
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    </div>
-
-                    <div>
-                        <label for="quantity" class="block text-sm font-medium text-stone-700 mb-1">จำนวน (ชิ้น/เม็ด) *</label>
-                        <input type="number" id="quantity" name="quantity" required min="1"
-                               class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label for="image" class="block text-sm font-medium text-stone-700 mb-1">รูปภาพ</label>
-                        <input type="file" id="image" name="image" accept="image/*"
-                               class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                <!-- Common fields for BOTH modes -->
+                <div class="mt-6 space-y-6">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
+                            <input type="date" id="importDate" name="importDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="supplier" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
+                            <input type="text" id="supplier" name="supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
+                            <input type="number" id="totalPrice" name="totalPrice" required step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                        </div>
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-stone-700 mb-1">จำนวนที่เพิ่ม (ชิ้น/เม็ด) *</label>
+                            <input type="number" id="quantity" name="quantity" required min="1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                        </div>
                     </div>
                 </div>
 
                 <div class="mt-8 pt-6 border-t">
-                    <button type="submit" id="submit-button"
-                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-stone-400 transition-colors">
+                    <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400">
                         <span id="button-text">บันทึกข้อมูล</span>
                     </button>
                 </div>
@@ -101,7 +125,7 @@
             <div class="mt-12">
                 <div class="flex justify-between items-center mb-4 border-t pt-6">
                     <h2 class="text-2xl font-bold text-stone-800">รายการล่าสุด (3)</h2>
-                    <a href="stock.html" class="text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                    <a href="stock.html" class="text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                         ไปที่หน้าสต็อคทั้งหมด &rarr;
                     </a>
                 </div>
@@ -115,35 +139,55 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
+        import { showToast } from './utils.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
         const intakeForm = document.getElementById('intake-form');
-        const messageBox = document.getElementById('message-box');
         const submitButton = document.getElementById('submit-button');
         const buttonText = document.getElementById('button-text');
         const recentItemsContainer = document.getElementById('recent-items-container');
-
-        function showMessage(message, isError = false) {
-            messageBox.textContent = message;
-            messageBox.className = `p-4 mb-4 rounded-md text-white ${isError ? 'bg-rose-500' : 'bg-emerald-500'}`;
-            messageBox.classList.remove('hidden');
-            setTimeout(() => { messageBox.classList.add('hidden'); }, 5000);
-        }
+        const intakeModeRadios = document.querySelectorAll('input[name="intakeMode"]');
+        const existingItemSection = document.getElementById('existing-item-section');
+        const newItemSection = document.getElementById('new-item-section');
+        const existingItemSelect = document.getElementById('existing-item-select');
         
+        let allMaterials = [];
+
+        // --- UI Control ---
+        const handleModeChange = () => {
+            const selectedMode = document.querySelector('input[name="intakeMode"]:checked').value;
+            if (selectedMode === 'existing') {
+                newItemSection.classList.add('opacity-0', 'max-h-0', 'hidden');
+                existingItemSection.classList.remove('opacity-0', 'max-h-0', 'hidden');
+            } else {
+                existingItemSection.classList.add('opacity-0', 'max-h-0', 'hidden');
+                newItemSection.classList.remove('opacity-0', 'max-h-0', 'hidden');
+            }
+        };
+
+        intakeModeRadios.forEach(radio => radio.addEventListener('change', handleModeChange));
+
+        // --- Data Fetching and Population ---
+        async function populateExistingItems() {
+            const q = query(collection(db, "materials"), orderBy("name"));
+            const snapshot = await getDocs(q);
+            allMaterials = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            existingItemSelect.innerHTML = '<option value="">-- เลือกรายการ --</option>';
+            allMaterials.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = `${item.name} (${item.size || 'N/A'} mm)`;
+                existingItemSelect.appendChild(option);
+            });
+        }
+
         const renderRecentItems = (snapshot) => {
             recentItemsContainer.innerHTML = '';
             if (snapshot.empty) {
@@ -155,96 +199,113 @@
                 const itemDate = item.createdAt ? item.createdAt.toDate().toLocaleDateString('th-TH') : 'N/A';
                 const itemHtml = `
                     <div class="bg-stone-50 p-4 rounded-lg shadow-sm flex items-center space-x-4 border border-stone-200">
-                        <img src="${item.imageUrl || 'https://placehold.co/64x64/e2e8f0/64748b?text=No+Img'}" 
-                             alt="${item.name}" 
-                             class="w-16 h-16 rounded-md object-cover bg-stone-200 flex-shrink-0">
+                        <img src="${item.imageUrl || 'https://placehold.co/64x64/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-16 h-16 rounded-md object-cover bg-stone-200 flex-shrink-0">
                         <div class="flex-grow">
                             <p class="font-semibold text-stone-800">${item.name} <span class="text-sm font-normal text-stone-500">(${item.size || 'N/A'} mm)</span></p>
                             <p class="text-sm text-stone-600">ประเภท: ${item.type}</p>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <p class="text-lg font-bold text-emerald-600">${item.quantity} ชิ้น</p>
-                            <p class="text-xs text-stone-400">เพิ่มเมื่อ: ${itemDate}</p>
+                            <p class="text-lg font-bold text-emerald-600">${item.stockRemaining} ชิ้น</p>
+                            <p class="text-xs text-stone-400">เพิ่มล่าสุด: ${itemDate}</p>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 recentItemsContainer.innerHTML += itemHtml;
             });
         };
 
-        const materialsRef = collection(db, "materials");
-        const q = query(materialsRef, orderBy("createdAt", "desc"), limit(3));
-        onSnapshot(q, renderRecentItems);
+        const qRecent = query(collection(db, "materials"), orderBy("createdAt", "desc"), limit(3));
+        onSnapshot(qRecent, renderRecentItems);
 
+        // --- Form Submission Logic ---
         intakeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
-            buttonText.textContent = 'กำลังตรวจสอบข้อมูล...';
+            buttonText.textContent = 'กำลังบันทึก...';
+
+            const selectedMode = document.querySelector('input[name="intakeMode"]:checked').value;
+            const formData = new FormData(intakeForm);
+            const newTotalPrice = parseFloat(formData.get('totalPrice'));
+            const newQuantity = parseInt(formData.get('quantity'), 10);
 
             try {
-                const formData = new FormData(intakeForm);
-                const imageFile = formData.get('image');
-                let imageUrl = '';
-                let imagePath = '';
+                if (isNaN(newTotalPrice) || isNaN(newQuantity) || newQuantity <= 0) {
+                    throw new Error("กรุณากรอกราคาและจำนวนให้ถูกต้อง");
+                }
 
-                if (imageFile && imageFile.size > 0) {
-                    try {
-                        buttonText.textContent = 'กำลังบีบอัดรูปภาพ...';
+                if (selectedMode === 'existing') {
+                    const selectedId = existingItemSelect.value;
+                    if (!selectedId) throw new Error("กรุณาเลือกรายการจากสต็อค");
+
+                    const existingDocRef = doc(db, "materials", selectedId);
+                    const existingData = allMaterials.find(m => m.id === selectedId);
+
+                    const oldTotalValue = (existingData.avgPricePerPiece * existingData.quantity);
+                    const newTotalValue = oldTotalValue + newTotalPrice;
+                    const newTotalQuantity = existingData.quantity + newQuantity;
+                    const newAvgPrice = newTotalValue / newTotalQuantity;
+                    const newStockRemaining = existingData.stockRemaining + newQuantity;
+
+                    await updateDoc(existingDocRef, {
+                        quantity: newTotalQuantity,
+                        totalPrice: existingData.totalPrice + newTotalPrice,
+                        avgPricePerPiece: newAvgPrice,
+                        stockRemaining: newStockRemaining,
+                        supplier: formData.get('supplier'),
+                        importDate: new Date(formData.get('importDate')),
+                        createdAt: serverTimestamp()
+                    });
+                    showToast(`อัปเดตสต็อค "${existingData.name}" สำเร็จ!`);
+
+                } else { // Mode is 'new'
+                    const name = formData.get('name').trim();
+                    const size = parseFloat(formData.get('size')) || 0;
+                    if (!name) throw new Error("กรุณากรอกชื่อสำหรับรายการใหม่");
+
+                    const imageFile = formData.get('image');
+                    let imageUrl = '', imagePath = '';
+
+                    if (imageFile && imageFile.size > 0) {
                         const options = { maxSizeMB: 1, maxWidthOrHeight: 1024, useWebWorker: true };
                         const compressedFile = await imageCompression(imageFile, options);
-                        
-                        buttonText.textContent = 'กำลังอัปโหลด...';
                         imagePath = `materials/${Date.now()}-${compressedFile.name}`;
                         const imageRef = ref(storage, imagePath);
                         await uploadBytes(imageRef, compressedFile);
-                        
-                        buttonText.textContent = 'กำลังรับ URL...';
                         imageUrl = await getDownloadURL(imageRef);
-                    } catch (imageError) {
-                        console.error('Image Processing/Upload Error:', imageError);
-                        throw new Error('เกิดข้อผิดพลาดระหว่างการจัดการรูปภาพ');
                     }
+                    
+                    const dataToSave = {
+                        importDate: new Date(formData.get('importDate')),
+                        type: formData.get('type'),
+                        name: name, size: size,
+                        supplier: formData.get('supplier'),
+                        totalPrice: newTotalPrice, quantity: newQuantity,
+                        avgPricePerPiece: newTotalPrice / newQuantity,
+                        imageUrl: imageUrl, imagePath: imagePath,
+                        stockRemaining: newQuantity,
+                        createdAt: serverTimestamp()
+                    };
+                    await addDoc(collection(db, "materials"), dataToSave);
+                    showToast(`เพิ่ม "${name}" เป็นรายการใหม่สำเร็จ!`);
                 }
                 
-                buttonText.textContent = 'กำลังบันทึกข้อมูล...';
-                const totalPrice = parseFloat(formData.get('totalPrice'));
-                const quantity = parseInt(formData.get('quantity'), 10);
-                
-                if (isNaN(quantity) || quantity <= 0) throw new Error("จำนวนต้องเป็นตัวเลขและมากกว่า 0");
-                if (isNaN(totalPrice)) throw new Error("ราคาที่ซื้อมาต้องเป็นตัวเลข");
-
-                const dataToSave = {
-                    importDate: new Date(formData.get('importDate')),
-                    type: formData.get('type'),
-                    name: formData.get('name'),
-                    size: parseFloat(formData.get('size')) || 0,
-                    supplier: formData.get('supplier'),
-                    totalPrice: totalPrice,
-                    quantity: quantity,
-                    avgPricePerPiece: totalPrice / quantity,
-                    imageUrl: imageUrl,
-                    imagePath: imagePath,
-                    stockRemaining: quantity,
-                    createdAt: serverTimestamp()
-                };
-
-                await addDoc(collection(db, "materials"), dataToSave);
-                
-                showMessage('บันทึกข้อมูลสำเร็จ!');
                 intakeForm.reset();
                 document.getElementById('importDate').valueAsDate = new Date();
+                handleModeChange(); // Reset UI to default
+                await populateExistingItems(); // Refresh dropdown list
 
             } catch (error) {
                 console.error("Error during intake process: ", error);
-                showMessage(`เกิดข้อผิดพลาด: ${error.message}`, true);
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
             } finally {
                 submitButton.disabled = false;
                 buttonText.textContent = 'บันทึกข้อมูล';
             }
         });
 
+        // --- Initial Setup ---
         document.getElementById('importDate').valueAsDate = new Date();
-
+        populateExistingItems();
+        handleModeChange();
     </script>
 </body>
 </html>
