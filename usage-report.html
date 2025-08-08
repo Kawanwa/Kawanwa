@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายงานการใช้หิน - ระบบจัดการร้าน</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Kanit) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Kanit', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-10">
+        <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <div class="w-full">
+                    <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
+                    <h1 class="text-3xl font-bold text-stone-800">รายงานการใช้หิน</h1>
+                </div>
+            </header>
+
+            <!-- Filter Section -->
+            <section class="flex flex-col md:flex-row gap-4 items-center mb-6 p-4 bg-stone-50 rounded-lg">
+                <div class="flex items-center gap-2">
+                    <label for="start-date" class="text-sm font-medium text-stone-700">ตั้งแต่:</label>
+                    <input type="date" id="start-date" class="border-stone-300 rounded-md shadow-sm">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="end-date" class="text-sm font-medium text-stone-700">ถึง:</label>
+                    <input type="date" id="end-date" class="border-stone-300 rounded-md shadow-sm">
+                </div>
+                <button id="generate-report-btn" class="w-full md:w-auto bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                    สร้างรายงาน
+                </button>
+                 <div class="relative flex-grow w-full md:w-auto">
+                     <input type="text" id="search-input" placeholder="ค้นหาในตาราง..." 
+                            class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                     </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Top 3 Items -->
+                <div class="lg:col-span-1 bg-gradient-to-br from-indigo-500 to-purple-600 p-6 rounded-xl shadow-lg text-white">
+                    <h2 class="text-xl font-bold mb-4">หินที่ใช้บ่อย 3 อันดับแรก</h2>
+                    <ol id="top-items-list" class="space-y-3 list-decimal list-inside">
+                        <!-- Top items will be populated here -->
+                    </ol>
+                </div>
+                <!-- Chart -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                    <h2 class="text-xl font-bold text-stone-800 mb-4">กราฟ 10 อันดับหินที่ใช้บ่อย</h2>
+                    <canvas id="usageChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Report Table -->
+            <main id="report-table-container" class="overflow-x-auto border-t pt-6">
+                <p class="text-center py-10 text-stone-500">กรุณาเลือกช่วงวันที่และกด "สร้างรายงาน"</p>
+            </main>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.appspot.com",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generate-report-btn');
+            const searchInput = document.getElementById('search-input');
+            const dashboardSection = document.getElementById('dashboard-section');
+            
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('start-date').valueAsDate = firstDayOfMonth;
+            document.getElementById('end-date').valueAsDate = today;
+
+            let fullReportData = [];
+            let usageChartInstance = null;
+            
+            // --- NEW: Function to generate an array of beautiful colors for the chart ---
+            const generateChartColors = (count) => {
+                const colors = [];
+                const baseColors = [
+                    'rgba(255, 99, 132, 0.7)', 'rgba(54, 162, 235, 0.7)', 'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)', 'rgba(153, 102, 255, 0.7)', 'rgba(255, 159, 64, 0.7)',
+                    'rgba(46, 204, 113, 0.7)', 'rgba(231, 76, 60, 0.7)', 'rgba(52, 73, 94, 0.7)',
+                    'rgba(241, 196, 15, 0.7)'
+                ];
+                for (let i = 0; i < count; i++) {
+                    colors.push(baseColors[i % baseColors.length]);
+                }
+                return colors;
+            };
+
+            const renderTopItems = (data) => {
+                const list = document.getElementById('top-items-list');
+                list.innerHTML = '';
+                if (data.length === 0) {
+                    list.innerHTML = '<li class="text-purple-200">ไม่พบข้อมูล</li>';
+                    return;
+                }
+                const top3 = data.slice(0, 3);
+                top3.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span class="font-semibold">${item.name} (${item.size})</span> - <span class="font-normal opacity-90">${item.totalUsed.toLocaleString()} ชิ้น</span>`;
+                    list.appendChild(li);
+                });
+            };
+
+            const renderUsageChart = (data) => {
+                const ctx = document.getElementById('usageChart').getContext('2d');
+                if (usageChartInstance) {
+                    usageChartInstance.destroy();
+                }
+                const top10 = data.slice(0, 10);
+
+                // --- NEW: Use the color generator function ---
+                const chartColors = generateChartColors(top10.length);
+
+                usageChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: top10.map(item => `${item.name} (${item.size})`),
+                        datasets: [{
+                            label: 'จำนวนที่ใช้ไป',
+                            data: top10.map(item => item.totalUsed),
+                            backgroundColor: chartColors, // Use array of colors
+                            borderColor: chartColors.map(c => c.replace('0.7', '1')), // Make border solid
+                            borderWidth: 1,
+                            borderRadius: 5,
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        scales: {
+                            x: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            };
+
+            const renderReportTable = (data) => {
+                const container = document.getElementById('report-table-container');
+                container.innerHTML = '';
+
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredData = data.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    item.size.toLowerCase().includes(searchTerm)
+                );
+
+                if (filteredData.length === 0) {
+                    container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลการใช้งานหินที่ตรงกับคำค้นหา</p>';
+                    return;
+                }
+
+                const table = document.createElement('table');
+                table.className = 'w-full text-sm text-left text-stone-700';
+                table.innerHTML = `
+                    <thead class="text-xs text-stone-700 uppercase bg-stone-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">ชื่อหิน</th>
+                            <th scope="col" class="px-6 py-3">ขนาด</th>
+                            <th scope="col" class="px-6 py-3 text-right">จำนวนที่ใช้ไป (เม็ด)</th>
+                        </tr>
+                    </thead>`;
+                
+                const tbody = document.createElement('tbody');
+                filteredData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-stone-50';
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium text-stone-900">${item.name}</td>
+                        <td class="px-6 py-4">${item.size}</td>
+                        <td class="px-6 py-4 text-right font-bold text-indigo-600">${item.totalUsed.toLocaleString()}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                table.appendChild(tbody);
+                container.appendChild(table);
+            };
+
+            const generateReport = async () => {
+                const container = document.getElementById('report-table-container');
+                dashboardSection.classList.add('hidden');
+                container.innerHTML = '<p class="text-center py-10 text-stone-500">กำลังประมวลผลรายงาน...</p>';
+
+                const startDate = document.getElementById('start-date').value;
+                const endDate = document.getElementById('end-date').value;
+
+                if (!startDate || !endDate) {
+                    alert('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+                    container.innerHTML = '<p class="text-center py-10 text-stone-500">กรุณาเลือกช่วงวันที่และกด "สร้างรายงาน"</p>';
+                    return;
+                }
+                
+                try {
+                    const materialsMap = new Map();
+                    const materialsSnapshot = await getDocs(collection(db, "materials"));
+                    materialsSnapshot.forEach(doc => {
+                        materialsMap.set(doc.id, { id: doc.id, ...doc.data() });
+                    });
+
+                    const startTimestamp = Timestamp.fromDate(new Date(startDate));
+                    const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
+
+                    const ordersQuery = query(collection(db, "orders"),
+                        where("orderDate", ">=", startTimestamp),
+                        where("orderDate", "<=", endTimestamp)
+                    );
+                    const ordersSnapshot = await getDocs(ordersQuery);
+                    const braceletIds = ordersSnapshot.docs.map(doc => doc.data().braceletId).filter(id => id);
+
+                    if (braceletIds.length === 0) {
+                        dashboardSection.classList.add('hidden');
+                        container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบออเดอร์ในช่วงวันที่ที่เลือก</p>';
+                        return;
+                    }
+
+                    const braceletsQuery = query(collection(db, "bracelets"), where("__name__", "in", braceletIds));
+                    const braceletsSnapshot = await getDocs(braceletsQuery);
+
+                    const usageMap = new Map();
+                    braceletsSnapshot.forEach(doc => {
+                        const bracelet = doc.data();
+                        if (bracelet.usedMaterials && Array.isArray(bracelet.usedMaterials)) {
+                            bracelet.usedMaterials.forEach(item => {
+                                const currentUsage = usageMap.get(item.materialId) || 0;
+                                usageMap.set(item.materialId, currentUsage + item.quantityUsed);
+                            });
+                        }
+                    });
+
+                    fullReportData = [];
+                    usageMap.forEach((totalUsed, materialId) => {
+                        const materialInfo = materialsMap.get(materialId);
+                        // --- MODIFIED: Only include materials with type 'หิน' ---
+                        if (materialInfo && materialInfo.type === 'หิน') {
+                            fullReportData.push({
+                                name: materialInfo.name,
+                                size: materialInfo.size,
+                                totalUsed: totalUsed
+                            });
+                        }
+                    });
+                    
+                    fullReportData.sort((a, b) => b.totalUsed - a.totalUsed);
+
+                    if (fullReportData.length === 0) {
+                        dashboardSection.classList.add('hidden');
+                        container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลการใช้งาน "หิน" ในช่วงวันที่ที่เลือก</p>';
+                        return;
+                    }
+
+                    dashboardSection.classList.remove('hidden');
+                    renderTopItems(fullReportData);
+                    renderUsageChart(fullReportData);
+                    renderReportTable(fullReportData);
+
+                } catch (error) {
+                    console.error("Error generating report:", error);
+                    dashboardSection.classList.add('hidden');
+                    container.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p>`;
+                }
+            };
+            
+            generateBtn.addEventListener('click', generateReport);
+            searchInput.addEventListener('input', () => renderReportTable(fullReportData));
+        });
+    </script>
+</body>
+</html>
