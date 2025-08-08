@@ -3,263 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แดชบอร์ดสรุป - ระบบจัดการร้านกำไลหิน</title>
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (Kanit) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>สรุปรายงานการขาย - ระบบจัดการร้าน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
     <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #ecf0f1;
+            --surface-color: #ffffff;
+            --text-color: #34495e;
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --font-family: 'Sarabun', sans-serif;
+        }
+
         body {
-            font-family: 'Kanit', sans-serif;
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--background-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.8em;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section label {
+            font-weight: 500;
+        }
+
+        .filter-section input[type="date"] {
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-family: var(--font-family);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: var(--font-family);
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #7f8c8d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background-color: #6c7a7b;
+        }
+
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 5px solid var(--primary-color);
+        }
+        
+        .kpi-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            color: #555;
+        }
+
+        .kpi-card .value {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .kpi-card.profit .value {
+            color: var(--success-color);
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+        }
+
+        .report-section h2 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: 700;
+        }
+        
+        tbody tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            font-style: italic;
+            color: #777;
+        }
+        
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
-<body class="bg-stone-100">
+<body>
 
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 py-10">
-        <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="w-full">
-                    <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
-                    <h1 class="text-3xl font-bold text-stone-800">แดชบอร์ดสรุป</h1>
-                </div>
-                <!-- Date Range Picker -->
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <div>
-                        <label for="start-date" class="text-sm font-medium text-stone-600">ตั้งแต่</label>
-                        <input type="date" id="start-date" class="bg-white border border-stone-300 text-stone-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 p-2">
-                    </div>
-                    <div>
-                        <label for="end-date" class="text-sm font-medium text-stone-600">ถึง</label>
-                        <input type="date" id="end-date" class="bg-white border border-stone-300 text-stone-900 text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 p-2">
-                    </div>
-                    <button id="update-dashboard-btn" class="flex-shrink-0 text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                        แสดงผล
-                    </button>
-                </div>
-            </header>
+    <div class="container">
+        <header>
+            <h1>สรุปรายงานการขาย</h1>
+            <button class="btn btn-secondary" onclick="window.print()">พิมพ์รายงาน</button>
+        </header>
 
-            <div id="loader" class="text-center py-20 hidden">
-                 <p class="text-stone-500">กำลังคำนวณข้อมูล...</p>
-            </div>
-
-            <div id="dashboard-content">
-                <!-- Summary KPI Cards -->
-                <section id="summary-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-teal-50 p-6 rounded-lg border-l-4 border-teal-500">
-                        <h2 class="text-sm font-medium text-teal-700">ยอดขายรวม</h2>
-                        <p id="kpi-total-sales" class="text-3xl font-bold text-teal-900">0.00 ฿</p>
-                    </div>
-                    <div class="bg-green-50 p-6 rounded-lg border-l-4 border-green-500">
-                        <h2 class="text-sm font-medium text-green-700">กำไรทั้งหมด</h2>
-                        <p id="kpi-total-profit" class="text-3xl font-bold text-green-900">0.00 ฿</p>
-                    </div>
-                    <div class="bg-sky-50 p-6 rounded-lg border-l-4 border-sky-500">
-                        <h2 class="text-sm font-medium text-sky-700">จำนวนออเดอร์</h2>
-                        <p id="kpi-total-orders" class="text-3xl font-bold text-sky-900">0</p>
-                    </div>
-                    <div class="bg-red-50 p-6 rounded-lg border-l-4 border-red-500">
-                        <h2 class="text-sm font-medium text-red-700">ค่าใช้จ่ายอื่นๆ</h2>
-                        <p id="kpi-total-expenses" class="text-3xl font-bold text-red-900">0.00 ฿</p>
-                    </div>
-                </section>
-
-                <!-- Charts Section -->
-                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 border-t pt-8">
-                    <div class="lg:col-span-2 bg-stone-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-stone-700 mb-2">ยอดขายรายวัน</h3>
-                        <canvas id="sales-chart"></canvas>
-                    </div>
-                    <div class="bg-stone-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-stone-700 mb-2">สัดส่วนค่าใช้จ่าย</h3>
-                        <canvas id="expenses-chart"></canvas>
-                    </div>
-                </section>
-            </div>
+        <div class="filter-section">
+            <label for="startDate">วันที่เริ่มต้น:</label>
+            <input type="date" id="startDate">
+            <label for="endDate">วันที่สิ้นสุด:</label>
+            <input type="date" id="endDate">
+            <button id="generateReportBtn" class="btn btn-primary">สร้างรายงาน</button>
         </div>
+        
+        <div id="reportContent">
+            <!-- KPIs -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <h3>ยอดขายรวม</h3>
+                    <p class="value" id="totalSales">฿0.00</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>ต้นทุนรวม</h3>
+                    <p class="value" id="totalCost">฿0.00</p>
+                </div>
+                <div class="kpi-card profit">
+                    <h3>กำไรสุทธิ</h3>
+                    <p class="value" id="totalProfit">฿0.00</p>
+                </div>
+                <div class="kpi-card">
+                    <h3>จำนวนออเดอร์</h3>
+                    <p class="value" id="orderCount">0</p>
+                </div>
+            </div>
+
+            <!-- Charts and Best Sellers -->
+            <div class="report-grid">
+                 <div class="report-section">
+                    <h2>ภาพรวมยอดขายรายวัน</h2>
+                    <canvas id="salesChart"></canvas>
+                </div>
+                <div class="report-section">
+                    <h2>สินค้าขายดี 5 อันดับ</h2>
+                    <table id="bestSellersTable">
+                        <thead>
+                            <tr>
+                                <th>ชื่อสินค้า</th>
+                                <th>จำนวน (ชิ้น)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detailed Orders -->
+            <div class="report-section">
+                <h2>รายการออเดอร์</h2>
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>ลูกค้า</th>
+                            <th>ยอดขาย</th>
+                            <th>ต้นทุน</th>
+                            <th>กำไร</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    <script>
+        let salesChartInstance;
 
         document.addEventListener('DOMContentLoaded', () => {
-            const startDateInput = document.getElementById('start-date');
-            const endDateInput = document.getElementById('end-date');
-            const updateBtn = document.getElementById('update-dashboard-btn');
-            const loader = document.getElementById('loader');
-            const dashboardContent = document.getElementById('dashboard-content');
+            // Set default dates to the current month
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            document.getElementById('startDate').valueAsDate = firstDayOfMonth;
+            document.getElementById('endDate').valueAsDate = today;
 
-            const kpiTotalSales = document.getElementById('kpi-total-sales');
-            const kpiTotalProfit = document.getElementById('kpi-total-profit');
-            const kpiTotalOrders = document.getElementById('kpi-total-orders');
-            const kpiTotalExpenses = document.getElementById('kpi-total-expenses');
-
-            let salesChartInstance = null;
-            let expensesChartInstance = null;
-
-            const formatCurrency = (number) => (number || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-            const setDefaultDates = () => {
-                const today = new Date();
-                const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                
-                endDateInput.value = today.toISOString().split('T')[0];
-                startDateInput.value = firstDayOfMonth.toISOString().split('T')[0];
-            };
-
-            const fetchAndProcessData = async () => {
-                loader.classList.remove('hidden');
-                dashboardContent.classList.add('hidden');
-
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-                endDate.setHours(23, 59, 59, 999); // Include the whole end day
-
-                try {
-                    // 1. Fetch Orders and Bracelets
-                    const ordersQuery = query(collection(db, "orders"), 
-                        where("orderDate", ">=", Timestamp.fromDate(startDate)),
-                        where("orderDate", "<=", Timestamp.fromDate(endDate)),
-                        where("status", "!=", "ยกเลิก")
-                    );
-                    const ordersSnapshot = await getDocs(ordersQuery);
-                    const orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                    let totalSales = 0;
-                    let totalProfit = 0;
-                    const salesByDay = {};
-
-                    if (orders.length > 0) {
-                        const braceletIds = orders.map(order => order.braceletId);
-                        const braceletsQuery = query(collection(db, "bracelets"), where('__name__', 'in', braceletIds));
-                        const braceletsSnapshot = await getDocs(braceletsQuery);
-                        const braceletsMap = new Map();
-                        braceletsSnapshot.forEach(doc => braceletsMap.set(doc.id, doc.data()));
-
-                        orders.forEach(order => {
-                            const bracelet = braceletsMap.get(order.braceletId);
-                            if (bracelet) {
-                                const profit = (bracelet.sellingPrice || 0) - (bracelet.costPrice || 0);
-                                totalProfit += profit;
-                            }
-                            totalSales += order.totalAmount || 0;
-
-                            const day = order.orderDate.toDate().toLocaleDateString('th-TH', { day: '2-digit', month: 'short' });
-                            salesByDay[day] = (salesByDay[day] || 0) + (order.totalAmount || 0);
-                        });
-                    }
-                    
-                    // 2. Fetch Expenses
-                    const expensesQuery = query(collection(db, "expenses"),
-                        where("expenseDate", ">=", Timestamp.fromDate(startDate)),
-                        where("expenseDate", "<=", Timestamp.fromDate(endDate))
-                    );
-                    const expensesSnapshot = await getDocs(expensesQuery);
-                    const expensesByCategory = { 'ทุนร้าน': 0, 'ส่วนตัวพี่พีช': 0, 'ส่วนตัวน็อต': 0 };
-                    let totalExpenses = 0;
-
-                    expensesSnapshot.forEach(doc => {
-                        const expense = doc.data();
-                        const amount = expense.amount || 0;
-                        if (expense.type !== 'reimbursement') {
-                            totalExpenses += amount;
-                        }
-                        if (expensesByCategory[expense.source] !== undefined) {
-                            expensesByCategory[expense.source] += amount;
-                        }
-                    });
-
-                    // 3. Update UI
-                    kpiTotalSales.textContent = `${formatCurrency(totalSales)} ฿`;
-                    kpiTotalProfit.textContent = `${formatCurrency(totalProfit)} ฿`;
-                    kpiTotalOrders.textContent = orders.length;
-                    kpiTotalExpenses.textContent = `${formatCurrency(totalExpenses)} ฿`;
-
-                    // 4. Render Charts
-                    renderSalesChart(salesByDay);
-                    renderExpensesChart(expensesByCategory);
-
-                } catch (error) {
-                    console.error("Error fetching dashboard data:", error);
-                    alert("เกิดข้อผิดพลาดในการดึงข้อมูล: " + error.message);
-                } finally {
-                    loader.classList.add('hidden');
-                    dashboardContent.classList.remove('hidden');
-                }
-            };
-
-            const renderSalesChart = (salesData) => {
-                const ctx = document.getElementById('sales-chart').getContext('2d');
-                if (salesChartInstance) {
-                    salesChartInstance.destroy();
-                }
-                salesChartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: Object.keys(salesData),
-                        datasets: [{
-                            label: 'ยอดขาย',
-                            data: Object.values(salesData),
-                            borderColor: 'rgb(20, 184, 166)',
-                            backgroundColor: 'rgba(20, 184, 166, 0.1)',
-                            fill: true,
-                            tension: 0.1
-                        }]
-                    }
-                });
-            };
-
-            const renderExpensesChart = (expenseData) => {
-                const ctx = document.getElementById('expenses-chart').getContext('2d');
-                if (expensesChartInstance) {
-                    expensesChartInstance.destroy();
-                }
-                expensesChartInstance = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: Object.keys(expenseData),
-                        datasets: [{
-                            label: 'ค่าใช้จ่าย',
-                            data: Object.values(expenseData),
-                            backgroundColor: [
-                                'rgb(59, 130, 246)', // blue
-                                'rgb(34, 197, 94)', // green
-                                'rgb(236, 72, 153)'  // pink
-                            ],
-                            hoverOffset: 4
-                        }]
-                    }
-                });
-            };
-
-            // Initial Load & Event Listeners
-            setDefaultDates();
-            fetchAndProcessData();
-            updateBtn.addEventListener('click', fetchAndProcessData);
+            document.getElementById('generateReportBtn').addEventListener('click', generateReport);
+            
+            // Generate report on page load with default dates
+            generateReport();
         });
+
+        function formatCurrency(value) {
+            return `฿${Number(value).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+        }
+
+        function generateReport() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+                return;
+            }
+
+            const allOrders = JSON.parse(localStorage.getItem('orders')) || [];
+            
+            const filteredOrders = allOrders.filter(order => {
+                const orderDate = new Date(order.orderDate);
+                // Adjust end date to include the whole day
+                const endOfDay = new Date(endDate);
+                endOfDay.setHours(23, 59, 59, 999);
+                
+                return orderDate >= new Date(startDate) && orderDate <= endOfDay && order.status === 'สำเร็จ';
+            });
+            
+            updateKPIs(filteredOrders);
+            updateSalesChart(filteredOrders);
+            updateBestSellers(filteredOrders);
+            updateOrdersTable(filteredOrders);
+        }
+
+        function updateKPIs(orders) {
+            const totalSales = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+            const totalCost = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
+            const totalProfit = orders.reduce((sum, order) => sum + (order.profit || 0), 0);
+            const orderCount = orders.length;
+
+            document.getElementById('totalSales').textContent = formatCurrency(totalSales);
+            document.getElementById('totalCost').textContent = formatCurrency(totalCost);
+            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
+            document.getElementById('orderCount').textContent = orderCount;
+        }
+
+        function updateSalesChart(orders) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const salesByDate = {};
+
+            orders.forEach(order => {
+                const date = new Date(order.orderDate).toISOString().split('T')[0];
+                salesByDate[date] = (salesByDate[date] || 0) + (order.totalPrice || 0);
+            });
+            
+            const sortedDates = Object.keys(salesByDate).sort();
+            
+            const chartData = {
+                labels: sortedDates,
+                datasets: [{
+                    label: 'ยอดขายรายวัน',
+                    data: sortedDates.map(date => salesByDate[date]),
+                    backgroundColor: 'rgba(52, 152, 219, 0.5)',
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4,
+                }]
+            };
+
+            if (salesChartInstance) {
+                salesChartInstance.destroy();
+            }
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: chartData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) { return formatCurrency(value); }
+                            }
+                        },
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                tooltipFormat: 'dd MMM yyyy',
+                                displayFormats: {
+                                    day: 'dd MMM'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `ยอดขาย: ${formatCurrency(context.raw)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateBestSellers(orders) {
+            const itemCounts = {};
+            orders.forEach(order => {
+                (order.items || []).forEach(item => {
+                    itemCounts[item.name] = (itemCounts[item.name] || 0) + item.quantity;
+                });
+            });
+
+            const sortedItems = Object.entries(itemCounts)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 5); // Get top 5
+
+            const tableBody = document.getElementById('bestSellersTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if (sortedItems.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="no-data">ไม่มีข้อมูล</td></tr>';
+            } else {
+                sortedItems.forEach(([name, quantity]) => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = name;
+                    row.insertCell(1).textContent = quantity;
+                });
+            }
+        }
+
+        function updateOrdersTable(orders) {
+            const tableBody = document.getElementById('ordersTable').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="no-data">ไม่มีออเดอร์ที่สำเร็จในช่วงวันที่เลือก</td></tr>';
+                return;
+            }
+            
+            const sortedOrders = orders.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+            sortedOrders.forEach(order => {
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = new Date(order.orderDate).toLocaleDateString('th-TH');
+                row.insertCell(1).textContent = order.customerName || 'N/A';
+                row.insertCell(2).textContent = formatCurrency(order.totalPrice);
+                row.insertCell(3).textContent = formatCurrency(order.totalCost);
+                row.insertCell(4).textContent = formatCurrency(order.profit);
+                row.insertCell(5).textContent = order.status;
+            });
+        }
     </script>
+
 </body>
 </html>
