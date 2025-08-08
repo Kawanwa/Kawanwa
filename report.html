@@ -4,28 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สรุปรายงานการขาย - ระบบจัดการร้าน</title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (Kanit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
-    
-    <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-    </style>
+    <style> body { font-family: 'Kanit', sans-serif; } </style>
 </head>
 <body class="bg-stone-100">
 
+    <!-- เนื้อหา HTML เหมือนเดิม -->
     <div class="container mx-auto px-4 py-10">
         <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -96,19 +86,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
+        import { formatCurrency, showToast } from './utils.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -124,8 +106,6 @@
             document.getElementById('generateReportBtn').addEventListener('click', generateReport);
         });
 
-        const formatCurrency = (value) => `฿${Number(value || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
-
         async function generateReport() {
             const generateBtn = document.getElementById('generateReportBtn');
             generateBtn.disabled = true;
@@ -135,7 +115,7 @@
             const endDate = document.getElementById('endDate').value;
 
             if (!startDate || !endDate) {
-                alert('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด');
+                showToast('กรุณาเลือกวันที่เริ่มต้นและสิ้นสุด', true);
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'สร้างรายงาน';
                 return;
@@ -152,10 +132,9 @@
                 
                 const ordersSnapshot = await getDocs(ordersQuery);
                 
-                // Filter for successful orders (paid or shipped)
                 const successfulOrders = ordersSnapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(order => order.paymentStatus === 'ชำระแล้ว' || order.processingStatus === 'จัดส่งแล้ว');
+                    .filter(order => (order.paymentStatus === 'ชำระแล้ว' || order.processingStatus === 'จัดส่งแล้ว') && !order.isFree);
 
                 const customersMap = new Map();
                 const customersSnapshot = await getDocs(collection(db, "customers"));
@@ -168,7 +147,7 @@
 
             } catch (error) {
                 console.error("Error generating report:", error);
-                alert("เกิดข้อผิดพลาดในการสร้างรายงาน: " + error.message);
+                showToast("เกิดข้อผิดพลาดในการสร้างรายงาน: " + error.message, true);
             } finally {
                 generateBtn.disabled = false;
                 generateBtn.textContent = 'สร้างรายงาน';
@@ -176,6 +155,7 @@
         }
 
         function updateKPIs(orders) {
+            // *** IMPROVEMENT: Directly sum from order documents ***
             const totalSales = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
             const totalCost = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
             const totalProfit = orders.reduce((sum, order) => sum + (order.profit || 0), 0);
@@ -186,6 +166,7 @@
             document.getElementById('orderCount').textContent = orders.length;
         }
 
+        // --- Other functions (updateSalesChart, updateBestSellers, updateOrdersTable) remain largely the same ---
         function updateSalesChart(orders) {
             const ctx = document.getElementById('salesChart').getContext('2d');
             const salesByDate = {};
@@ -257,7 +238,7 @@
                 .map(([materialId, quantity]) => {
                     const material = materialsMap.get(materialId);
                     return {
-                        name: material ? `${material.name} (${material.size})` : 'ไม่พบข้อมูล',
+                        name: material ? `${material.name} (${material.size || 'N/A'})` : 'ไม่พบข้อมูล',
                         quantity
                     };
                 })

@@ -4,28 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>สร้างออเดอร์ใหม่ - ระบบจัดการร้านกำไลหิน</title>
-    
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts (Kanit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        input:disabled, select:disabled, textarea:disabled {
-            background-color: #f3f4f6;
-            cursor: not-allowed;
-        }
+        body { font-family: 'Kanit', sans-serif; }
+        input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
     </style>
 </head>
 <body class="bg-stone-100">
 
-    <!-- Main Container -->
     <div class="container mx-auto px-4 py-10">
         <form id="order-form" class="max-w-4xl mx-auto">
             <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg relative">
@@ -42,35 +31,53 @@
                 </div>
 
                 <section id="customer-section" class="mb-8">
-                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">1. ข้อมูลลูกค้าและออเดอร์</h2>
+                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">1. ข้อมูลลูกค้าและผู้รับ</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                            <label for="orderDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับออเดอร์ *</label>
                            <input type="date" id="orderDate" name="orderDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
                         </div>
                         <div>
-                            <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า *</label>
+                            <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า (ผู้สั่ง) *</label>
                             <select id="customer-select" name="customerId" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
                                 <option value="">-- กรุณาเลือกลูกค้า --</option>
                             </select>
                         </div>
                     </div>
-                    <div id="customer-info-display" class="hidden bg-sky-50 p-4 rounded-lg mt-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <h3 class="font-semibold text-sky-800 mb-1">ข้อมูลลูกค้า</h3>
-                                <p class="font-semibold text-sky-800" id="customer-name-display"></p>
-                                <p class="text-sm text-sky-700" id="customer-contact-display"></p>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-sky-800 mb-1">ที่อยู่สำหรับจัดส่ง</h3>
-                                <p class="text-sm text-sky-700 whitespace-pre-line" id="customer-address-text">ไม่มีข้อมูล</p>
-                            </div>
+                    <div id="customer-info-display" class="hidden bg-gray-50 p-4 rounded-lg mt-4">
+                        <h3 class="font-semibold text-gray-800 mb-1">ข้อมูลผู้สั่ง</h3>
+                        <p class="font-semibold text-gray-800" id="customer-name-display"></p>
+                        <p class="text-sm text-gray-700" id="customer-contact-display"></p>
+                    </div>
+
+                    <div class="mt-6 space-y-4 p-4 border-t">
+                        <div>
+                            <input type="checkbox" id="use-customer-address-checkbox" checked class="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                            <label for="use-customer-address-checkbox" class="ml-2 text-sm font-medium text-stone-700">ใช้ที่อยู่และเบอร์โทรเริ่มต้นของลูกค้า</label>
+                        </div>
+                        <div id="recipient-address-display" class="bg-sky-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-sky-800 mb-1">ข้อมูลจัดส่ง (ค่าเริ่มต้น)</h3>
+                            <p class="text-sm text-sky-700 whitespace-pre-line" id="customer-address-text">กรุณาเลือกลูกค้า</p>
+                            <p class="text-sm text-sky-700 mt-2" id="customer-phone-text"></p>
+                        </div>
+                        <div id="recipient-form" class="hidden space-y-4 bg-amber-50 p-4 rounded-lg border border-amber-200">
+                             <div>
+                                <label for="recipientName" class="block text-sm font-medium text-stone-700 mb-1">ชื่อผู้รับ *</label>
+                                <input type="text" id="recipientName" placeholder="ชื่อ-นามสกุล ของผู้รับ" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                             </div>
+                             <div>
+                                <label for="recipientPhone" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทรผู้รับ *</label>
+                                <input type="tel" id="recipientPhone" placeholder="เบอร์โทรศัพท์สำหรับติดต่อ" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                             </div>
+                             <div>
+                                <label for="recipientAddress" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่ผู้รับ *</label>
+                                <textarea id="recipientAddress" rows="3" placeholder="ที่อยู่สำหรับจัดส่ง" class="w-full px-3 py-2 border border-stone-300 rounded-md"></textarea>
+                             </div>
                         </div>
                     </div>
                 </section>
                 
-                <section id="design-section" class="mb-8">
+                <section id="design-section" class="mb-8 border-t pt-6">
                     <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ออกแบบกำไล</h2>
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
@@ -98,72 +105,21 @@
                 <section id="pricing-section">
                     <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. สรุปราคาและรายละเอียด</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                        <div class="bg-stone-50 p-4 rounded-lg">
-                            <label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label>
-                            <p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p>
-                        </div>
-                        <div class="bg-stone-50 p-4 rounded-lg">
-                            <label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label>
-                            <p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p>
-                        </div>
+                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label>
-                                <select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                                    <option value="เงิน 925">เงิน 925</option>
-                                    <option value="แสตนเลส">แสตนเลส</option>
-                                    <option value="ไหมยืด">ไหมยืด</option>
-                                    <option value="อื่นๆ">อื่นๆ</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label>
-                                <input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                            </div>
+                            <div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div>
+                            <div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
                         </div>
-                        <div>
-                            <label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label>
-                            <input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        </div>
-                        
-                        <div>
-                            <label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label>
-                            <select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
-                                <option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option>
-                                <option value="delivery">มีการจัดส่ง</option>
-                            </select>
-                        </div>
-                        <div id="shipping-cost-container" class="hidden">
-                            <label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label>
-                            <input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        </div>
-                        
-                        <div class="space-y-2">
-                             <label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label>
-                             <select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
-                                <option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option>
-                                <option value="มัดจำ">มัดจำ</option>
-                                <option value="ชำระแล้ว">ชำระแล้ว</option>
-                            </select>
-                        </div>
-                        <div id="deposit-amount-container" class="space-y-2 hidden">
-                            <label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label>
-                            <input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        </div>
-
+                        <div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        <div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div>
+                        <div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        <div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div>
+                        <div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
                         <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                            <div class="bg-red-50 p-4 rounded-lg">
-                                <label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label>
-                                <p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p>
-                            </div>
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label>
-                                <input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1">
-                            </div>
-                             <div class="bg-green-50 p-4 rounded-lg">
-                                <label class="block text-sm font-medium text-green-600">กำไร</label>
-                                <p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p>
-                            </div>
+                            <div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div>
+                            <div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div>
+                            <div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div>
                         </div>
                     </div>
                 </section>
@@ -171,46 +127,38 @@
                 <div class="mt-8 pt-6 border-t">
                     <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-stone-400 transition-colors">
                         <span id="button-text">สร้างออเดอร์</span>
-                        <span id="button-loader" class="hidden items-center">
-                           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                           กำลังบันทึก...
-                        </span>
+                        <span id="button-loader" class="hidden items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังบันทึก...</span>
                     </button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
+        import { showToast } from './utils.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let allCustomers = [];
-        let availableStones = [];
-        let availableDecorations = [];
-
+        // --- DOM Elements ---
+        let allCustomers = [], availableStones = [], availableDecorations = [];
         const loadingOverlay = document.getElementById('loading-overlay');
         const customerSelect = document.getElementById('customer-select');
         const customerInfoDisplay = document.getElementById('customer-info-display');
         const customerNameDisplay = document.getElementById('customer-name-display');
         const customerContactDisplay = document.getElementById('customer-contact-display');
+        const useCustomerAddressCheckbox = document.getElementById('use-customer-address-checkbox');
+        const recipientAddressDisplay = document.getElementById('recipient-address-display');
         const customerAddressText = document.getElementById('customer-address-text');
-        
+        const customerPhoneText = document.getElementById('customer-phone-text'); // NEW
+        const recipientForm = document.getElementById('recipient-form');
+        const recipientNameInput = document.getElementById('recipientName');
+        const recipientPhoneInput = document.getElementById('recipientPhone'); // NEW
+        const recipientAddressInput = document.getElementById('recipientAddress');
         const isFreeCheckbox = document.getElementById('is-free-checkbox');
-        
         const stoneFields = document.getElementById('stone-fields');
         const decorationCheckboxList = document.getElementById('decoration-checkbox-list');
         const laborCostInput = document.getElementById('laborCost');
@@ -234,11 +182,10 @@
         const orderDateInput = document.getElementById('orderDate');
         const backLink = document.getElementById('back-link');
         const braceletNote = document.getElementById('bracelet-note');
-        
-        function calculateTotals() {
-            let totalStonePrice = 0;
-            let totalDecorationPrice = 0;
 
+        // --- Functions ---
+        function calculateTotals() {
+            let totalStonePrice = 0, totalDecorationPrice = 0;
             document.querySelectorAll('.stone-row').forEach(row => {
                 const select = row.querySelector('select');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -254,44 +201,28 @@
                 if(subtotalEl) subtotalEl.textContent = `${subtotal.toFixed(2)} ฿`;
                 totalStonePrice += subtotal;
             });
-
             document.querySelectorAll('.decoration-item-row input[type="checkbox"]').forEach(checkbox => {
                 if (checkbox.checked) {
                     const price = parseFloat(checkbox.dataset.price) || 0;
                     totalDecorationPrice += price;
                 }
             });
-
             const laborCost = parseFloat(laborCostInput.value) || 0;
             const wireCost = parseFloat(wireCostInput.value) || 0;
             const shippingCost = parseFloat(shippingCostInput.value) || 0;
             const costPrice = totalStonePrice + totalDecorationPrice + laborCost + wireCost + shippingCost;
             const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
             const profit = sellingPrice - costPrice;
-            
             totalStonePriceEl.textContent = `${totalStonePrice.toFixed(2)} ฿`;
             totalDecorationPriceEl.textContent = `${totalDecorationPrice.toFixed(2)} ฿`;
             costPriceEl.textContent = `${costPrice.toFixed(2)} ฿`;
             profitPriceEl.textContent = `${profit.toFixed(2)} ฿`;
         }
 
-        function createMaterialRow(index, type) {
-            const isStone = type === 'หิน';
+        function createMaterialRow() {
             const row = document.createElement('div');
             row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
-            row.innerHTML = `
-                <div class="col-span-7">
-                    <select data-type="${type}" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                        <option value="">-- เลือกหิน --</option>
-                    </select>
-                </div>
-                <div class="col-span-2">
-                    <input type="number" min="1" placeholder="_ _" class="w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500">
-                </div>
-                <div class="col-span-3 text-right">
-                    <p class="material-subtotal text-sm font-medium text-stone-600">0.00 ฿</p>
-                </div>
-            `;
+            row.innerHTML = `<div class="col-span-7"><select class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="">-- เลือกหิน --</option></select></div><div class="col-span-2"><input type="number" min="1" placeholder="_ _" class="w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="col-span-3 text-right"><p class="material-subtotal text-sm font-medium text-stone-600">0.00 ฿</p></div>`;
             return row;
         }
 
@@ -299,17 +230,14 @@
             const container = document.createElement('div');
             container.className = 'decoration-item-row flex items-center';
             const checkboxId = `deco-${item.id}`;
-
-            container.innerHTML = `
-                <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                <label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size}mm)</label>
-            `;
+            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size}mm)</label>`;
             return container;
         }
 
         function updateCustomerDisplay(customerId) {
             if (!customerId) {
                 customerInfoDisplay.classList.add('hidden');
+                recipientAddressDisplay.classList.add('hidden');
                 return;
             }
             const customer = allCustomers.find(c => c.id === customerId);
@@ -317,33 +245,28 @@
                 customerNameDisplay.textContent = `ลูกค้า: ${customer.name}`;
                 customerContactDisplay.textContent = `ติดต่อ: ${customer.phone || customer.contactChannel || 'ไม่มีข้อมูล'}`;
                 customerAddressText.textContent = customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                customerPhoneText.textContent = `เบอร์โทร: ${customer.phone || '-'}`; // NEW
                 customerInfoDisplay.classList.remove('hidden');
+                recipientAddressDisplay.classList.remove('hidden');
+                useCustomerAddressCheckbox.checked = true;
+                useCustomerAddressCheckbox.dispatchEvent(new Event('change'));
             }
         }
 
         async function initializePage() {
             loadingOverlay.classList.remove('hidden');
             orderDateInput.valueAsDate = new Date();
-            
             const customersQuery = query(collection(db, "customers"), orderBy("name"));
             const materialsQuery = query(collection(db, "materials"), where("stockRemaining", ">", 0));
-
             try {
-                const [customersSnapshot, materialsSnapshot] = await Promise.all([
-                    getDocs(customersQuery),
-                    getDocs(materialsQuery)
-                ]);
-
+                const [customersSnapshot, materialsSnapshot] = await Promise.all([getDocs(customersQuery), getDocs(materialsQuery)]);
                 allCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const allMaterials = materialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
                 availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
                 availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
-
                 allCustomers.forEach(c => customerSelect.add(new Option(c.name, c.id)));
-                for (let i = 0; i < 9; i++) stoneFields.appendChild(createMaterialRow(i, 'หิน'));
+                for (let i = 0; i < 9; i++) stoneFields.appendChild(createMaterialRow());
                 availableDecorations.forEach(item => decorationCheckboxList.appendChild(createDecorationCheckbox(item)));
-                
                 const stoneSelects = document.querySelectorAll('.stone-row select');
                 stoneSelects.forEach(select => {
                     availableStones.forEach(item => {
@@ -353,7 +276,6 @@
                         select.add(option);
                     });
                 });
-
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
                 if (customerIdFromUrl && allCustomers.some(c => c.id === customerIdFromUrl)) {
@@ -362,87 +284,65 @@
                     customerSelect.value = customerIdFromUrl;
                     updateCustomerDisplay(customerIdFromUrl);
                 }
-
             } catch (error) {
                 console.error("Error loading initial data:", error);
-                alert("เกิดข้อผิดพลาดในการโหลดข้อมูลเริ่มต้น: " + error.message);
+                showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลเริ่มต้น: " + error.message, true);
             } finally {
                 loadingOverlay.classList.add('hidden');
             }
         }
 
+        // --- Event Listeners ---
         orderForm.addEventListener('change', calculateTotals);
         orderForm.addEventListener('input', calculateTotals);
-        
-        customerSelect.addEventListener('change', (e) => {
-            updateCustomerDisplay(e.target.value);
+        customerSelect.addEventListener('change', (e) => updateCustomerDisplay(e.target.value));
+        useCustomerAddressCheckbox.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            recipientAddressDisplay.classList.toggle('hidden', !isChecked);
+            recipientForm.classList.toggle('hidden', isChecked);
+            if (!isChecked) {
+                const customer = allCustomers.find(c => c.id === customerSelect.value);
+                if (customer) {
+                    recipientNameInput.value = customer.name;
+                    recipientPhoneInput.value = customer.phone || ''; // NEW
+                    recipientAddressInput.value = customer.shippingAddress || '';
+                }
+            }
         });
-        
         wireTypeInput.addEventListener('change', (e) => {
             switch(e.target.value) {
-                case 'เงิน 925':
-                    wireCostInput.value = 100;
-                    break;
-                case 'แสตนเลส':
-                    wireCostInput.value = 60;
-                    break;
-                case 'ไหมยืด':
-                    wireCostInput.value = 20;
-                    break;
-                default:
-                    wireCostInput.value = 0;
+                case 'เงิน 925': wireCostInput.value = 100; break;
+                case 'แสตนเลส': wireCostInput.value = 60; break;
+                case 'ไหมยืด': wireCostInput.value = 20; break;
+                default: wireCostInput.value = 0;
             }
             calculateTotals(); 
         });
-
         shippingMethodInput.addEventListener('change', (e) => {
-            if (e.target.value === 'delivery') {
-                shippingCostContainer.classList.remove('hidden');
-            } else {
-                shippingCostContainer.classList.add('hidden');
-                shippingCostInput.value = 0;
-            }
+            shippingCostContainer.classList.toggle('hidden', e.target.value !== 'delivery');
+            if (e.target.value !== 'delivery') shippingCostInput.value = 0;
             calculateTotals();
         });
-
         paymentStatusSelect.addEventListener('change', (e) => {
             depositAmountContainer.classList.toggle('hidden', e.target.value !== 'มัดจำ');
-            if (e.target.value !== 'มัดจำ') {
-                depositInput.value = 0;
-            }
+            if (e.target.value !== 'มัดจำ') depositInput.value = 0;
         });
-
         isFreeCheckbox.addEventListener('change', (e) => {
             const isChecked = e.target.checked;
-            
-            const sellingRelatedElements = [
-                sellingPriceInput,
-                paymentStatusSelect,
-                depositInput
-            ];
-
+            const sellingRelatedElements = [sellingPriceInput, paymentStatusSelect, depositInput];
             if (isChecked) {
-                // Store original values
                 sellingPriceInput.dataset.originalValue = sellingPriceInput.value;
                 paymentStatusSelect.dataset.originalValue = paymentStatusSelect.value;
                 depositInput.dataset.originalValue = depositInput.value;
-
-                // Disable and set to 0/free state
                 sellingPriceInput.value = 0;
                 depositInput.value = 0;
-                
                 sellingRelatedElements.forEach(el => el.disabled = true);
                 depositAmountContainer.classList.add('hidden');
-
             } else {
-                // Restore original values
                 sellingPriceInput.value = sellingPriceInput.dataset.originalValue || '';
                 paymentStatusSelect.value = paymentStatusSelect.dataset.originalValue || 'ยังไม่ได้ชำระ';
                 depositInput.value = depositInput.dataset.originalValue || 0;
-
                 sellingRelatedElements.forEach(el => el.disabled = false);
-                
-                // Trigger change event to show/hide deposit field if needed
                 paymentStatusSelect.dispatchEvent(new Event('change'));
             }
             calculateTotals();
@@ -457,20 +357,29 @@
 
             const customerId = customerSelect.value;
             const selectedCustomer = allCustomers.find(c => c.id === customerId);
-            const isFree = isFreeCheckbox.checked;
-
             if (!selectedCustomer) {
-                alert("กรุณาเลือกลูกค้า");
-                submitButton.disabled = false;
-                buttonText.classList.remove('hidden');
-                buttonLoader.classList.add('hidden');
-                buttonLoader.classList.remove('flex');
-                return;
+                showToast("กรุณาเลือกลูกค้า", true);
+                submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return;
+            }
+
+            let recipientName, recipientAddress, recipientPhone;
+            if (useCustomerAddressCheckbox.checked) {
+                recipientName = selectedCustomer.name;
+                recipientAddress = selectedCustomer.shippingAddress;
+                recipientPhone = selectedCustomer.phone; // NEW
+            } else {
+                recipientName = recipientNameInput.value.trim();
+                recipientAddress = recipientAddressInput.value.trim();
+                recipientPhone = recipientPhoneInput.value.trim(); // NEW
+            }
+
+            if (!recipientName || !recipientAddress || !recipientPhone) { // NEW Check
+                showToast("กรุณากรอกข้อมูลผู้รับ (ชื่อ, ที่อยู่, เบอร์โทร) ให้ครบถ้วน", true);
+                submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return;
             }
 
             const usedMaterials = [];
             let stockValidationError = null;
-
             document.querySelectorAll('.stone-row').forEach(row => {
                 const select = row.querySelector('select');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -479,120 +388,67 @@
                     const selectedOption = select.options[select.selectedIndex];
                     const stock = parseInt(selectedOption.dataset.stock, 10);
                     if (quantity > stock) stockValidationError = `สินค้าไม่พอ: ${selectedOption.text.split(' - ')[0]}`;
-                    usedMaterials.push({
-                        materialId: select.value,
-                        quantityUsed: quantity,
-                        name: selectedOption.text.split(' (')[0],
-                        pricePerPiece: parseFloat(selectedOption.dataset.price)
-                    });
+                    usedMaterials.push({ materialId: select.value, quantityUsed: quantity, name: selectedOption.text.split(' (')[0], pricePerPiece: parseFloat(selectedOption.dataset.price) });
                 }
             });
-
-            document.querySelectorAll('.decoration-item-row input[type="checkbox"]').forEach(checkbox => {
-                if (checkbox.checked) {
-                    const stock = parseInt(checkbox.dataset.stock, 10);
-                    if (stock < 1) stockValidationError = `สินค้าไม่พอ: ${checkbox.dataset.name}`;
-                    usedMaterials.push({
-                        materialId: checkbox.dataset.id,
-                        quantityUsed: 1,
-                        name: checkbox.dataset.name,
-                        pricePerPiece: parseFloat(checkbox.dataset.price)
-                    });
-                }
+            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
+                const stock = parseInt(checkbox.dataset.stock, 10);
+                if (stock < 1) stockValidationError = `สินค้าไม่พอ: ${checkbox.dataset.name}`;
+                usedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1, name: checkbox.dataset.name, pricePerPiece: parseFloat(checkbox.dataset.price) });
             });
 
-            if (stockValidationError) {
-                alert(stockValidationError);
-                submitButton.disabled = false;
-                buttonText.classList.remove('hidden');
-                buttonLoader.classList.add('hidden');
-                buttonLoader.classList.remove('flex');
-                return;
-            }
-            if (usedMaterials.length === 0) {
-                alert("กรุณาเลือกวัสดุอย่างน้อย 1 รายการ");
-                submitButton.disabled = false;
-                buttonText.classList.remove('hidden');
-                buttonLoader.classList.add('hidden');
-                buttonLoader.classList.remove('flex');
-                return;
+            if (stockValidationError || usedMaterials.length === 0) {
+                showToast(stockValidationError || "กรุณาเลือกวัสดุอย่างน้อย 1 รายการ", true);
+                submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return;
             }
 
             try {
+                const isFree = isFreeCheckbox.checked;
                 const orderDate = new Date(orderDateInput.value);
                 const sellingPrice = isFree ? 0 : parseFloat(sellingPriceInput.value);
-                if (!isFree && (isNaN(sellingPrice))) throw new Error("กรุณากรอกราคาขายจริงให้ถูกต้อง");
+                if (!isFree && isNaN(sellingPrice)) throw new Error("กรุณากรอกราคาขายจริงให้ถูกต้อง");
                 
                 const shippingCost = isFree ? 0 : parseFloat(shippingCostInput.value) || 0;
                 const paymentStatus = isFree ? "ฟรี" : paymentStatusSelect.value;
                 const depositAmount = isFree ? 0 : (paymentStatus === 'มัดจำ' ? (parseFloat(depositInput.value) || 0) : 0);
                 const finalCostPrice = parseFloat(costPriceEl.textContent) || 0;
+                const finalProfit = sellingPrice - finalCostPrice;
 
                 await runTransaction(db, async (transaction) => {
                     const materialDocs = new Map();
                     for (const item of usedMaterials) {
                         const materialRef = doc(db, "materials", item.materialId);
                         const materialDoc = await transaction.get(materialRef);
-                        if (!materialDoc.exists()) throw new Error(`ไม่พบข้อมูลวัสดุ: ${item.name}`);
-                        const currentStock = materialDoc.data().stockRemaining;
-                        if (currentStock < item.quantityUsed) throw new Error(`สินค้าหมดสต็อค: ${item.name} (เหลือ ${currentStock})`);
+                        if (!materialDoc.exists() || materialDoc.data().stockRemaining < item.quantityUsed) throw new Error(`สินค้าหมดสต็อค: ${item.name}`);
                         materialDocs.set(item.materialId, materialDoc);
                     }
 
-                    const braceletData = {
-                        createdDate: orderDate,
-                        usedMaterials: usedMaterials,
-                        costPrice: finalCostPrice,
-                        sellingPrice: sellingPrice,
-                        shippingCost: shippingCost,
-                        note: braceletNote.value,
-                        customerId: customerId,
-                        wireType: wireTypeInput.value,
-                        wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0),
-                        isFree: isFree
-                    };
+                    const braceletData = { createdDate: orderDate, usedMaterials, costPrice: finalCostPrice, sellingPrice, shippingCost, note: braceletNote.value, customerId, wireType: wireTypeInput.value, wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0), isFree };
                     const newBraceletRef = doc(collection(db, "bracelets"));
                     transaction.set(newBraceletRef, braceletData);
 
-                    const orderData = {
-                        orderDate: orderDate,
-                        customerId: customerId,
-                        braceletId: newBraceletRef.id,
-                        totalAmount: sellingPrice,
-                        depositAmount: depositAmount,
-                        paymentStatus: paymentStatus,
-                        processingStatus: "รอดำเนินการ",
-                        trackingNumber: "",
-                        shippingAddress: selectedCustomer.shippingAddress || '',
-                        isFree: isFree
-                    };
+                    const orderData = { orderDate, customerId, braceletId: newBraceletRef.id, totalAmount: sellingPrice, depositAmount, paymentStatus, processingStatus: "รอดำเนินการ", trackingNumber: "", isFree, totalCost: finalCostPrice, profit: finalProfit, recipientName, recipientAddress, recipientPhone };
                     const newOrderRef = doc(collection(db, "orders"));
                     transaction.set(newOrderRef, orderData);
 
                     for (const item of usedMaterials) {
                         const materialRef = doc(db, "materials", item.materialId);
-                        const materialDoc = materialDocs.get(item.materialId);
-                        const newStock = materialDoc.data().stockRemaining - item.quantityUsed;
+                        const newStock = materialDocs.get(item.materialId).data().stockRemaining - item.quantityUsed;
                         transaction.update(materialRef, { stockRemaining: newStock });
                     }
                 });
 
-                alert("สร้างออเดอร์สำเร็จ!");
+                showToast("สร้างออเดอร์สำเร็จ!");
                 const urlParams = new URLSearchParams(window.location.search);
-                if (urlParams.has('customerId')) {
-                    window.location.href = "customers.html";
-                } else {
-                    window.location.href = "order-history.html";
-                }
+                window.location.href = urlParams.has('customerId') ? "customers.html" : "order-history.html";
 
             } catch (error) {
                 console.error("Transaction failed: ", error);
-                alert(`เกิดข้อผิดพลาดในการสร้างออเดอร์: ${error.message}`);
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
             } finally {
                 submitButton.disabled = false;
                 buttonText.classList.remove('hidden');
                 buttonLoader.classList.add('hidden');
-                buttonLoader.classList.remove('flex');
             }
         });
 

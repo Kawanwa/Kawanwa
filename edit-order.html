@@ -4,21 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แก้ไขออเดอร์ - ระบบจัดการร้านกำไลหิน</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        input:disabled, select:disabled, textarea:disabled {
-            background-color: #f3f4f6;
-            cursor: not-allowed;
-        }
+        body { font-family: 'Kanit', sans-serif; }
+        input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
     </style>
 </head>
 <body class="bg-stone-100">
@@ -29,15 +21,9 @@
                 
                 <header class="mb-8 border-b pb-4">
                     <a id="back-link" href="#" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้ารายละเอียดออเดอร์</a>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 items-start">
-                        <div>
-                            <h1 class="text-3xl font-bold text-stone-800">แก้ไขรายการในออเดอร์</h1>
-                            <p id="customer-name-display" class="text-stone-600 mt-1">สำหรับลูกค้า: กำลังโหลด...</p>
-                        </div>
-                        <div class="bg-sky-50 p-3 rounded-lg">
-                             <h3 class="font-semibold text-sky-800 mb-1 text-sm">ที่อยู่สำหรับจัดส่ง (ข้อมูลอ้างอิง)</h3>
-                             <p id="customer-address-display" class="text-sm text-sky-700 whitespace-pre-line">กำลังโหลด...</p>
-                        </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-stone-800">แก้ไขรายการในออเดอร์</h1>
+                        <p id="customer-name-display" class="text-stone-600 mt-1">สำหรับลูกค้า: กำลังโหลด...</p>
                     </div>
                 </header>
 
@@ -46,6 +32,36 @@
                 </div>
 
                 <div id="form-content" class="hidden">
+                    <section id="recipient-section-edit" class="mb-8 border-b pb-6">
+                         <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">ข้อมูลผู้รับ</h2>
+                         <div class="mt-6 space-y-4 p-4">
+                            <div>
+                                <input type="checkbox" id="use-customer-address-checkbox-edit" class="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                                <label for="use-customer-address-checkbox-edit" class="ml-2 text-sm font-medium text-stone-700">ใช้ที่อยู่และเบอร์โทรเริ่มต้นของลูกค้า</label>
+                            </div>
+                            <div id="recipient-address-display-edit" class="bg-sky-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-sky-800 mb-1">ข้อมูลจัดส่ง (ค่าเริ่มต้น)</h3>
+                                <p class="text-sm text-sky-700 whitespace-pre-line" id="customer-address-text-edit">กำลังโหลด...</p>
+                                <p class="text-sm text-sky-700 mt-2" id="customer-phone-text-edit"></p>
+                            </div>
+                            <div id="recipient-form-edit" class="hidden space-y-4 bg-amber-50 p-4 rounded-lg border border-amber-200">
+                                 <div>
+                                    <label for="recipientName-edit" class="block text-sm font-medium text-stone-700 mb-1">ชื่อผู้รับ *</label>
+                                    <input type="text" id="recipientName-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                 </div>
+                                 <!-- NEW: Phone Number Field -->
+                                 <div>
+                                    <label for="recipientPhone-edit" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทรผู้รับ *</label>
+                                    <input type="tel" id="recipientPhone-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                 </div>
+                                 <div>
+                                    <label for="recipientAddress-edit" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่ผู้รับ *</label>
+                                    <textarea id="recipientAddress-edit" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md"></textarea>
+                                 </div>
+                            </div>
+                        </div>
+                    </section>
+
                     <section id="design-section" class="mb-8">
                         <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">ออกแบบกำไล</h2>
                         <div class="mb-6">
@@ -141,366 +157,344 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc, getDocs, updateDoc, collection, runTransaction, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
+        import { showToast } from './utils.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const loader = document.getElementById('loader');
-            const formContent = document.getElementById('form-content');
-            const backLink = document.getElementById('back-link');
-            const cancelEditLink = document.getElementById('cancel-edit-link');
-            const customerNameDisplay = document.getElementById('customer-name-display');
-            const customerAddressDisplay = document.getElementById('customer-address-display');
-            
-            const editForm = document.getElementById('edit-form');
-            const stoneFieldsEdit = document.getElementById('stone-fields-edit');
-            const decorationCheckboxListEdit = document.getElementById('decoration-checkbox-list-edit');
-            const braceletNoteEdit = document.getElementById('bracelet-note-edit');
-            const laborCostEdit = document.getElementById('laborCost-edit');
-            const sellingPriceEdit = document.getElementById('selling-price-edit');
-            const saveChangesBtn = document.getElementById('save-item-changes-btn');
-            const wireTypeEdit = document.getElementById('wireType-edit');
-            const wireCostEdit = document.getElementById('wireCost-edit');
-            const totalStonePriceEl = document.getElementById('total-stone-price');
-            const totalDecorationPriceEl = document.getElementById('total-decoration-price');
-            const costPriceEditEl = document.getElementById('cost-price-edit');
-            const profitPriceEditEl = document.getElementById('profit-price-edit');
-            const shippingMethodEdit = document.getElementById('shipping-method-edit');
-            const isFreeCheckboxEdit = document.getElementById('is-free-checkbox-edit');
+        // --- DOM Elements ---
+        const loader = document.getElementById('loader');
+        const formContent = document.getElementById('form-content');
+        const backLink = document.getElementById('back-link');
+        const cancelEditLink = document.getElementById('cancel-edit-link');
+        const customerNameDisplay = document.getElementById('customer-name-display');
+        
+        const useCustomerAddressCheckbox = document.getElementById('use-customer-address-checkbox-edit');
+        const recipientAddressDisplay = document.getElementById('recipient-address-display-edit');
+        const customerAddressText = document.getElementById('customer-address-text-edit');
+        const customerPhoneText = document.getElementById('customer-phone-text-edit'); // NEW
+        const recipientForm = document.getElementById('recipient-form-edit');
+        const recipientNameInput = document.getElementById('recipientName-edit');
+        const recipientPhoneInput = document.getElementById('recipientPhone-edit'); // NEW
+        const recipientAddressInput = document.getElementById('recipientAddress-edit');
 
-            let currentOrderData = null;
-            let currentBraceletData = null;
-            let originalUsedMaterials = [];
-            let materialsMap = new Map();
-            let availableStones = [];
-            let availableDecorations = [];
-            let shippingCostFromDb = 0;
-            
-            function calculateTotalsEdit() {
-                let totalStonePrice = 0;
-                let totalDecorationPrice = 0;
+        const editForm = document.getElementById('edit-form');
+        const stoneFieldsEdit = document.getElementById('stone-fields-edit');
+        const decorationCheckboxListEdit = document.getElementById('decoration-checkbox-list-edit');
+        const braceletNoteEdit = document.getElementById('bracelet-note-edit');
+        const laborCostEdit = document.getElementById('laborCost-edit');
+        const sellingPriceEdit = document.getElementById('selling-price-edit');
+        const saveChangesBtn = document.getElementById('save-item-changes-btn');
+        const wireTypeEdit = document.getElementById('wireType-edit');
+        const wireCostEdit = document.getElementById('wireCost-edit');
+        const totalStonePriceEl = document.getElementById('total-stone-price');
+        const totalDecorationPriceEl = document.getElementById('total-decoration-price');
+        const costPriceEditEl = document.getElementById('cost-price-edit');
+        const profitPriceEditEl = document.getElementById('profit-price-edit');
+        const shippingMethodEdit = document.getElementById('shipping-method-edit');
+        const isFreeCheckboxEdit = document.getElementById('is-free-checkbox-edit');
 
+        // --- State Variables ---
+        let currentOrderData = null;
+        let currentBraceletData = null;
+        let currentCustomerData = null;
+        let originalUsedMaterials = [];
+        let materialsMap = new Map();
+        let availableStones = [];
+        let availableDecorations = [];
+        let shippingCostFromDb = 0;
+        
+        // --- Functions ---
+        function calculateTotalsEdit() {
+            let totalStonePrice = 0;
+            let totalDecorationPrice = 0;
+            document.querySelectorAll('.stone-row').forEach(row => {
+                const select = row.querySelector('select');
+                const quantityInput = row.querySelector('input');
+                if (select.value && quantityInput.value) {
+                    const price = parseFloat(materialsMap.get(select.value)?.avgPricePerPiece || 0);
+                    const quantity = parseInt(quantityInput.value, 10) || 0;
+                    totalStonePrice += price * quantity;
+                }
+            });
+            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
+                const price = parseFloat(checkbox.dataset.price) || 0;
+                totalDecorationPrice += price;
+            });
+            totalStonePriceEl.textContent = `${totalStonePrice.toFixed(2)} ฿`;
+            totalDecorationPriceEl.textContent = `${totalDecorationPrice.toFixed(2)} ฿`;
+            const laborCost = parseFloat(laborCostEdit.value) || 0;
+            const wireCost = parseFloat(wireCostEdit.value) || 0;
+            const shippingMethod = shippingMethodEdit.value;
+            const shippingCostForCalc = (shippingMethod === 'delivery') ? shippingCostFromDb : 0;
+            const costPrice = totalStonePrice + totalDecorationPrice + laborCost + wireCost + shippingCostForCalc;
+            const sellingPrice = parseFloat(sellingPriceEdit.value) || 0;
+            const profit = sellingPrice - costPrice;
+            costPriceEditEl.textContent = `${costPrice.toFixed(2)} ฿`;
+            profitPriceEditEl.textContent = `${profit.toFixed(2)} ฿`;
+        }
+
+        const createMaterialRow = () => {
+            const row = document.createElement('div');
+            row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
+            row.innerHTML = `
+                <div class="col-span-8">
+                    <select class="stone-select w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm text-sm">
+                        <option value="">-- เลือกหิน --</option>
+                    </select>
+                </div>
+                <div class="col-span-4">
+                    <input type="number" min="1" placeholder="จำนวน" class="stone-quantity w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm">
+                </div>`;
+            return row;
+        };
+
+        const createDecorationCheckbox = (item) => {
+            const container = document.createElement('div');
+            container.className = 'decoration-item-row flex items-center';
+            const checkboxId = `deco-edit-${item.id}`;
+            container.innerHTML = `
+                <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
+                <label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size}mm)</label>
+            `;
+            return container;
+        };
+
+        async function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            if (!orderId) { loader.textContent = "ไม่พบรหัสออเดอร์"; return; }
+
+            try {
+                const orderRef = doc(db, "orders", orderId);
+                const orderSnap = await getDoc(orderRef);
+                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
+                currentOrderData = orderSnap.data();
+
+                const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
+                const customerRef = doc(db, "customers", currentOrderData.customerId);
+                const materialsQuery = query(collection(db, "materials"));
+
+                const [braceletSnap, customerSnap, materialsSnap] = await Promise.all([
+                    getDoc(braceletRef), getDoc(customerRef), getDocs(materialsQuery)
+                ]);
+
+                if (!braceletSnap.exists() || !customerSnap.exists()) throw new Error("ไม่พบข้อมูลกำไลหรือลูกค้า");
+                currentBraceletData = braceletSnap.data();
+                currentCustomerData = customerSnap.data();
+                originalUsedMaterials = JSON.parse(JSON.stringify(currentBraceletData.usedMaterials));
+                
+                customerNameDisplay.textContent = `สำหรับลูกค้า: ${currentCustomerData.name}`;
+                customerAddressText.textContent = currentCustomerData.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                customerPhoneText.textContent = `เบอร์โทร: ${currentCustomerData.phone || '-'}`; // NEW
+                backLink.href = `order-details.html?orderId=${orderId}`;
+                cancelEditLink.href = `order-details.html?orderId=${orderId}`;
+
+                materialsSnap.forEach(doc => materialsMap.set(doc.id, doc.data()));
+                const allMaterials = Array.from(materialsMap.values()).map((data, i) => ({ id: Array.from(materialsMap.keys())[i], ...data }));
+                availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
+                availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
+
+                // Populate Recipient Form
+                if (currentOrderData.recipientName && (currentOrderData.recipientName !== currentCustomerData.name || currentOrderData.recipientAddress !== currentCustomerData.shippingAddress)) {
+                    useCustomerAddressCheckbox.checked = false;
+                    recipientNameInput.value = currentOrderData.recipientName;
+                    recipientPhoneInput.value = currentOrderData.recipientPhone || ''; // NEW
+                    recipientAddressInput.value = currentOrderData.recipientAddress;
+                } else {
+                    useCustomerAddressCheckbox.checked = true;
+                }
+                useCustomerAddressCheckbox.dispatchEvent(new Event('change'));
+
+                // Populate form
+                braceletNoteEdit.value = currentBraceletData.note || '';
+                laborCostEdit.value = currentBraceletData.laborCost || 0;
+                sellingPriceEdit.value = currentBraceletData.sellingPrice || 0;
+                wireTypeEdit.value = currentBraceletData.wireType || 'เงิน 925';
+                wireCostEdit.value = currentBraceletData.wireCost || 0;
+                shippingCostFromDb = currentBraceletData.shippingCost || 0;
+                shippingMethodEdit.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
+                isFreeCheckboxEdit.checked = currentBraceletData.isFree || false;
+                isFreeCheckboxEdit.dispatchEvent(new Event('change'));
+
+                stoneFieldsEdit.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const stoneRow = createMaterialRow();
+                    stoneFieldsEdit.appendChild(stoneRow);
+                    const select = stoneRow.querySelector('select');
+                    const quantityInput = stoneRow.querySelector('input');
+                    availableStones.forEach(item => {
+                        const stockNow = item.stockRemaining;
+                        const originalItem = originalUsedMaterials.find(u => u.materialId === item.id);
+                        const currentStock = stockNow + (originalItem ? originalItem.quantityUsed : 0);
+                        const option = new Option(`${item.name} (${item.size}mm) - เหลือ ${currentStock} ชิ้น`, item.id);
+                        option.dataset.price = materialsMap.get(item.id)?.avgPricePerPiece || 0;
+                        select.add(option);
+                    });
+                    const usedStone = originalUsedMaterials.filter(m => materialsMap.get(m.materialId)?.type === 'หิน')[i];
+                    if (usedStone) {
+                        select.value = usedStone.materialId;
+                        quantityInput.value = usedStone.quantityUsed;
+                    }
+                }
+
+                decorationCheckboxListEdit.innerHTML = '';
+                availableDecorations.forEach(deco => {
+                    const checkboxRow = createDecorationCheckbox(deco);
+                    decorationCheckboxListEdit.appendChild(checkboxRow);
+                    const checkbox = checkboxRow.querySelector('input');
+                    const usedDeco = originalUsedMaterials.find(m => m.materialId === deco.id);
+                    if (usedDeco) checkbox.checked = true;
+                });
+                
+                calculateTotalsEdit();
+                loader.classList.add('hidden');
+                formContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error loading order:", error);
+                loader.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+            }
+        }
+        
+        // --- Event Listeners ---
+        useCustomerAddressCheckbox.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            recipientAddressDisplay.classList.toggle('hidden', !isChecked);
+            recipientForm.classList.toggle('hidden', isChecked);
+        });
+
+        wireTypeEdit.addEventListener('change', (e) => {
+            switch(e.target.value) {
+                case 'เงิน 925': wireCostEdit.value = 100; break;
+                case 'แสตนเลส': wireCostEdit.value = 60; break;
+                case 'ไหมยืด': wireCostEdit.value = 20; break;
+                default: wireCostEdit.value = 0;
+            }
+            calculateTotalsEdit();
+        });
+
+        isFreeCheckboxEdit.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            if (isChecked) {
+                sellingPriceEdit.dataset.originalValue = sellingPriceEdit.value;
+                sellingPriceEdit.value = 0;
+                sellingPriceEdit.disabled = true;
+            } else {
+                sellingPriceEdit.value = sellingPriceEdit.dataset.originalValue || currentBraceletData.sellingPrice || 0;
+                sellingPriceEdit.disabled = false;
+            }
+            calculateTotalsEdit();
+        });
+
+        editForm.addEventListener('input', calculateTotalsEdit);
+        editForm.addEventListener('change', calculateTotalsEdit);
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveChangesBtn.disabled = true;
+            saveChangesBtn.textContent = 'กำลังบันทึก...';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const isFree = isFreeCheckboxEdit.checked;
+
+            let recipientName, recipientAddress, recipientPhone;
+            if (useCustomerAddressCheckbox.checked) {
+                recipientName = currentCustomerData.name;
+                recipientAddress = currentCustomerData.shippingAddress;
+                recipientPhone = currentCustomerData.phone; // NEW
+            } else {
+                recipientName = recipientNameInput.value.trim();
+                recipientAddress = recipientAddressInput.value.trim();
+                recipientPhone = recipientPhoneInput.value.trim(); // NEW
+            }
+            if (!recipientName || !recipientAddress || !recipientPhone) { // NEW Check
+                showToast("กรุณากรอกข้อมูลผู้รับ (ชื่อ, ที่อยู่, เบอร์โทร) ให้ครบถ้วน", true);
+                saveChangesBtn.disabled = false;
+                saveChangesBtn.textContent = 'บันทึกการแก้ไข';
+                return;
+            }
+
+            try {
+                const newUsedMaterials = [];
                 document.querySelectorAll('.stone-row').forEach(row => {
                     const select = row.querySelector('select');
                     const quantityInput = row.querySelector('input');
-                    if (select.value && quantityInput.value) {
-                        const price = parseFloat(materialsMap.get(select.value)?.avgPricePerPiece || 0);
-                        const quantity = parseInt(quantityInput.value, 10) || 0;
-                        totalStonePrice += price * quantity;
+                    const quantity = parseInt(quantityInput.value, 10);
+                    if (select.value && quantity > 0) {
+                        newUsedMaterials.push({ materialId: select.value, quantityUsed: quantity, name: materialsMap.get(select.value).name });
                     }
                 });
-
                 document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
-                    const price = parseFloat(checkbox.dataset.price) || 0;
-                    totalDecorationPrice += price;
+                    newUsedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1, name: checkbox.dataset.name });
+                });
+
+                const stockChanges = new Map();
+                originalUsedMaterials.forEach(item => stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) + item.quantityUsed));
+                newUsedMaterials.forEach(item => stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) - item.quantityUsed));
+
+                let newTotalStonePrice = 0, newTotalDecorationPrice = 0;
+                newUsedMaterials.forEach(item => {
+                    const materialInfo = materialsMap.get(item.materialId);
+                    const price = materialInfo.avgPricePerPiece || 0;
+                    if(materialInfo.type === 'หิน') newTotalStonePrice += price * item.quantityUsed;
+                    else newTotalDecorationPrice += price * item.quantityUsed;
                 });
                 
-                totalStonePriceEl.textContent = `${totalStonePrice.toFixed(2)} ฿`;
-                totalDecorationPriceEl.textContent = `${totalDecorationPrice.toFixed(2)} ฿`;
-
-                const laborCost = parseFloat(laborCostEdit.value) || 0;
-                const wireCost = parseFloat(wireCostEdit.value) || 0;
-                
+                const newLaborCost = parseFloat(laborCostEdit.value) || 0;
+                const newWireCost = parseFloat(wireCostEdit.value) || 0;
+                const newWireType = document.getElementById('wireType-edit').value;
+                const newSellingPrice = isFree ? 0 : parseFloat(sellingPriceEdit.value) || 0;
+                const newShippingCost = shippingCostFromDb; 
                 const shippingMethod = shippingMethodEdit.value;
                 const shippingCostForCalc = (shippingMethod === 'delivery') ? shippingCostFromDb : 0;
+                const newCostPrice = newTotalStonePrice + newTotalDecorationPrice + newLaborCost + newWireCost + shippingCostForCalc;
+                const newProfit = newSellingPrice - newCostPrice;
 
-                const costPrice = totalStonePrice + totalDecorationPrice + laborCost + wireCost + shippingCostForCalc;
-                const sellingPrice = parseFloat(sellingPriceEdit.value) || 0;
-                const profit = sellingPrice - costPrice;
-
-                costPriceEditEl.textContent = `${costPrice.toFixed(2)} ฿`;
-                profitPriceEditEl.textContent = `${profit.toFixed(2)} ฿`;
-            }
-
-            const createMaterialRow = () => {
-                const row = document.createElement('div');
-                row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
-                row.innerHTML = `
-                    <div class="col-span-8">
-                        <select class="stone-select w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm text-sm">
-                            <option value="">-- เลือกหิน --</option>
-                        </select>
-                    </div>
-                    <div class="col-span-4">
-                        <input type="number" min="1" placeholder="จำนวน" class="stone-quantity w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm">
-                    </div>`;
-                return row;
-            };
-
-            const createDecorationCheckbox = (item) => {
-                const container = document.createElement('div');
-                container.className = 'decoration-item-row flex items-center';
-                const checkboxId = `deco-edit-${item.id}`;
-                container.innerHTML = `
-                    <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500">
-                    <label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size}mm)</label>
-                `;
-                return container;
-            };
-
-            async function initializePage() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const orderId = urlParams.get('orderId');
-
-                if (!orderId) {
-                    loader.textContent = "ไม่พบรหัสออเดอร์";
-                    return;
-                }
-
-                try {
-                    const orderRef = doc(db, "orders", orderId);
-                    const orderSnap = await getDoc(orderRef);
-                    if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
-                    currentOrderData = orderSnap.data();
-
-                    const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
-                    const customerRef = doc(db, "customers", currentOrderData.customerId);
-                    const materialsQuery = query(collection(db, "materials"));
-
-                    const [braceletSnap, customerSnap, materialsSnap] = await Promise.all([
-                        getDoc(braceletRef),
-                        getDoc(customerRef),
-                        getDocs(materialsQuery)
-                    ]);
-
-                    if (!braceletSnap.exists() || !customerSnap.exists()) throw new Error("ไม่พบข้อมูลกำไลหรือลูกค้า");
-                    currentBraceletData = braceletSnap.data();
-                    originalUsedMaterials = JSON.parse(JSON.stringify(currentBraceletData.usedMaterials));
-                    const customer = customerSnap.data();
-
-                    customerNameDisplay.textContent = `สำหรับลูกค้า: ${customer.name}`;
-                    customerAddressDisplay.textContent = currentOrderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                    backLink.href = `order-details.html?orderId=${orderId}`;
-                    cancelEditLink.href = `order-details.html?orderId=${orderId}`;
-
-                    materialsSnap.forEach(doc => materialsMap.set(doc.id, doc.data()));
-                    const allMaterials = Array.from(materialsMap.values()).map((data, i) => ({ id: Array.from(materialsMap.keys())[i], ...data }));
-                    
-                    availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
-                    availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
-
-                    // Populate form
-                    braceletNoteEdit.value = currentBraceletData.note || '';
-                    laborCostEdit.value = currentBraceletData.laborCost || 0;
-                    sellingPriceEdit.value = currentBraceletData.sellingPrice || 0;
-                    wireTypeEdit.value = currentBraceletData.wireType || 'เงิน 925';
-                    wireCostEdit.value = currentBraceletData.wireCost || 0;
-                    
-                    shippingCostFromDb = currentBraceletData.shippingCost || 0;
-                    shippingMethodEdit.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
-                    
-                    isFreeCheckboxEdit.checked = currentBraceletData.isFree || false;
-                    isFreeCheckboxEdit.dispatchEvent(new Event('change'));
-
-
-                    stoneFieldsEdit.innerHTML = '';
-                    for (let i = 0; i < 9; i++) {
-                        const stoneRow = createMaterialRow();
-                        stoneFieldsEdit.appendChild(stoneRow);
-                        const select = stoneRow.querySelector('select');
-                        const quantityInput = stoneRow.querySelector('input');
-                        
-                        availableStones.forEach(item => {
-                            const stockNow = item.stockRemaining;
-                            const originalItem = originalUsedMaterials.find(u => u.materialId === item.id);
-                            const currentStock = stockNow + (originalItem ? originalItem.quantityUsed : 0);
-                            const option = new Option(`${item.name} (${item.size}mm) - เหลือ ${currentStock} ชิ้น`, item.id);
-                            option.dataset.price = materialsMap.get(item.id)?.avgPricePerPiece || 0;
-                            select.add(option);
-                        });
-
-                        const usedStone = originalUsedMaterials.filter(m => materialsMap.get(m.materialId)?.type === 'หิน')[i];
-                        if (usedStone) {
-                            select.value = usedStone.materialId;
-                            quantityInput.value = usedStone.quantityUsed;
-                        }
+                await runTransaction(db, async (transaction) => {
+                    const materialRefs = Array.from(stockChanges.keys()).map(id => doc(db, "materials", id));
+                    const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
+                    for(let i = 0; i < materialRefs.length; i++) {
+                        const materialDoc = materialDocs[i];
+                        const change = stockChanges.get(materialRefs[i].id);
+                        if (!materialDoc.exists()) throw new Error(`ไม่พบวัสดุ ID: ${materialRefs[i].id}`);
+                        const newStock = materialDoc.data().stockRemaining + change;
+                        if (newStock < 0) throw new Error(`สต็อคไม่พอสำหรับ: ${materialDoc.data().name}`);
+                        transaction.update(materialRefs[i], { stockRemaining: newStock });
                     }
 
-                    decorationCheckboxListEdit.innerHTML = '';
-                    availableDecorations.forEach(deco => {
-                        const checkboxRow = createDecorationCheckbox(deco);
-                        decorationCheckboxListEdit.appendChild(checkboxRow);
-                        const checkbox = checkboxRow.querySelector('input');
-                        const usedDeco = originalUsedMaterials.find(m => m.materialId === deco.id);
-                        if (usedDeco) {
-                            checkbox.checked = true;
-                        }
+                    const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
+                    transaction.update(braceletRef, {
+                        usedMaterials: newUsedMaterials, note: braceletNoteEdit.value, laborCost: newLaborCost,
+                        sellingPrice: newSellingPrice, costPrice: newCostPrice, wireType: newWireType,
+                        wireCost: newWireCost, isFree: isFree
                     });
                     
-                    calculateTotalsEdit();
-                    loader.classList.add('hidden');
-                    formContent.classList.remove('hidden');
+                    const orderRef = doc(db, "orders", orderId);
+                    transaction.update(orderRef, {
+                        totalAmount: newSellingPrice, paymentStatus: isFree ? "ฟรี" : currentOrderData.paymentStatus,
+                        isFree: isFree, totalCost: newCostPrice, profit: newProfit,
+                        recipientName: recipientName, 
+                        recipientAddress: recipientAddress,
+                        recipientPhone: recipientPhone // NEW
+                    });
+                });
 
-                } catch (error) {
-                    console.error("Error loading order:", error);
-                    loader.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
-                }
+                showToast("อัปเดตออเดอร์สำเร็จ!");
+                window.location.href = `order-details.html?orderId=${orderId}`;
+
+            } catch (error) {
+                console.error("Failed to update order:", error);
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
+            } finally {
+                saveChangesBtn.disabled = false;
+                saveChangesBtn.textContent = 'บันทึกการแก้ไข';
             }
-            
-            wireTypeEdit.addEventListener('change', (e) => {
-                switch(e.target.value) {
-                    case 'เงิน 925':
-                        wireCostEdit.value = 100;
-                        break;
-                    case 'แสตนเลส':
-                        wireCostEdit.value = 60;
-                        break;
-                    case 'ไหมยืด':
-                        wireCostEdit.value = 20;
-                        break;
-                    default:
-                        wireCostEdit.value = 0;
-                }
-                calculateTotalsEdit();
-            });
-
-            isFreeCheckboxEdit.addEventListener('change', (e) => {
-                const isChecked = e.target.checked;
-                if (isChecked) {
-                    sellingPriceEdit.dataset.originalValue = sellingPriceEdit.value;
-                    sellingPriceEdit.value = 0;
-                    sellingPriceEdit.disabled = true;
-                } else {
-                    sellingPriceEdit.value = sellingPriceEdit.dataset.originalValue || currentBraceletData.sellingPrice || 0;
-                    sellingPriceEdit.disabled = false;
-                }
-                calculateTotalsEdit();
-            });
-
-            editForm.addEventListener('input', calculateTotalsEdit);
-            editForm.addEventListener('change', calculateTotalsEdit);
-
-            editForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                saveChangesBtn.disabled = true;
-                saveChangesBtn.textContent = 'กำลังบันทึก...';
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const orderId = urlParams.get('orderId');
-                const isFree = isFreeCheckboxEdit.checked;
-
-                try {
-                    const newUsedMaterials = [];
-                    // Gather stones
-                    document.querySelectorAll('.stone-row').forEach(row => {
-                        const select = row.querySelector('select');
-                        const quantityInput = row.querySelector('input');
-                        const quantity = parseInt(quantityInput.value, 10);
-                        if (select.value && quantity > 0) {
-                            newUsedMaterials.push({
-                                materialId: select.value,
-                                quantityUsed: quantity,
-                                name: materialsMap.get(select.value).name,
-                            });
-                        }
-                    });
-                    // Gather decorations
-                    document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
-                        newUsedMaterials.push({
-                            materialId: checkbox.dataset.id,
-                            quantityUsed: 1,
-                            name: checkbox.dataset.name,
-                        });
-                    });
-
-                    const stockChanges = new Map();
-                    originalUsedMaterials.forEach(item => {
-                        stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) + item.quantityUsed);
-                    });
-                    newUsedMaterials.forEach(item => {
-                        stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) - item.quantityUsed);
-                    });
-
-                    // Recalculate costs based on form values
-                    let newTotalStonePrice = 0;
-                    let newTotalDecorationPrice = 0;
-                    newUsedMaterials.forEach(item => {
-                        const materialInfo = materialsMap.get(item.materialId);
-                        const price = materialInfo.avgPricePerPiece || 0;
-                        if(materialInfo.type === 'หิน') {
-                            newTotalStonePrice += price * item.quantityUsed;
-                        } else {
-                            newTotalDecorationPrice += price * item.quantityUsed;
-                        }
-                    });
-                    
-                    const newLaborCost = parseFloat(laborCostEdit.value) || 0;
-                    const newWireCost = parseFloat(wireCostEdit.value) || 0;
-                    const newWireType = document.getElementById('wireType-edit').value;
-                    const newSellingPrice = isFree ? 0 : parseFloat(sellingPriceEdit.value) || 0;
-                    
-                    const newShippingCost = shippingCostFromDb; 
-                    
-                    const shippingMethod = shippingMethodEdit.value;
-                    const shippingCostForCalc = (shippingMethod === 'delivery') ? shippingCostFromDb : 0;
-                    const newCostPrice = newTotalStonePrice + newTotalDecorationPrice + newLaborCost + newWireCost + shippingCostForCalc;
-
-
-                    await runTransaction(db, async (transaction) => {
-                        // 1. READ ALL AFFECTED DOCS FIRST
-                        const materialRefs = Array.from(stockChanges.keys()).map(id => doc(db, "materials", id));
-                        const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
-
-                        // 2. CHECK STOCK AND PREPARE UPDATES
-                        for(let i = 0; i < materialRefs.length; i++) {
-                            const materialId = materialRefs[i].id;
-                            const materialDoc = materialDocs[i];
-                            const change = stockChanges.get(materialId);
-
-                            if (!materialDoc.exists()) throw new Error(`ไม่พบวัสดุ ID: ${materialId}`);
-                            const newStock = materialDoc.data().stockRemaining + change;
-                            if (newStock < 0) throw new Error(`สต็อคไม่พอสำหรับ: ${materialDoc.data().name}`);
-                            transaction.update(materialRefs[i], { stockRemaining: newStock });
-                        }
-
-                        // 3. UPDATE BRACELET AND ORDER
-                        const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
-                        transaction.update(braceletRef, {
-                            usedMaterials: newUsedMaterials,
-                            note: braceletNoteEdit.value,
-                            laborCost: newLaborCost,
-                            shippingCost: newShippingCost,
-                            sellingPrice: newSellingPrice,
-                            costPrice: newCostPrice,
-                            wireType: newWireType,
-                            wireCost: newWireCost,
-                            totalStonePrice: newTotalStonePrice,
-                            totalDecorationPrice: newTotalDecorationPrice,
-                            isFree: isFree
-                        });
-                        
-                        const orderRef = doc(db, "orders", orderId);
-                        transaction.update(orderRef, {
-                            totalAmount: newSellingPrice,
-                            paymentStatus: isFree ? "ฟรี" : currentOrderData.paymentStatus,
-                            isFree: isFree
-                        });
-                    });
-
-                    alert("อัปเดตออเดอร์สำเร็จ!");
-                    window.location.href = `order-details.html?orderId=${orderId}`;
-
-                } catch (error) {
-                    console.error("Failed to update order:", error);
-                    alert(`เกิดข้อผิดพลาด: ${error.message}`);
-                } finally {
-                    saveChangesBtn.disabled = false;
-                    saveChangesBtn.textContent = 'บันทึกการแก้ไข';
-                }
-            });
-
-            initializePage();
         });
+
+        initializePage();
     </script>
 </body>
 </html>

@@ -8,100 +8,21 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* General body and html styles */
-        body, html {
-            font-family: 'Sarabun', sans-serif;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white; 
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* --- STYLES FOR SCREEN PREVIEW --- */
-        .label-container {
-            transform: rotate(-90deg);
-            line-height: 1.3;
-            color: black;
-        }
-
-        #content-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1vh; /* Add some internal padding */
-            border: 1px solid white; /* Invisible border to help with sizing */
-        }
-        
-        /* This is the line with the recipient's name */
-        #name-line {
-            white-space: nowrap; /* Keep name on a single line */
-        }
-        
-        #name {
-            font-weight: 700;
-        }
-        
-        #address {
-            white-space: normal; /* Allow address to wrap */
-        }
-        
-        #phone {
-            font-weight: 700;
-            text-align: center;
-            white-space: nowrap; /* Keep phone on a single line */
-        }
-
-
-        /* --- PRINT-ONLY STYLES (REMAINS CORRECT) --- */
+        body, html { font-family: 'Sarabun', sans-serif; margin: 0; padding: 0; width: 100%; height: 100%; background-color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .label-container { transform: rotate(-90deg); line-height: 1.3; color: black; }
+        #content-wrapper { display: flex; flex-direction: column; justify-content: space-between; padding: 1vh; border: 1px solid white; }
+        #name-line { white-space: nowrap; }
+        #name { font-weight: 700; }
+        #address { white-space: normal; }
+        #phone { font-weight: 700; text-align: center; white-space: nowrap; }
+        #loader { transform: rotate(90deg); font-size: 16px; }
         @media print {
-            body, html {
-                background-color: white;
-                display: block;
-            }
-            .label-container {
-                white-space: normal !important;
-                width: 58mm !important;
-                height: 25mm !important;
-                padding: 1.5mm !important;
-                font-size: 8pt !important;
-                line-height: 1.3 !important;
-                position: absolute !important;
-                top: 16.5mm !important;
-                left: -16.5mm !important;
-                transform: rotate(-90deg) !important;
-            }
-            
-            #content-wrapper {
-                height: 100% !important;
-                padding: 0 !important;
-            }
-
-            #name {
-                font-size: 9pt !important;
-            }
-            
-            #phone {
-                font-size: 8pt !important;
-                font-weight: 700 !important;
-                text-align: left !important;
-            }
-            
-            @page {
-                size: 25mm 58mm;
-                margin: 0;
-            }
-        }
-
-        #loader {
-           transform: rotate(90deg);
-           font-size: 16px;
+            body, html { background-color: white; display: block; }
+            .label-container { white-space: normal !important; width: 58mm !important; height: 25mm !important; padding: 1.5mm !important; font-size: 8pt !important; line-height: 1.3 !important; position: absolute !important; top: 16.5mm !important; left: -16.5mm !important; transform: rotate(-90deg) !important; }
+            #content-wrapper { height: 100% !important; padding: 0 !important; }
+            #name { font-size: 9pt !important; }
+            #phone { font-size: 8pt !important; font-weight: 700 !important; text-align: left !important; }
+            @page { size: 25mm 58mm; margin: 0; }
         }
     </style>
 </head>
@@ -123,53 +44,28 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        /**
-         * NEW FUNCTION: Dynamically adjusts font size for the screen preview
-         * to make all content fit the screen without wrapping.
-         */
         function adjustFontSize() {
             const container = document.querySelector('.label-container');
             const contentWrapper = document.querySelector('#content-wrapper');
             const nameLine = document.querySelector('#name-line');
             if (!container || !contentWrapper || !nameLine) return;
-
-            container.style.fontSize = '10px'; // Start with a small base
-
-            // Because the container is rotated, its visual width is the screen's height,
-            // and its visual height is the screen's width.
-            const availableWidth = window.innerHeight * 0.98; // Use 98% of screen height
-            const availableHeight = window.innerWidth * 0.98; // Use 98% of screen width
-
+            container.style.fontSize = '10px';
+            const availableWidth = window.innerHeight * 0.98;
+            const availableHeight = window.innerWidth * 0.98;
             let fontSize = 10;
-            // Loop to find the best font size
             while (true) {
                 container.style.fontSize = (fontSize + 1) + 'px';
-                
-                // Check two conditions:
-                // 1. The name line must not be wider than the available space.
-                // 2. The entire content block must not be taller than the available space.
                 if (nameLine.scrollWidth > availableWidth || contentWrapper.scrollHeight > availableHeight) {
-                    // It overflowed, so the previous font size was the correct one.
                     container.style.fontSize = fontSize + 'px';
-                    break; // Exit loop
+                    break;
                 }
-                
                 fontSize++;
-                if (fontSize > 300) break; // Safety break to prevent infinite loops
+                if (fontSize > 300) break;
             }
         }
 
@@ -192,30 +88,22 @@
                 const orderRef = doc(db, "orders", orderId);
                 const orderSnap = await getDoc(orderRef);
                 if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
-                
                 const orderData = orderSnap.data();
+
+                // IMPROVEMENT: Use recipient phone from order, fallback to customer phone
                 const customerRef = doc(db, "customers", orderData.customerId);
                 const customerSnap = await getDoc(customerRef);
+                const customer = customerSnap.exists() ? customerSnap.data() : {};
 
-                if (!customerSnap.exists()) throw new Error("ไม่พบข้อมูลลูกค้า");
-
-                const customer = customerSnap.data();
-
-                nameEl.textContent = customer.name || 'N/A';
-                const address = orderData.shippingAddress || customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                const phone = customer.phone || 'N/A';
-                
-                addressEl.textContent = address;
-                phoneEl.textContent = `โทร. ${phone}`;
+                nameEl.textContent = orderData.recipientName || 'N/A';
+                addressEl.textContent = orderData.recipientAddress || 'ไม่มีข้อมูลที่อยู่';
+                phoneEl.textContent = `โทร. ${orderData.recipientPhone || customer.phone || 'N/A'}`;
                 
                 loader.style.display = 'none';
                 contentWrapper.style.display = 'flex';
                 
-                // ** Call the new function to auto-size the font for the preview **
                 adjustFontSize();
-                // Adjust again on window resize for responsiveness
                 window.onresize = adjustFontSize;
-
                 window.print();
 
             } catch (error) {
@@ -228,4 +116,3 @@
     </script>
 </body>
 </html>
-
