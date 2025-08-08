@@ -148,12 +148,15 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-        // *** FIX: Import config from the central file ***
-        import { firebaseConfig } from './config.js'; 
-        import { showToast } from './utils.js';
 
-        // *** NO LONGER NEEDED HERE ***
-        // const firebaseConfig = { ... };
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.appspot.com",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -276,8 +279,7 @@
                             await deleteObject(oldImageRef).catch(err => console.error("Error deleting old image:", err));
                         }
                         await deleteDoc(materialRef);
-                        showToast('ลบรายการสำเร็จ');
-                    } catch (err) { showToast(`เกิดข้อผิดพลาด: ${err.message}`, true); }
+                    } catch (err) { alert(`Error: ${err.message}`); }
                 }
             } else if (button.classList.contains('plus-btn')) {
                 const currentStock = parseInt(button.dataset.stock, 10);
@@ -338,11 +340,10 @@
 
                 const materialRef = doc(db, "materials", id);
                 await updateDoc(materialRef, dataToUpdate);
-                showToast('อัปเดตข้อมูลสำเร็จ');
                 closeModal();
             } catch (error) {
                 console.error("Error updating document:", error);
-                showToast("เกิดข้อผิดพลาด: " + error.message, true);
+                alert("เกิดข้อผิดพลาด: " + error.message);
             } finally {
                 submitButton.disabled = false;
                 submitButton.textContent = "บันทึกการเปลี่ยนแปลง";

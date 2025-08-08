@@ -11,6 +11,7 @@
     <style>
         body { font-family: 'Kanit', sans-serif; }
         input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+        #customer-modal.hidden { display: none; }
     </style>
 </head>
 <body class="bg-stone-100">
@@ -37,11 +38,17 @@
                            <label for="orderDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับออเดอร์ *</label>
                            <input type="date" id="orderDate" name="orderDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
                         </div>
-                        <div>
-                            <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า (ผู้สั่ง) *</label>
-                            <select id="customer-select" name="customerId" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                                <option value="">-- กรุณาเลือกลูกค้า --</option>
-                            </select>
+                        <!-- IMPROVEMENT: Add "Add Customer" button -->
+                        <div class="flex items-end gap-2">
+                            <div class="flex-grow">
+                                <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า (ผู้สั่ง) *</label>
+                                <select id="customer-select" name="customerId" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                    <option value="">-- กรุณาเลือกลูกค้า --</option>
+                                </select>
+                            </div>
+                            <button type="button" id="add-customer-btn" class="flex-shrink-0 h-10 text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-4 text-center transition-colors">
+                                &#43; เพิ่ม
+                            </button>
                         </div>
                     </div>
                     <div id="customer-info-display" class="hidden bg-gray-50 p-4 rounded-lg mt-4">
@@ -77,66 +84,39 @@
                     </div>
                 </section>
                 
-                <section id="design-section" class="mb-8 border-t pt-6">
-                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ออกแบบกำไล</h2>
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
-                        <div id="stone-fields" class="space-y-2"></div>
-                    </div>
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3>
-                        <div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
-                    </div>
-                    <div>
-                        <label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียงของหิน)</label>
-                        <textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, อความารีน 1, ไหมทอง 5, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
-                    </div>
-                </section>
-                
-                <div class="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-lg">
-                    <div class="flex items-center">
-                        <input id="is-free-checkbox" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500">
-                        <label for="is-free-checkbox" class="ml-3 block text-lg font-bold text-rose-600">
-                            ทำฟรี (หักสต็อกอย่างเดียว)
-                        </label>
-                    </div>
-                </div>
-
-                <section id="pricing-section">
-                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. สรุปราคาและรายละเอียด</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
-                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div>
-                            <div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        </div>
-                        <div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div>
-                        <div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div>
-                        <div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                            <div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div>
-                            <div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div>
-                            <div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div>
-                        </div>
-                    </div>
-                </section>
-
-                <div class="mt-8 pt-6 border-t">
-                    <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:bg-stone-400 transition-colors">
-                        <span id="button-text">สร้างออเดอร์</span>
-                        <span id="button-loader" class="hidden items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังบันทึก...</span>
-                    </button>
-                </div>
+                <section id="design-section" class="mb-8 border-t pt-6"><h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ออกแบบกำไล</h2><div class="mb-6"><h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3><div id="stone-fields" class="space-y-2"></div></div><div class="mb-6"><h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3><div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div></div><div><label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียงของหิน)</label><textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, อความารีน 1, ไหมทอง 5, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea></div></section>
+                <div class="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-lg"><div class="flex items-center"><input id="is-free-checkbox" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500"><label for="is-free-checkbox" class="ml-3 block text-lg font-bold text-rose-600">ทำฟรี (หักสต็อกอย่างเดียว)</label></div></div>
+                <section id="pricing-section"><h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. สรุปราคาและรายละเอียด</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"><div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div><div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div><div class="grid grid-cols-2 gap-4"><div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div><div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div></div><div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div><div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div><div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"><div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div><div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div><div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div></div></div></section>
+                <div class="mt-8 pt-6 border-t"><button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400"><span id="button-text">สร้างออเดอร์</span><span id="button-loader" class="hidden items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังบันทึก...</span></button></div>
             </div>
         </form>
     </div>
 
+    <!-- NEW: Add Customer Modal -->
+    <div id="customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <form id="customer-form" class="p-6 md:p-8">
+                <header class="flex justify-between items-start mb-6 pb-4 border-b">
+                    <h2 class="text-2xl font-bold text-stone-800">เพิ่มลูกค้าใหม่</h2>
+                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
+                        <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </header>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label for="modal-name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อลูกค้า *</label><input type="text" id="modal-name" required class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                    <div><label for="modal-contactChannel" class="block text-sm font-medium text-stone-700 mb-1">ช่องทางการติดต่อ</label><input type="text" id="modal-contactChannel" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                    <div><label for="modal-phone" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทร</label><input type="tel" id="modal-phone" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                    <div class="md:col-span-2"><label for="modal-shippingAddress" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่หลัก</label><textarea id="modal-shippingAddress" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md"></textarea></div>
+                    <div class="md:col-span-2"><label for="modal-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ</label><input type="text" id="modal-note" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                </div>
+                <div class="mt-6 pt-6 border-t"><button type="submit" id="modal-submit-button" class="w-full justify-center py-2.5 px-5 text-white bg-sky-600 hover:bg-sky-700 rounded-md">บันทึก</button></div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { firebaseConfig } from './config.js';
         import { showToast } from './utils.js';
 
@@ -153,10 +133,10 @@
         const useCustomerAddressCheckbox = document.getElementById('use-customer-address-checkbox');
         const recipientAddressDisplay = document.getElementById('recipient-address-display');
         const customerAddressText = document.getElementById('customer-address-text');
-        const customerPhoneText = document.getElementById('customer-phone-text'); // NEW
+        const customerPhoneText = document.getElementById('customer-phone-text');
         const recipientForm = document.getElementById('recipient-form');
         const recipientNameInput = document.getElementById('recipientName');
-        const recipientPhoneInput = document.getElementById('recipientPhone'); // NEW
+        const recipientPhoneInput = document.getElementById('recipientPhone');
         const recipientAddressInput = document.getElementById('recipientAddress');
         const isFreeCheckbox = document.getElementById('is-free-checkbox');
         const stoneFields = document.getElementById('stone-fields');
@@ -183,7 +163,30 @@
         const backLink = document.getElementById('back-link');
         const braceletNote = document.getElementById('bracelet-note');
 
+        // NEW Modal elements
+        const addCustomerBtn = document.getElementById('add-customer-btn');
+        const customerModal = document.getElementById('customer-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const customerForm = document.getElementById('customer-form');
+
         // --- Functions ---
+        const openModal = () => customerModal.classList.remove('hidden');
+        const closeModal = () => customerModal.classList.add('hidden');
+
+        async function refreshCustomerList(selectedId = null) {
+            const customersQuery = query(collection(db, "customers"), orderBy("name"));
+            const customersSnapshot = await getDocs(customersQuery);
+            allCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            customerSelect.innerHTML = '<option value="">-- กรุณาเลือกลูกค้า --</option>';
+            allCustomers.forEach(c => customerSelect.add(new Option(c.name, c.id)));
+
+            if (selectedId) {
+                customerSelect.value = selectedId;
+                updateCustomerDisplay(selectedId);
+            }
+        }
+
         function calculateTotals() {
             let totalStonePrice = 0, totalDecorationPrice = 0;
             document.querySelectorAll('.stone-row').forEach(row => {
@@ -245,7 +248,7 @@
                 customerNameDisplay.textContent = `ลูกค้า: ${customer.name}`;
                 customerContactDisplay.textContent = `ติดต่อ: ${customer.phone || customer.contactChannel || 'ไม่มีข้อมูล'}`;
                 customerAddressText.textContent = customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
-                customerPhoneText.textContent = `เบอร์โทร: ${customer.phone || '-'}`; // NEW
+                customerPhoneText.textContent = `เบอร์โทร: ${customer.phone || '-'}`;
                 customerInfoDisplay.classList.remove('hidden');
                 recipientAddressDisplay.classList.remove('hidden');
                 useCustomerAddressCheckbox.checked = true;
@@ -256,15 +259,12 @@
         async function initializePage() {
             loadingOverlay.classList.remove('hidden');
             orderDateInput.valueAsDate = new Date();
-            const customersQuery = query(collection(db, "customers"), orderBy("name"));
             const materialsQuery = query(collection(db, "materials"), where("stockRemaining", ">", 0));
             try {
-                const [customersSnapshot, materialsSnapshot] = await Promise.all([getDocs(customersQuery), getDocs(materialsQuery)]);
-                allCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                const materialsSnapshot = await getDocs(materialsQuery);
                 const allMaterials = materialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
                 availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
-                allCustomers.forEach(c => customerSelect.add(new Option(c.name, c.id)));
                 for (let i = 0; i < 9; i++) stoneFields.appendChild(createMaterialRow());
                 availableDecorations.forEach(item => decorationCheckboxList.appendChild(createDecorationCheckbox(item)));
                 const stoneSelects = document.querySelectorAll('.stone-row select');
@@ -276,14 +276,15 @@
                         select.add(option);
                     });
                 });
+                
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
-                if (customerIdFromUrl && allCustomers.some(c => c.id === customerIdFromUrl)) {
+                await refreshCustomerList(customerIdFromUrl); // Initial load
+                if (customerIdFromUrl) {
                     backLink.href = "customers.html";
                     backLink.innerHTML = "&larr; กลับไปหน้าข้อมูลลูกค้า";
-                    customerSelect.value = customerIdFromUrl;
-                    updateCustomerDisplay(customerIdFromUrl);
                 }
+
             } catch (error) {
                 console.error("Error loading initial data:", error);
                 showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลเริ่มต้น: " + error.message, true);
@@ -293,6 +294,35 @@
         }
 
         // --- Event Listeners ---
+        addCustomerBtn.addEventListener('click', openModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        customerModal.addEventListener('click', (e) => { if (e.target === customerModal) closeModal(); });
+
+        customerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const customerData = {
+                name: document.getElementById('modal-name').value,
+                contactChannel: document.getElementById('modal-contactChannel').value,
+                phone: document.getElementById('modal-phone').value,
+                shippingAddress: document.getElementById('modal-shippingAddress').value,
+                note: document.getElementById('modal-note').value,
+                createdDate: serverTimestamp()
+            };
+            if (!customerData.name) {
+                showToast('กรุณากรอกชื่อลูกค้า', true);
+                return;
+            }
+            try {
+                const docRef = await addDoc(collection(db, "customers"), customerData);
+                showToast('เพิ่มลูกค้าใหม่สำเร็จ');
+                customerForm.reset();
+                closeModal();
+                await refreshCustomerList(docRef.id); // Refresh list and select the new one
+            } catch (error) {
+                showToast("เกิดข้อผิดพลาด: " + error.message, true);
+            }
+        });
+
         orderForm.addEventListener('change', calculateTotals);
         orderForm.addEventListener('input', calculateTotals);
         customerSelect.addEventListener('change', (e) => updateCustomerDisplay(e.target.value));
@@ -304,7 +334,7 @@
                 const customer = allCustomers.find(c => c.id === customerSelect.value);
                 if (customer) {
                     recipientNameInput.value = customer.name;
-                    recipientPhoneInput.value = customer.phone || ''; // NEW
+                    recipientPhoneInput.value = customer.phone || '';
                     recipientAddressInput.value = customer.shippingAddress || '';
                 }
             }
@@ -366,14 +396,14 @@
             if (useCustomerAddressCheckbox.checked) {
                 recipientName = selectedCustomer.name;
                 recipientAddress = selectedCustomer.shippingAddress;
-                recipientPhone = selectedCustomer.phone; // NEW
+                recipientPhone = selectedCustomer.phone;
             } else {
                 recipientName = recipientNameInput.value.trim();
                 recipientAddress = recipientAddressInput.value.trim();
-                recipientPhone = recipientPhoneInput.value.trim(); // NEW
+                recipientPhone = recipientPhoneInput.value.trim();
             }
 
-            if (!recipientName || !recipientAddress || !recipientPhone) { // NEW Check
+            if (!recipientName || !recipientAddress || !recipientPhone) {
                 showToast("กรุณากรอกข้อมูลผู้รับ (ชื่อ, ที่อยู่, เบอร์โทร) ให้ครบถ้วน", true);
                 submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return;
             }
