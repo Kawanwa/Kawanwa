@@ -90,7 +90,6 @@
                     </div>
                 </section>
                 
-                <!-- NEW: Product Type Section -->
                 <section id="product-type-section" class="mb-8 border-t pt-6">
                     <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ประเภทสินค้า</h2>
                     <div class="flex gap-4">
@@ -116,11 +115,24 @@
                                 <option value="2">2 วงแหวน</option>
                             </select>
                         </div>
+                        <!-- NEW: Chain Type Selection -->
+                        <div>
+                            <label for="necklaceChainType" class="block text-sm font-medium text-stone-700 mb-1">รูปแบบสร้อย</label>
+                            <select id="necklaceChainType" name="necklaceChainType" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <option value="โซ่ถัก">โซ่ถัก</option>
+                                <option value="โซ่บาง">โซ่บาง</option>
+                                <option value="อื่นๆ">อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div id="necklace-chain-other-container" class="hidden">
+                            <label for="necklaceChainTypeOther" class="block text-sm font-medium text-stone-700 mb-1">ระบุรูปแบบสร้อยอื่นๆ</label>
+                            <input type="text" id="necklaceChainTypeOther" name="necklaceChainTypeOther" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                        </div>
                     </div>
                 </section>
 
                 <section id="design-section" class="mb-8 border-t pt-6">
-                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. ออกแบบกำไล</h2>
+                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. ออกแบบสินค้า</h2>
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
                         <div id="stone-fields" class="space-y-2"></div>
@@ -180,7 +192,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { firebaseConfig } from './config.js';
         import { showToast } from './utils.js';
 
@@ -227,10 +239,12 @@
         const backLink = document.getElementById('back-link');
         const braceletNote = document.getElementById('bracelet-note');
 
-        // NEW Product Type Elements
+        // Product Type Elements
         const productTypeRadios = document.querySelectorAll('input[name="productType"]');
         const necklaceOptionsContainer = document.getElementById('necklace-options');
         const designSectionHeader = document.querySelector('#design-section h2');
+        const necklaceChainTypeSelect = document.getElementById('necklaceChainType');
+        const necklaceChainOtherContainer = document.getElementById('necklace-chain-other-container');
 
         // Modal elements
         const addCustomerBtn = document.getElementById('add-customer-btn');
@@ -447,13 +461,16 @@
             calculateTotals();
         });
 
-        // NEW: Event listener for Product Type change
         productTypeRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 const isNecklace = e.target.value === 'สร้อย';
                 necklaceOptionsContainer.classList.toggle('hidden', !isNecklace);
-                designSectionHeader.textContent = isNecklace ? '3. ออกแบบสร้อย' : '3. ออกแบบกำไล';
+                designSectionHeader.textContent = isNecklace ? '3. ออกแบบสร้อย' : '3. ออกแบบสินค้า';
             });
+        });
+
+        necklaceChainTypeSelect.addEventListener('change', (e) => {
+            necklaceChainOtherContainer.classList.toggle('hidden', e.target.value !== 'อื่นๆ');
         });
 
         orderForm.addEventListener('submit', async (e) => {
@@ -522,9 +539,10 @@
                 const finalCostPrice = parseFloat(costPriceEl.textContent) || 0;
                 const finalProfit = sellingPrice - finalCostPrice;
 
-                // NEW: Get product type data
                 const productType = document.querySelector('input[name="productType"]:checked').value;
                 const necklaceRings = document.getElementById('necklaceRings').value;
+                const necklaceChainType = document.getElementById('necklaceChainType').value;
+                const necklaceChainTypeOther = document.getElementById('necklaceChainTypeOther').value;
 
                 await runTransaction(db, async (transaction) => {
                     const materialDocs = new Map();
@@ -546,11 +564,17 @@
                         wireType: wireTypeInput.value, 
                         wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0), 
                         isFree,
-                        productType: productType // Add product type
+                        productType: productType
                     };
                     
                     if (productType === 'สร้อย') {
-                        braceletData.necklaceDetails = { rings: parseInt(necklaceRings, 10) };
+                        braceletData.necklaceDetails = { 
+                            rings: parseInt(necklaceRings, 10),
+                            chainType: necklaceChainType
+                        };
+                        if (necklaceChainType === 'อื่นๆ') {
+                            braceletData.necklaceDetails.chainTypeOther = necklaceChainTypeOther;
+                        }
                     }
 
                     const newBraceletRef = doc(collection(db, "bracelets"));
