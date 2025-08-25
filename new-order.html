@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สร้างออเดอร์ใหม่ - ระบบจัดการร้านกำไลหิน</title>
+    <title>สร้างออเดอร์ใหม่ - ระบบจัดการร้าน</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,6 +12,13 @@
         body { font-family: 'Kanit', sans-serif; }
         input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
         #customer-modal.hidden { display: none; }
+        /* Custom styles for radio button labels */
+        input[type="radio"]:checked + label {
+            border-color: #0ea5e9; /* sky-500 */
+            ring-width: 2px;
+            --tw-ring-color: #0ea5e9; /* sky-500 */
+            box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+        }
     </style>
 </head>
 <body class="bg-stone-100">
@@ -23,7 +30,7 @@
                 <header class="mb-8 border-b pb-4">
                     <a id="back-link" href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
                     <h1 class="text-3xl font-bold text-stone-800">สร้างออเดอร์ใหม่</h1>
-                    <p class="text-stone-600 mt-1">ออกแบบกำไลและบันทึกการสั่งซื้อ</p>
+                    <p class="text-stone-600 mt-1">ออกแบบสินค้าและบันทึกการสั่งซื้อ</p>
                 </header>
 
                 <div id="loading-overlay" class="hidden absolute inset-0 bg-white bg-opacity-75 z-20 flex flex-col items-center justify-center rounded-xl">
@@ -38,7 +45,6 @@
                            <label for="orderDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับออเดอร์ *</label>
                            <input type="date" id="orderDate" name="orderDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
                         </div>
-                        <!-- IMPROVEMENT: Add "Add Customer" button -->
                         <div class="flex items-end gap-2">
                             <div class="flex-grow">
                                 <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า (ผู้สั่ง) *</label>
@@ -84,15 +90,73 @@
                     </div>
                 </section>
                 
-                <section id="design-section" class="mb-8 border-t pt-6"><h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ออกแบบกำไล</h2><div class="mb-6"><h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3><div id="stone-fields" class="space-y-2"></div></div><div class="mb-6"><h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3><div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div></div><div><label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียงของหิน)</label><textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, อความารีน 1, ไหมทอง 5, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea></div></section>
+                <!-- NEW: Product Type Section -->
+                <section id="product-type-section" class="mb-8 border-t pt-6">
+                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ประเภทสินค้า</h2>
+                    <div class="flex gap-4">
+                        <div>
+                            <input type="radio" name="productType" value="กำไล" id="type-bracelet" class="peer hidden" checked>
+                            <label for="type-bracelet" class="block cursor-pointer rounded-lg border border-stone-300 p-4 transition-all">
+                                <p class="font-semibold text-stone-700">กำไล</p>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="productType" value="สร้อย" id="type-necklace" class="peer hidden">
+                            <label for="type-necklace" class="block cursor-pointer rounded-lg border border-stone-300 p-4 transition-all">
+                                <p class="font-semibold text-stone-700">สร้อย</p>
+                            </label>
+                        </div>
+                    </div>
+                    <!-- Necklace specific options -->
+                    <div id="necklace-options" class="hidden mt-4 space-y-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                        <div>
+                            <label for="necklaceRings" class="block text-sm font-medium text-stone-700 mb-1">จำนวนวงแหวน</label>
+                            <select id="necklaceRings" name="necklaceRings" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <option value="1">1 วงแหวน</option>
+                                <option value="2">2 วงแหวน</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="design-section" class="mb-8 border-t pt-6">
+                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. ออกแบบกำไล</h2>
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
+                        <div id="stone-fields" class="space-y-2"></div>
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3>
+                        <div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
+                    </div>
+                    <div>
+                        <label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียงของหิน)</label>
+                        <textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, อความารีน 1, ไหมทอง 5, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                    </div>
+                </section>
+
                 <div class="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-lg"><div class="flex items-center"><input id="is-free-checkbox" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500"><label for="is-free-checkbox" class="ml-3 block text-lg font-bold text-rose-600">ทำฟรี (หักสต็อกอย่างเดียว)</label></div></div>
-                <section id="pricing-section"><h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. สรุปราคาและรายละเอียด</h2><div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4"><div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div><div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div><div class="grid grid-cols-2 gap-4"><div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div><div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div></div><div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div><div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div><div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"><div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div><div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div><div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div></div></div></section>
+                
+                <section id="pricing-section">
+                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">4. สรุปราคาและรายละเอียด</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                        <div class="grid grid-cols-2 gap-4"><div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div><div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div></div>
+                        <div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        <div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div>
+                        <div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        <div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div>
+                        <div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"><div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div><div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div><div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div></div>
+                    </div>
+                </section>
                 <div class="mt-8 pt-6 border-t"><button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400"><span id="button-text">สร้างออเดอร์</span><span id="button-loader" class="hidden items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังบันทึก...</span></button></div>
             </div>
         </form>
     </div>
 
-    <!-- NEW: Add Customer Modal -->
+    <!-- Add Customer Modal -->
     <div id="customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <form id="customer-form" class="p-6 md:p-8">
@@ -163,7 +227,12 @@
         const backLink = document.getElementById('back-link');
         const braceletNote = document.getElementById('bracelet-note');
 
-        // NEW Modal elements
+        // NEW Product Type Elements
+        const productTypeRadios = document.querySelectorAll('input[name="productType"]');
+        const necklaceOptionsContainer = document.getElementById('necklace-options');
+        const designSectionHeader = document.querySelector('#design-section h2');
+
+        // Modal elements
         const addCustomerBtn = document.getElementById('add-customer-btn');
         const customerModal = document.getElementById('customer-modal');
         const closeModalBtn = document.getElementById('close-modal-btn');
@@ -378,6 +447,15 @@
             calculateTotals();
         });
 
+        // NEW: Event listener for Product Type change
+        productTypeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isNecklace = e.target.value === 'สร้อย';
+                necklaceOptionsContainer.classList.toggle('hidden', !isNecklace);
+                designSectionHeader.textContent = isNecklace ? '3. ออกแบบสร้อย' : '3. ออกแบบกำไล';
+            });
+        });
+
         orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
@@ -444,6 +522,10 @@
                 const finalCostPrice = parseFloat(costPriceEl.textContent) || 0;
                 const finalProfit = sellingPrice - finalCostPrice;
 
+                // NEW: Get product type data
+                const productType = document.querySelector('input[name="productType"]:checked').value;
+                const necklaceRings = document.getElementById('necklaceRings').value;
+
                 await runTransaction(db, async (transaction) => {
                     const materialDocs = new Map();
                     for (const item of usedMaterials) {
@@ -453,7 +535,24 @@
                         materialDocs.set(item.materialId, materialDoc);
                     }
 
-                    const braceletData = { createdDate: orderDate, usedMaterials, costPrice: finalCostPrice, sellingPrice, shippingCost, note: braceletNote.value, customerId, wireType: wireTypeInput.value, wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0), isFree };
+                    const braceletData = { 
+                        createdDate: orderDate, 
+                        usedMaterials, 
+                        costPrice: finalCostPrice, 
+                        sellingPrice, 
+                        shippingCost, 
+                        note: braceletNote.value, 
+                        customerId, 
+                        wireType: wireTypeInput.value, 
+                        wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0), 
+                        isFree,
+                        productType: productType // Add product type
+                    };
+                    
+                    if (productType === 'สร้อย') {
+                        braceletData.necklaceDetails = { rings: parseInt(necklaceRings, 10) };
+                    }
+
                     const newBraceletRef = doc(collection(db, "bracelets"));
                     transaction.set(newBraceletRef, braceletData);
 
