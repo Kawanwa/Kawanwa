@@ -9,23 +9,43 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; }
-        .menu-card { transition: all 0.2s ease-in-out; }
-        .menu-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .stat-card { transition: all 0.2s ease-in-out; }
-        .stat-card:hover { transform: scale(1.03); }
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .menu-card { 
+            transition: all 0.2s ease-in-out; 
+            background-color: white;
+        }
+        .menu-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+        }
+        .stat-card {
+            transition: all 0.2s ease-in-out;
+            border-left-width: 4px;
+        }
+        .stat-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #38bdf8, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
 
-    <div class="container mx-auto px-4 py-10">
+    <div class="container mx-auto px-4 py-8 md:py-12">
         <div class="w-full max-w-7xl mx-auto">
             
             <!-- Header -->
             <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
                 <div>
                     <h1 class="text-4xl font-bold text-slate-800 tracking-tight">Kawanwa Stone</h1>
-                    <p class="text-slate-500 mt-1">ยินดีต้อนรับ, น็อต!</p>
+                    <p class="text-slate-500 mt-1">ยินดีต้อนรับ, คุณน็อต!</p>
                 </div>
                 <a href="new-order.html" class="mt-4 sm:mt-0 w-full sm:w-auto flex-shrink-0 text-white bg-sky-500 hover:bg-sky-600 font-medium rounded-lg text-sm px-6 py-3 text-center transition-colors shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
@@ -33,75 +53,76 @@
                 </a>
             </header>
 
+            <!-- Quick Stats Section -->
+            <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-sky-400">
+                    <h3 class="font-semibold text-slate-500">ยอดขายเดือนนี้</h3>
+                    <p id="monthly-sales" class="text-3xl font-bold text-slate-800 mt-1">...</p>
+                </div>
+                <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-emerald-400">
+                    <h3 class="font-semibold text-slate-500">กำไรเดือนนี้</h3>
+                    <p id="monthly-profit" class="text-3xl font-bold text-emerald-600 mt-1">...</p>
+                </div>
+                <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-amber-400">
+                    <h3 class="font-semibold text-slate-500">ออเดอร์ที่ต้องทำ</h3>
+                    <p id="pending-orders-count" class="text-3xl font-bold text-amber-600 mt-1">...</p>
+                </div>
+            </section>
+
             <main class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <!-- Left Column: Main Menu -->
                 <div class="lg:col-span-2">
-                    <!-- Quick Stats -->
-                    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex items-center gap-5">
-                            <div class="bg-yellow-100 text-yellow-600 h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-slate-500">ออเดอร์ที่ต้องทำ</h3>
-                                <p id="pending-orders-count" class="text-3xl font-bold text-slate-800">...</p>
-                            </div>
-                        </div>
-                        <div class="stat-card bg-white p-6 rounded-2xl shadow-md border border-slate-200 flex items-center gap-5">
-                             <div class="bg-green-100 text-green-600 h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" /><path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" /></svg>
-                            </div>
-                            <div>
-                                <h3 class="font-semibold text-slate-500">ยอดขายเดือนนี้</h3>
-                                <p id="monthly-sales" class="text-3xl font-bold text-slate-800">...</p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Menu Grid -->
-                    <section>
-                         <h2 class="text-xl font-semibold text-slate-700 mb-4">เมนูจัดการ</h2>
-                         <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
-                            <!-- Manage Orders -->
-                            <a href="order-history.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">จัดการออเดอร์</h3>
-                            </a>
-                            <!-- Customers -->
-                            <a href="customers.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">ข้อมูลลูกค้า</h3>
-                            </a>
-                            <!-- Stock -->
-                            <a href="stock.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">จัดการสต็อค</h3>
-                            </a>
-                            <!-- Intake -->
-                            <a href="intake.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">รับของเข้า</h3>
-                            </a>
-                            <!-- Reports -->
-                            <a href="report.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">รายงาน</h3>
-                            </a>
-                            <!-- Expenses -->
-                            <a href="expenses.html" class="menu-card bg-white p-5 rounded-xl shadow-md border border-slate-200 text-center">
-                                <div class="h-14 w-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg></div>
-                                <h3 class="text-md font-semibold text-slate-800">บัญชี</h3>
-                            </a>
-                         </div>
-                    </section>
+                    <h2 class="text-xl font-semibold text-slate-700 mb-4">เมนูจัดการหลัก</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+                        <!-- Manage Orders -->
+                        <a href="order-history.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">จัดการออเดอร์</h3>
+                        </a>
+                        <!-- Customers -->
+                        <a href="customers.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">ข้อมูลลูกค้า</h3>
+                        </a>
+                        <!-- Stock -->
+                        <a href="stock.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">จัดการสต็อค</h3>
+                        </a>
+                        <!-- Intake -->
+                        <a href="intake.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">รับของเข้า</h3>
+                        </a>
+                        <!-- Reports -->
+                        <a href="report.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">รายงาน</h3>
+                        </a>
+                        <!-- Expenses -->
+                        <a href="expenses.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center">
+                            <div class="h-14 w-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg></div>
+                            <h3 class="text-md font-semibold text-slate-800">บัญชี</h3>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Right Column: Recent Activity -->
-                <div class="lg:col-span-1 bg-white p-6 rounded-2xl shadow-md border border-slate-200">
-                    <h2 class="text-xl font-semibold text-slate-700 mb-4">ออเดอร์ล่าสุด</h2>
-                    <div id="recent-orders-container" class="space-y-3">
-                        <p class="text-slate-500 text-center py-8">กำลังโหลด...</p>
+                <!-- Right Column: Activity & Low Stock -->
+                <div class="lg:col-span-1 space-y-8">
+                    <!-- Recent Orders -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h2 class="text-xl font-semibold text-slate-700 mb-4">ออเดอร์ล่าสุด</h2>
+                        <div id="recent-orders-container" class="space-y-3">
+                            <p class="text-slate-500 text-center py-8">กำลังโหลด...</p>
+                        </div>
+                    </div>
+                    <!-- Low Stock Items -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                        <h2 class="text-xl font-semibold text-slate-700 mb-4">สินค้าใกล้หมด (<=10)</h2>
+                        <div id="low-stock-container" class="space-y-3">
+                            <p class="text-slate-500 text-center py-8">กำลังโหลด...</p>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -118,30 +139,39 @@
         const db = getFirestore(app);
 
         async function fetchDashboardData() {
-            // Fetch Pending Orders
+            const today = new Date();
+            const startOfMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), 1));
+
+            // --- Quick Stats ---
+            // 1. Pending Orders
             const pendingOrdersQuery = query(collection(db, "orders"), where("processingStatus", "==", "รอดำเนินการ"));
             onSnapshot(pendingOrdersQuery, (snapshot) => {
                 document.getElementById('pending-orders-count').textContent = snapshot.size;
             });
 
-            // Fetch Monthly Sales
-            const today = new Date();
-            const startOfMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), 1));
-            const monthlySalesQuery = query(collection(db, "orders"), where("orderDate", ">=", startOfMonth), where("paymentStatus", "in", ["ชำระแล้ว", "มัดจำ"]));
-            onSnapshot(monthlySalesQuery, (snapshot) => {
+            // 2. Monthly Sales & Profit
+            const monthlyOrdersQuery = query(collection(db, "orders"), where("orderDate", ">=", startOfMonth));
+            onSnapshot(monthlyOrdersQuery, (snapshot) => {
                 let totalSales = 0;
+                let totalProfit = 0;
                 snapshot.forEach(doc => {
                     const order = doc.data();
                     if (order.paymentStatus === 'ชำระแล้ว') {
                         totalSales += order.totalAmount || 0;
+                        totalProfit += order.profit || 0;
                     } else if (order.paymentStatus === 'มัดจำ') {
-                        totalSales += order.depositAmount || 0;
+                        totalSales += order.depositAmount || 0; 
+                        // Profit is usually realized on full payment, but for simplicity we can count it here.
+                        // Or adjust logic as needed. For now, we'll sum profit on all orders in the month.
+                        totalProfit += order.profit || 0;
                     }
                 });
                 document.getElementById('monthly-sales').textContent = formatCurrency(totalSales);
+                document.getElementById('monthly-profit').textContent = formatCurrency(totalProfit);
             });
 
-            // Fetch Recent Orders
+            // --- Right Column ---
+            // 1. Recent Orders
             const recentOrdersContainer = document.getElementById('recent-orders-container');
             const recentOrdersQuery = query(collection(db, "orders"), orderBy("orderDate", "desc"), limit(5));
             const customersSnapshot = await getDocs(collection(db, "customers"));
@@ -170,6 +200,33 @@
                         </div>
                     `;
                     recentOrdersContainer.appendChild(orderCard);
+                });
+            });
+
+            // 2. Low Stock Items
+            const lowStockContainer = document.getElementById('low-stock-container');
+            const lowStockQuery = query(collection(db, "materials"), where("stockRemaining", "<=", 10), orderBy("stockRemaining", "asc"), limit(5));
+            onSnapshot(lowStockQuery, (snapshot) => {
+                lowStockContainer.innerHTML = '';
+                if (snapshot.empty) {
+                    lowStockContainer.innerHTML = '<p class="text-slate-500 text-center py-8">ไม่มีสินค้าใกล้หมด</p>';
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const itemCard = document.createElement('a');
+                    itemCard.href = 'stock.html'; // Link to stock page
+                    itemCard.className = 'block bg-slate-50 p-4 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors';
+                    itemCard.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="font-semibold text-slate-800">${item.name}</p>
+                                <p class="text-sm text-slate-500">${item.size} mm</p>
+                            </div>
+                            <div class="font-bold text-lg text-rose-500">${item.stockRemaining}</div>
+                        </div>
+                    `;
+                    lowStockContainer.appendChild(itemCard);
                 });
             });
         }
