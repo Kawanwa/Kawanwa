@@ -139,11 +139,12 @@
                 <section id="design-section" class="mb-8 border-t pt-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 mb-4">
                         <h2 class="text-xl font-bold text-stone-700">3. ออกแบบสินค้า</h2>
-                        <!-- *** อัปเดต: เพิ่มปุ่มจัดการ Template *** -->
+                        <!-- *** อัปเดต: เพิ่มปุ่มลบ *** -->
                         <div class="flex items-center gap-2 mt-2 sm:mt-0">
                             <select id="load-template-select" class="text-sm border-stone-300 rounded-md shadow-sm">
                                 <option value="">-- โหลดแบบร่าง --</option>
                             </select>
+                            <button type="button" id="delete-template-btn" class="text-sm text-white bg-rose-500 hover:bg-rose-600 font-medium rounded-lg px-3 py-2 text-center transition-colors">ลบ</button>
                             <button type="button" id="save-template-btn" class="text-sm text-white bg-indigo-500 hover:bg-indigo-600 font-medium rounded-lg px-3 py-2 text-center transition-colors">บันทึกแบบร่าง</button>
                         </div>
                     </div>
@@ -231,7 +232,7 @@
         </div>
     </div>
 
-    <!-- *** อัปเดต: เพิ่ม Modal สำหรับบันทึก Template *** -->
+    <!-- Save Template Modal -->
     <div id="save-template-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
             <form id="save-template-form" class="p-6">
@@ -250,7 +251,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, addDoc, deleteDoc, runTransaction, query, where, orderBy, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { firebaseConfig } from './config.js';
         import { showToast } from './utils.js';
 
@@ -314,14 +315,14 @@
         const closeStoneModalBtn = document.getElementById('close-stone-modal-btn');
         let activeStoneRow = null;
 
-        // *** อัปเดต: เพิ่ม DOM elements สำหรับ Template ***
         const saveTemplateBtn = document.getElementById('save-template-btn');
         const loadTemplateSelect = document.getElementById('load-template-select');
         const saveTemplateModal = document.getElementById('save-template-modal');
         const saveTemplateForm = document.getElementById('save-template-form');
         const cancelSaveTemplateBtn = document.getElementById('cancel-save-template-btn');
         const templateNameInput = document.getElementById('template-name-input');
-
+        // *** อัปเดต: เพิ่ม DOM element สำหรับปุ่มลบ ***
+        const deleteTemplateBtn = document.getElementById('delete-template-btn');
 
         // --- Functions ---
         const openCustomerModal = () => customerModal.classList.remove('hidden');
@@ -464,7 +465,6 @@
             }
         }
         
-        // *** อัปเดต: เพิ่มฟังก์ชันสำหรับจัดการ Template ***
         async function populateTemplatesDropdown() {
             const q = query(collection(db, "design_templates"), orderBy("name"));
             const snapshot = await getDocs(q);
@@ -478,7 +478,6 @@
         }
 
         function clearDesignForm() {
-            // Clear stones
             document.querySelectorAll('.stone-row').forEach(row => {
                 row.querySelector('.stone-id-input').value = '';
                 row.querySelector('.selected-stone-img').src = 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
@@ -486,7 +485,6 @@
                 row.querySelector('.selected-stone-name').classList.add('text-stone-500');
                 row.querySelector('input[type="number"]').value = '';
             });
-            // Clear decorations and charms
             document.querySelectorAll('.decoration-item-row input, .charm-item-row input').forEach(checkbox => {
                 checkbox.checked = false;
             });
@@ -513,7 +511,7 @@
                 
                 await Promise.all([
                     refreshCustomerList(customerIdFromUrl),
-                    populateTemplatesDropdown() // Load templates
+                    populateTemplatesDropdown()
                 ]);
 
                 if (customerIdFromUrl) {
@@ -587,7 +585,6 @@
             if (e.target === stoneSelectModal) stoneSelectModal.classList.add('hidden');
         });
 
-        // *** อัปเดต: Event Listeners สำหรับ Template ***
         saveTemplateBtn.addEventListener('click', () => {
             saveTemplateModal.classList.remove('hidden');
         });
@@ -670,9 +667,28 @@
             });
             
             calculateTotals();
-            e.target.value = ''; // Reset dropdown
+            e.target.value = '';
         });
 
+        // *** อัปเดต: เพิ่ม Event Listener สำหรับปุ่มลบ Template ***
+        deleteTemplateBtn.addEventListener('click', async () => {
+            const templateId = loadTemplateSelect.value;
+            if (!templateId) {
+                showToast('กรุณาเลือกแบบร่างที่ต้องการลบ', true);
+                return;
+            }
+
+            const selectedTemplate = allTemplates.find(t => t.id === templateId);
+            if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบแบบร่าง "${selectedTemplate.name}"?`)) {
+                try {
+                    await deleteDoc(doc(db, "design_templates", templateId));
+                    showToast('ลบแบบร่างสำเร็จ');
+                    await populateTemplatesDropdown();
+                } catch (error) {
+                    showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
+                }
+            }
+        });
 
         orderForm.addEventListener('change', calculateTotals);
         orderForm.addEventListener('input', calculateTotals);
