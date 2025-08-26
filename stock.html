@@ -82,7 +82,6 @@
                         <div class="col-span-full text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</div>
                     </div>
                 </div>
-                <!-- NEW: Charms Section -->
                 <div id="charms-section">
                     <h2 class="text-2xl font-bold text-stone-700 mb-4 border-t pt-8">💖 จี้</h2>
                     <div id="charms-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -166,12 +165,12 @@
 
         const stonesContainer = document.getElementById('stones-container');
         const decorationsContainer = document.getElementById('decorations-container');
-        const charmsContainer = document.getElementById('charms-container'); // New
+        const charmsContainer = document.getElementById('charms-container');
         const searchInput = document.getElementById('search-input');
         const filterControls = document.getElementById('filter-controls');
         const stonesSection = document.getElementById('stones-section');
         const decorationsSection = document.getElementById('decorations-section');
-        const charmsSection = document.getElementById('charms-section'); // New
+        const charmsSection = document.getElementById('charms-section');
         
         const editModal = document.getElementById('edit-modal');
         const modalPanel = document.getElementById('modal-panel');
@@ -209,13 +208,17 @@
             }
             items.forEach(item => {
                 const stockColorClass = item.stockRemaining <= 0 ? 'text-rose-600' : (item.stockRemaining <= 10 ? 'text-amber-600' : 'text-green-600');
+                
+                // --- โค้ดใหม่: สร้าง HTML สำหรับขนาดแบบมีเงื่อนไข ---
+                const sizeHtml = item.size ? `<p class="text-sm text-stone-500 mb-2">${item.size} mm</p>` : `<div class="h-[20px] mb-2"></div>`; // ใช้ div ว่างๆ เพื่อรักษาระยะห่าง
+
                 const card = document.createElement('div');
                 card.className = 'border rounded-lg shadow-sm overflow-hidden bg-white flex flex-col';
                 card.innerHTML = `
                     <img src="${item.imageUrl || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'}" alt="${item.name}" class="w-full h-32 object-cover bg-stone-100">
                     <div class="p-4 flex-grow flex flex-col">
                         <h3 class="font-bold text-stone-800">${item.name}</h3>
-                        <p class="text-sm text-stone-500 mb-2">${item.size || 'N/A'} mm</p>
+                        ${sizeHtml} <!-- ใช้ตัวแปร sizeHtml ที่สร้างขึ้น -->
                         <div class="mt-auto pt-2">
                             <div class="flex items-center justify-center gap-3 my-2">
                                 <button data-id="${item.id}" data-stock="${item.stockRemaining}" class="minus-btn bg-rose-100 text-rose-700 rounded-full w-7 h-7 flex items-center justify-center font-bold text-lg transition hover:bg-rose-200">-</button>
@@ -242,10 +245,10 @@
             const filtered = allMaterials.filter(item => item.name.toLowerCase().includes(searchTerm));
             const stones = filtered.filter(item => item.type === 'หิน');
             const decorations = filtered.filter(item => item.type === 'อุปกรณ์ตกแต่ง');
-            const charms = filtered.filter(item => item.type === 'จี้'); // New
+            const charms = filtered.filter(item => item.type === 'จี้');
             renderItems(stonesContainer, stones);
             renderItems(decorationsContainer, decorations);
-            renderItems(charmsContainer, charms); // New
+            renderItems(charmsContainer, charms);
         };
 
         const materialsRef = collection(db, "materials");
@@ -376,7 +379,7 @@
             const filter = target.dataset.filter;
             stonesSection.style.display = (filter === 'all' || filter === 'stones') ? 'block' : 'none';
             decorationsSection.style.display = (filter === 'all' || filter === 'decorations') ? 'block' : 'none';
-            charmsSection.style.display = (filter === 'all' || filter === 'charms') ? 'block' : 'none'; // New
+            charmsSection.style.display = (filter === 'all' || filter === 'charms') ? 'block' : 'none';
         });
     </script>
 </body>
