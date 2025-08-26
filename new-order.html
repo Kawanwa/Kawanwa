@@ -18,7 +18,6 @@
             --tw-ring-color: #0ea5e9;
             box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
         }
-        /* --- โค้ดใหม่: CSS สำหรับ Modal และการแสดงผลรูปภาพ --- */
         #stone-select-modal.hidden {
             display: none;
         }
@@ -208,7 +207,7 @@
         </div>
     </div>
 
-    <!-- === โค้ดใหม่: Stone Selection Modal === -->
+    <!-- Stone Selection Modal -->
     <div id="stone-select-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
             <header class="p-4 border-b flex justify-between items-center">
@@ -286,18 +285,16 @@
         const closeCustomerModalBtn = document.getElementById('close-customer-modal-btn');
         const customerForm = document.getElementById('customer-form');
         
-        // --- โค้ดใหม่: DOM Elements สำหรับ Modal เลือกหิน ---
         const stoneSelectModal = document.getElementById('stone-select-modal');
         const modalStoneGrid = document.getElementById('modal-stone-grid');
         const modalSearchInput = document.getElementById('modal-search-input');
         const closeStoneModalBtn = document.getElementById('close-stone-modal-btn');
-        let activeStoneRow = null; // สำหรับเก็บแถวของหินที่กำลังเลือก
+        let activeStoneRow = null;
 
         // --- Functions ---
         const openCustomerModal = () => customerModal.classList.remove('hidden');
         const closeCustomerModal = () => customerModal.classList.add('hidden');
 
-        // --- โค้ดใหม่: ฟังก์ชันสำหรับจัดการ Modal เลือกหิน ---
         function populateStoneModal(searchTerm = '') {
             modalStoneGrid.innerHTML = '';
             const filteredStones = availableStones.filter(stone => 
@@ -334,7 +331,6 @@
         function calculateTotals() {
             let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
             
-            // --- โค้ดใหม่: คำนวณราคาหินจาก UI แบบใหม่ ---
             document.querySelectorAll('.stone-row').forEach(row => {
                 const stoneIdInput = row.querySelector('.stone-id-input');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -353,13 +349,11 @@
                 totalStonePrice += subtotal;
             });
 
-            // Calculate decoration prices
             document.querySelectorAll('.decoration-item-row input[type="checkbox"]').forEach(checkbox => {
                 if (checkbox.checked) {
                     totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0;
                 }
             });
-            // Calculate charm prices
             document.querySelectorAll('.charm-item-row input[type="checkbox"]').forEach(checkbox => {
                 if (checkbox.checked) {
                     totalCharmPrice += parseFloat(checkbox.dataset.price) || 0;
@@ -380,7 +374,6 @@
             profitPriceEl.textContent = `${profit.toFixed(2)} ฿`;
         }
 
-        // --- โค้ดใหม่: สร้างแถวสำหรับเลือกหิน (ใช้ปุ่มแทน select) ---
         function createMaterialRow() {
             const row = document.createElement('div');
             row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
@@ -402,17 +395,20 @@
             return row;
         }
 
-        // --- โค้ดใหม่: สร้าง checkbox ที่มีรูปภาพ ---
         function createCheckboxItem(item, type) {
             const container = document.createElement('div');
             container.className = `${type}-item-row flex items-center`;
             const checkboxId = `${type}-${item.id}`;
             const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
+            
+            // --- โค้ดใหม่: สร้าง HTML สำหรับขนาดแบบมีเงื่อนไข ---
+            const sizeText = item.size ? `(${item.size}mm)` : '';
+
             container.innerHTML = `
                 <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
                 <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
                     <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
-                    <span>${item.name} (${item.size || 'N/A'}mm)</span>
+                    <span>${item.name} ${sizeText}</span>
                 </label>
             `;
             return container;
@@ -499,7 +495,6 @@
             }
         });
 
-        // --- โค้ดใหม่: Event Listeners สำหรับ Modal เลือกหิน ---
         stoneFields.addEventListener('click', (e) => {
             const button = e.target.closest('.select-stone-btn');
             if (button) {
@@ -626,7 +621,6 @@
             const usedMaterials = [];
             let stockValidationError = null;
             
-            // --- โค้ดใหม่: รวบรวมข้อมูลหินจาก UI แบบใหม่ ---
             document.querySelectorAll('.stone-row').forEach(row => {
                 const stoneIdInput = row.querySelector('.stone-id-input');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -651,7 +645,6 @@
                 }
             });
 
-            // Gather decorations and charms
             document.querySelectorAll('.decoration-item-row input:checked, .charm-item-row input:checked').forEach(checkbox => {
                 const stock = parseInt(checkbox.dataset.stock, 10);
                 if (stock < 1) stockValidationError = `สินค้าไม่พอ: ${checkbox.dataset.name}`;
