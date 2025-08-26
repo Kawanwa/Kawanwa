@@ -15,7 +15,6 @@
 </head>
 <body class="bg-stone-100">
 
-    <!-- เนื้อหา HTML เหมือนเดิม -->
     <div class="container mx-auto px-4 py-10">
         <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -41,23 +40,27 @@
             </div>
             
             <div id="reportContent">
-                <!-- KPIs -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <!-- *** อัปเดต: เพิ่มการ์ดสรุปยอดใหม่ *** -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                     <div class="bg-blue-50 p-4 rounded-lg border-b-4 border-blue-400">
                         <h3 class="text-sm font-medium text-blue-700">ยอดขายรวม</h3>
                         <p class="text-2xl font-bold text-blue-900" id="totalSales">0.00 ฿</p>
                     </div>
                     <div class="bg-orange-50 p-4 rounded-lg border-b-4 border-orange-400">
-                        <h3 class="text-sm font-medium text-orange-700">ต้นทุนรวม</h3>
+                        <h3 class="text-sm font-medium text-orange-700">ต้นทุนสินค้า</h3>
                         <p class="text-2xl font-bold text-orange-900" id="totalCost">0.00 ฿</p>
                     </div>
-                    <div class="bg-green-50 p-4 rounded-lg border-b-4 border-green-400">
-                        <h3 class="text-sm font-medium text-green-700">กำไรสุทธิ</h3>
-                        <p class="text-2xl font-bold text-green-900" id="totalProfit">0.00 ฿</p>
+                    <div class="bg-emerald-50 p-4 rounded-lg border-b-4 border-emerald-400">
+                        <h3 class="text-sm font-medium text-emerald-700">กำไรขั้นต้น</h3>
+                        <p class="text-2xl font-bold text-emerald-900" id="grossProfit">0.00 ฿</p>
                     </div>
-                    <div class="bg-purple-50 p-4 rounded-lg border-b-4 border-purple-400">
-                        <h3 class="text-sm font-medium text-purple-700">จำนวนออเดอร์</h3>
-                        <p class="text-2xl font-bold text-purple-900" id="orderCount">0</p>
+                    <div class="bg-rose-50 p-4 rounded-lg border-b-4 border-rose-400">
+                        <h3 class="text-sm font-medium text-rose-700">ค่าใช้จ่ายร้าน</h3>
+                        <p class="text-2xl font-bold text-rose-900" id="totalExpenses">0.00 ฿</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg border-b-4 border-green-500">
+                        <h3 class="text-sm font-medium text-green-800">กำไรสุทธิ</h3>
+                        <p class="text-3xl font-extrabold text-green-900" id="netProfit">0.00 ฿</p>
                     </div>
                 </div>
 
@@ -130,17 +133,30 @@
                     where("orderDate", "<=", endTimestamp)
                 );
                 
-                const ordersSnapshot = await getDocs(ordersQuery);
+                // *** อัปเดต: ดึงข้อมูลค่าใช้จ่ายมาด้วย ***
+                const expensesQuery = query(collection(db, "expenses"),
+                    where("expenseDate", ">=", startTimestamp),
+                    where("expenseDate", "<=", endTimestamp),
+                    where("type", "==", "expense"), // ดึงมาเฉพาะรายการที่เป็น 'ค่าใช้จ่าย'
+                    where("source", "==", "ทุนร้าน") // และใช้เงินจาก 'ทุนร้าน' เท่านั้น
+                );
+
+                const [ordersSnapshot, expensesSnapshot] = await Promise.all([
+                    getDocs(ordersQuery),
+                    getDocs(expensesQuery)
+                ]);
                 
                 const successfulOrders = ordersSnapshot.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
                     .filter(order => (order.paymentStatus === 'ชำระแล้ว' || order.processingStatus === 'จัดส่งแล้ว') && !order.isFree);
+                
+                const shopExpenses = expensesSnapshot.docs.map(doc => doc.data());
 
                 const customersMap = new Map();
                 const customersSnapshot = await getDocs(collection(db, "customers"));
                 customersSnapshot.forEach(doc => customersMap.set(doc.id, doc.data()));
 
-                updateKPIs(successfulOrders);
+                updateKPIs(successfulOrders, shopExpenses);
                 updateSalesChart(successfulOrders);
                 updateOrdersTable(successfulOrders, customersMap);
                 await updateBestSellers(successfulOrders);
@@ -154,19 +170,22 @@
             }
         }
 
-        function updateKPIs(orders) {
-            // *** IMPROVEMENT: Directly sum from order documents ***
+        // *** อัปเดต: ฟังก์ชัน updateKPIs รับพารามิเตอร์ expenses เพิ่ม ***
+        function updateKPIs(orders, expenses) {
             const totalSales = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
             const totalCost = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
-            const totalProfit = orders.reduce((sum, order) => sum + (order.profit || 0), 0);
+            const grossProfit = totalSales - totalCost;
+            const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+            const netProfit = grossProfit - totalExpenses;
             
             document.getElementById('totalSales').textContent = formatCurrency(totalSales);
             document.getElementById('totalCost').textContent = formatCurrency(totalCost);
-            document.getElementById('totalProfit').textContent = formatCurrency(totalProfit);
-            document.getElementById('orderCount').textContent = orders.length;
+            document.getElementById('grossProfit').textContent = formatCurrency(grossProfit);
+            document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('netProfit').textContent = formatCurrency(netProfit);
+            // document.getElementById('orderCount').textContent = orders.length; // (Optional: Can be re-added if needed)
         }
 
-        // --- Other functions (updateSalesChart, updateBestSellers, updateOrdersTable) remain largely the same ---
         function updateSalesChart(orders) {
             const ctx = document.getElementById('salesChart').getContext('2d');
             const salesByDate = {};
@@ -277,7 +296,7 @@
                         <th class="px-4 py-3">วันที่</th>
                         <th class="px-4 py-3">ลูกค้า</th>
                         <th class="px-4 py-3 text-right">ยอดขาย</th>
-                        <th class="px-4 py-3 text-right">กำไร</th>
+                        <th class="px-4 py-3 text-right">กำไรขั้นต้น</th>
                         <th class="px-4 py-3 text-center">สถานะชำระเงิน</th>
                     </tr>
                 </thead>
