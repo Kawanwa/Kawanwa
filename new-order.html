@@ -11,15 +11,12 @@
     <style>
         body { font-family: 'Kanit', sans-serif; }
         input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
-        #customer-modal.hidden { display: none; }
+        #customer-modal.hidden, #stone-select-modal.hidden, #save-template-modal.hidden { display: none; }
         input[type="radio"]:checked + label {
             border-color: #0ea5e9; /* sky-500 */
             ring-width: 2px;
             --tw-ring-color: #0ea5e9;
             box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-        }
-        #stone-select-modal.hidden {
-            display: none;
         }
         .modal-item {
             transition: all 0.15s ease-in-out;
@@ -140,7 +137,16 @@
                 </section>
 
                 <section id="design-section" class="mb-8 border-t pt-6">
-                    <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. ออกแบบสินค้า</h2>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 mb-4">
+                        <h2 class="text-xl font-bold text-stone-700">3. ออกแบบสินค้า</h2>
+                        <!-- *** อัปเดต: เพิ่มปุ่มจัดการ Template *** -->
+                        <div class="flex items-center gap-2 mt-2 sm:mt-0">
+                            <select id="load-template-select" class="text-sm border-stone-300 rounded-md shadow-sm">
+                                <option value="">-- โหลดแบบร่าง --</option>
+                            </select>
+                            <button type="button" id="save-template-btn" class="text-sm text-white bg-indigo-500 hover:bg-indigo-600 font-medium rounded-lg px-3 py-2 text-center transition-colors">บันทึกแบบร่าง</button>
+                        </div>
+                    </div>
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
                         <div id="stone-fields" class="space-y-2"></div>
@@ -225,6 +231,23 @@
         </div>
     </div>
 
+    <!-- *** อัปเดต: เพิ่ม Modal สำหรับบันทึก Template *** -->
+    <div id="save-template-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <form id="save-template-form" class="p-6">
+                <h2 class="text-xl font-bold text-stone-800 mb-4">บันทึกแบบร่าง</h2>
+                <div>
+                    <label for="template-name-input" class="block text-sm font-medium text-stone-700 mb-1">ตั้งชื่อแบบร่าง *</label>
+                    <input type="text" id="template-name-input" required class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                </div>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" id="cancel-save-template-btn" class="bg-stone-200 text-stone-800 font-medium rounded-lg px-4 py-2 text-center">ยกเลิก</button>
+                    <button type="submit" class="text-white bg-indigo-500 hover:bg-indigo-600 font-medium rounded-lg px-4 py-2 text-center">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, addDoc, runTransaction, query, where, orderBy, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -235,7 +258,7 @@
         const db = getFirestore(app);
 
         // --- DOM Elements ---
-        let allCustomers = [], availableStones = [], availableDecorations = [], availableCharms = [];
+        let allCustomers = [], availableStones = [], availableDecorations = [], availableCharms = [], allTemplates = [];
         const loadingOverlay = document.getElementById('loading-overlay');
         const customerSelect = document.getElementById('customer-select');
         const customerInfoDisplay = document.getElementById('customer-info-display');
@@ -290,6 +313,15 @@
         const modalSearchInput = document.getElementById('modal-search-input');
         const closeStoneModalBtn = document.getElementById('close-stone-modal-btn');
         let activeStoneRow = null;
+
+        // *** อัปเดต: เพิ่ม DOM elements สำหรับ Template ***
+        const saveTemplateBtn = document.getElementById('save-template-btn');
+        const loadTemplateSelect = document.getElementById('load-template-select');
+        const saveTemplateModal = document.getElementById('save-template-modal');
+        const saveTemplateForm = document.getElementById('save-template-form');
+        const cancelSaveTemplateBtn = document.getElementById('cancel-save-template-btn');
+        const templateNameInput = document.getElementById('template-name-input');
+
 
         // --- Functions ---
         const openCustomerModal = () => customerModal.classList.remove('hidden');
@@ -401,7 +433,6 @@
             const checkboxId = `${type}-${item.id}`;
             const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
             
-            // --- โค้ดใหม่: สร้าง HTML สำหรับขนาดแบบมีเงื่อนไข ---
             const sizeText = item.size ? `(${item.size}mm)` : '';
 
             container.innerHTML = `
@@ -432,6 +463,34 @@
                 useCustomerAddressCheckbox.dispatchEvent(new Event('change'));
             }
         }
+        
+        // *** อัปเดต: เพิ่มฟังก์ชันสำหรับจัดการ Template ***
+        async function populateTemplatesDropdown() {
+            const q = query(collection(db, "design_templates"), orderBy("name"));
+            const snapshot = await getDocs(q);
+            allTemplates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            loadTemplateSelect.innerHTML = '<option value="">-- โหลดแบบร่าง --</option>';
+            allTemplates.forEach(template => {
+                const option = new Option(template.name, template.id);
+                loadTemplateSelect.add(option);
+            });
+        }
+
+        function clearDesignForm() {
+            // Clear stones
+            document.querySelectorAll('.stone-row').forEach(row => {
+                row.querySelector('.stone-id-input').value = '';
+                row.querySelector('.selected-stone-img').src = 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
+                row.querySelector('.selected-stone-name').textContent = '-- เลือกหิน --';
+                row.querySelector('.selected-stone-name').classList.add('text-stone-500');
+                row.querySelector('input[type="number"]').value = '';
+            });
+            // Clear decorations and charms
+            document.querySelectorAll('.decoration-item-row input, .charm-item-row input').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
 
         async function initializePage() {
             loadingOverlay.classList.remove('hidden');
@@ -451,7 +510,12 @@
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
-                await refreshCustomerList(customerIdFromUrl);
+                
+                await Promise.all([
+                    refreshCustomerList(customerIdFromUrl),
+                    populateTemplatesDropdown() // Load templates
+                ]);
+
                 if (customerIdFromUrl) {
                     backLink.href = "customers.html";
                     backLink.innerHTML = "&larr; กลับไปหน้าข้อมูลลูกค้า";
@@ -522,6 +586,93 @@
         stoneSelectModal.addEventListener('click', (e) => {
             if (e.target === stoneSelectModal) stoneSelectModal.classList.add('hidden');
         });
+
+        // *** อัปเดต: Event Listeners สำหรับ Template ***
+        saveTemplateBtn.addEventListener('click', () => {
+            saveTemplateModal.classList.remove('hidden');
+        });
+        cancelSaveTemplateBtn.addEventListener('click', () => {
+            saveTemplateModal.classList.add('hidden');
+            saveTemplateForm.reset();
+        });
+        saveTemplateForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const templateName = templateNameInput.value.trim();
+            if (!templateName) {
+                showToast('กรุณาตั้งชื่อแบบร่าง', true);
+                return;
+            }
+
+            const usedMaterials = [];
+            document.querySelectorAll('.stone-row').forEach(row => {
+                const stoneIdInput = row.querySelector('.stone-id-input');
+                const quantityInput = row.querySelector('input[type="number"]');
+                const quantity = parseInt(quantityInput.value, 10);
+                if (stoneIdInput.value && quantity > 0) {
+                    usedMaterials.push({ materialId: stoneIdInput.value, quantityUsed: quantity });
+                }
+            });
+            document.querySelectorAll('.decoration-item-row input:checked, .charm-item-row input:checked').forEach(checkbox => {
+                usedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1 });
+            });
+
+            if (usedMaterials.length === 0) {
+                showToast('ไม่สามารถบันทึกแบบร่างที่ว่างเปล่าได้', true);
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "design_templates"), {
+                    name: templateName,
+                    usedMaterials: usedMaterials
+                });
+                showToast(`บันทึกแบบร่าง "${templateName}" สำเร็จ!`);
+                saveTemplateModal.classList.add('hidden');
+                saveTemplateForm.reset();
+                await populateTemplatesDropdown();
+            } catch (error) {
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
+            }
+        });
+
+        loadTemplateSelect.addEventListener('change', (e) => {
+            const templateId = e.target.value;
+            if (!templateId) return;
+
+            const selectedTemplate = allTemplates.find(t => t.id === templateId);
+            if (!selectedTemplate) return;
+
+            clearDesignForm();
+            const { usedMaterials } = selectedTemplate;
+            const stoneMaterials = usedMaterials.filter(m => availableStones.some(s => s.id === m.materialId));
+            
+            let stoneIndex = 0;
+            document.querySelectorAll('.stone-row').forEach(row => {
+                if (stoneIndex < stoneMaterials.length) {
+                    const item = stoneMaterials[stoneIndex];
+                    const stoneData = availableStones.find(s => s.id === item.materialId);
+                    if (stoneData) {
+                        row.querySelector('.stone-id-input').value = item.materialId;
+                        row.querySelector('.selected-stone-img').src = stoneData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
+                        row.querySelector('.selected-stone-name').textContent = stoneData.name;
+                        row.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                        row.querySelector('input[type="number"]').value = item.quantityUsed;
+                    }
+                    stoneIndex++;
+                }
+            });
+
+            usedMaterials.forEach(item => {
+                const checkbox = document.querySelector(`.decoration-item-row input[data-id="${item.materialId}"], .charm-item-row input[data-id="${item.materialId}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+            
+            calculateTotals();
+            e.target.value = ''; // Reset dropdown
+        });
+
 
         orderForm.addEventListener('change', calculateTotals);
         orderForm.addEventListener('input', calculateTotals);
