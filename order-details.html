@@ -84,7 +84,7 @@
 
 
                 <section class="my-6 grid grid-cols-1 md:grid-cols-2 gap-8 border-t pt-6">
-                    <div class="bg-red-50 p-4 rounded-lg"><h2 class="font-bold text-red-800 mb-3 text-lg">สรุปต้นทุน</h2><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-stone-600">ต้นทุนหินรวม:</span><span id="cost-stones" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ต้นทุนอุปกรณ์ตกแต่งรวม:</span><span id="cost-decorations" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ค่าลวด:</span><span id="cost-wire" class="font-semibold"></span></div><div class="flex justify-between pb-2 border-b border-dashed"><span class="text-stone-600">ค่าแรง:</span><span id="cost-labor" class="font-semibold"></span></div><div class="flex justify-between font-bold pt-2"><span class="text-red-700">รวมต้นทุนสินค้า:</span><span id="cost-total-items" class="text-red-700"></span></div></div></div>
+                    <div class="bg-red-50 p-4 rounded-lg"><h2 class="font-bold text-red-800 mb-3 text-lg">สรุปต้นทุน</h2><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-stone-600">ต้นทุนหินรวม:</span><span id="cost-stones" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ต้นทุนอุปกรณ์ตกแต่งรวม:</span><span id="cost-decorations" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ต้นทุนจี้รวม:</span><span id="cost-charms" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ค่าลวด:</span><span id="cost-wire" class="font-semibold"></span></div><div class="flex justify-between pb-2 border-b border-dashed"><span class="text-stone-600">ค่าแรง:</span><span id="cost-labor" class="font-semibold"></span></div><div class="flex justify-between font-bold pt-2"><span class="text-red-700">รวมต้นทุนสินค้า:</span><span id="cost-total-items" class="text-red-700"></span></div></div></div>
                     <div class="bg-green-50 p-4 rounded-lg"><h2 class="font-bold text-green-800 mb-3 text-lg">สรุปการเงิน</h2><div id="free-order-banner" class="hidden text-center bg-rose-100 text-rose-700 font-bold p-2 rounded-md mb-3">*** ออเดอร์ฟรี ***</div><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-stone-600">ราคาขายสินค้า:</span><span id="summary-selling-price" class="font-semibold"></span></div><div class="flex justify-between"><span class="text-stone-600">ค่าจัดส่ง:</span><span id="summary-shipping-cost" class="font-semibold"></span></div><div class="flex justify-between font-bold text-lg pt-2 pb-2 border-y border-dashed"><span class="text-stone-800">ยอดรวมที่ต้องชำระ:</span><span id="summary-grand-total" class="text-stone-800"></span></div><div class="flex justify-between pt-2"><span class="text-stone-600">ยอดมัดจำ:</span><span id="summary-deposit" class="font-semibold text-green-600"></span></div><div class="flex justify-between font-bold text-xl text-red-600"><span class="">ยอดค้างชำระ:</span><span id="summary-balance-due"></span></div><div class="flex justify-between font-bold text-xl text-green-700 mt-4 pt-4 border-t-2"><span class="">กำไร:</span><span id="summary-profit"></span></div></div></div>
                 </section>
                 <section class="mt-8 pt-6 border-t text-center grid grid-cols-2 gap-4">
@@ -172,6 +172,7 @@
 
                 const stones = [];
                 const decorations = [];
+                const charms = []; // New
 
                 usedMaterials.forEach(mat => {
                     const materialInfo = materialsMap.get(mat.materialId) || {};
@@ -184,11 +185,14 @@
                         stones.push(itemData);
                     } else if (materialInfo.type === 'อุปกรณ์ตกแต่ง') {
                         decorations.push(itemData);
+                    } else if (materialInfo.type === 'จี้') { // New
+                        charms.push(itemData);
                     }
                 });
 
                 container.innerHTML += createRecipeSubTable('💎 หิน', stones);
                 container.innerHTML += createRecipeSubTable('✨ อุปกรณ์ตกแต่ง', decorations);
+                container.innerHTML += createRecipeSubTable('💖 จี้', charms); // New
 
                 if (bracelet.wireType) {
                     container.innerHTML += `
@@ -268,15 +272,17 @@
                     const grandTotal = sellingPrice + shippingCost;
                     let balanceDue = (currentOrderData.paymentStatus === 'ยังไม่ได้ชำระ') ? grandTotal : (currentOrderData.paymentStatus === 'มัดจำ' ? grandTotal - depositAmount : 0);
                     
-                    let totalStoneCost = 0, totalDecorationCost = 0;
+                    let totalStoneCost = 0, totalDecorationCost = 0, totalCharmCost = 0;
                      bracelet.usedMaterials.forEach(mat => {
                         const materialInfo = materialsMap.get(mat.materialId);
                         const itemTotalCost = (materialInfo?.avgPricePerPiece || 0) * mat.quantityUsed;
                         if (materialInfo?.type === 'หิน') { totalStoneCost += itemTotalCost; }
-                        else { totalDecorationCost += itemTotalCost; }
+                        else if (materialInfo?.type === 'อุปกรณ์ตกแต่ง') { totalDecorationCost += itemTotalCost; }
+                        else if (materialInfo?.type === 'จี้') { totalCharmCost += itemTotalCost; }
                     });
                     document.getElementById('cost-stones').textContent = formatCurrency(totalStoneCost);
                     document.getElementById('cost-decorations').textContent = formatCurrency(totalDecorationCost);
+                    document.getElementById('cost-charms').textContent = formatCurrency(totalCharmCost);
                     document.getElementById('cost-wire').textContent = formatCurrency(wireCost);
                     document.getElementById('cost-labor').textContent = formatCurrency(laborCost);
                     document.getElementById('cost-total-items').textContent = formatCurrency(totalItemCost);
