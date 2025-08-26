@@ -100,9 +100,17 @@
                             <label for="importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
                             <input type="date" id="importDate" name="importDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md">
                         </div>
+                        <!-- *** อัปเดต: เปลี่ยนช่องผู้ขายเป็น Dropdown *** -->
                         <div>
-                            <label for="supplier" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
-                            <input type="text" id="supplier" name="supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            <label for="supplier-select" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
+                            <select id="supplier-select" name="supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <option value="">-- ไม่ระบุ --</option>
+                                <option value="other">อื่นๆ (กรอกเอง)</option>
+                            </select>
+                        </div>
+                        <div id="other-supplier-container" class="hidden md:col-span-2">
+                             <label for="other-supplier" class="block text-sm font-medium text-stone-700 mb-1">ระบุชื่อผู้ขายอื่น</label>
+                             <input type="text" id="other-supplier" name="other-supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
                         </div>
                         <div>
                             <label for="totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
@@ -156,10 +164,13 @@
         const existingItemSection = document.getElementById('existing-item-section');
         const newItemSection = document.getElementById('new-item-section');
         const existingItemSelect = document.getElementById('existing-item-select');
+        // *** อัปเดต: เพิ่ม DOM elements สำหรับผู้ขาย ***
+        const supplierSelect = document.getElementById('supplier-select');
+        const otherSupplierContainer = document.getElementById('other-supplier-container');
+        const otherSupplierInput = document.getElementById('other-supplier');
         
         let allMaterials = [];
 
-        // --- UI Control ---
         const handleModeChange = () => {
             const selectedMode = document.querySelector('input[name="intakeMode"]:checked').value;
             if (selectedMode === 'existing') {
@@ -173,7 +184,6 @@
 
         intakeModeRadios.forEach(radio => radio.addEventListener('change', handleModeChange));
 
-        // --- Data Fetching and Population ---
         async function populateExistingItems() {
             const q = query(collection(db, "materials"), orderBy("name"));
             const snapshot = await getDocs(q);
@@ -185,6 +195,19 @@
                 option.value = item.id;
                 option.textContent = `${item.name} (${item.size || 'N/A'} mm) - [${item.type}]`;
                 existingItemSelect.appendChild(option);
+            });
+        }
+
+        // *** อัปเดต: ฟังก์ชันสำหรับดึงข้อมูลผู้ขาย ***
+        async function populateSuppliers() {
+            const q = query(collection(db, "suppliers"), orderBy("name"));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(doc => {
+                const supplier = doc.data();
+                const option = document.createElement('option');
+                option.value = supplier.name;
+                option.textContent = supplier.name;
+                supplierSelect.appendChild(option);
             });
         }
 
@@ -216,7 +239,6 @@
         const qRecent = query(collection(db, "materials"), orderBy("createdAt", "desc"), limit(3));
         onSnapshot(qRecent, renderRecentItems);
 
-        // --- Form Submission Logic ---
         intakeForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             submitButton.disabled = true;
@@ -226,6 +248,12 @@
             const formData = new FormData(intakeForm);
             const newTotalPrice = parseFloat(formData.get('totalPrice'));
             const newQuantity = parseInt(formData.get('quantity'), 10);
+
+            // *** อัปเดต: Logic การดึงชื่อผู้ขาย ***
+            let supplierName = supplierSelect.value;
+            if (supplierName === 'other') {
+                supplierName = otherSupplierInput.value.trim();
+            }
 
             try {
                 if (isNaN(newTotalPrice) || isNaN(newQuantity) || newQuantity <= 0) {
@@ -250,7 +278,7 @@
                         totalPrice: existingData.totalPrice + newTotalPrice,
                         avgPricePerPiece: newAvgPrice,
                         stockRemaining: newStockRemaining,
-                        supplier: formData.get('supplier'),
+                        supplier: supplierName,
                         importDate: new Date(formData.get('importDate')),
                         createdAt: serverTimestamp()
                     });
@@ -278,7 +306,7 @@
                         type: formData.get('type'),
                         name: name, 
                         size: size,
-                        supplier: formData.get('supplier'),
+                        supplier: supplierName,
                         totalPrice: newTotalPrice, 
                         quantity: newQuantity,
                         avgPricePerPiece: newTotalPrice / newQuantity,
@@ -305,13 +333,19 @@
             }
         });
 
-        // --- Initial Setup ---
+        // *** อัปเดต: Event listener สำหรับ dropdown ผู้ขาย ***
+        supplierSelect.addEventListener('change', (e) => {
+            otherSupplierContainer.classList.toggle('hidden', e.target.value !== 'other');
+        });
+
         async function initializePage() {
             document.getElementById('importDate').valueAsDate = new Date();
-            await populateExistingItems();
+            await Promise.all([
+                populateExistingItems(),
+                populateSuppliers() // ดึงข้อมูลผู้ขาย
+            ]);
             handleModeChange();
 
-            // --- อัปเดต: Auto-select item from URL parameter ---
             const urlParams = new URLSearchParams(window.location.search);
             const materialIdFromUrl = urlParams.get('materialId');
 
