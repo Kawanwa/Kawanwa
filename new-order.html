@@ -18,6 +18,18 @@
             --tw-ring-color: #0ea5e9;
             box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
         }
+        /* --- โค้ดใหม่: CSS สำหรับ Modal และการแสดงผลรูปภาพ --- */
+        #stone-select-modal.hidden {
+            display: none;
+        }
+        .modal-item {
+            transition: all 0.15s ease-in-out;
+        }
+        .modal-item:hover {
+            transform: scale(1.05);
+            background-color: #f0f9ff; /* sky-50 */
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-stone-100">
@@ -138,7 +150,6 @@
                         <h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3>
                         <div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
                     </div>
-                    <!-- NEW: Charms Section -->
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">จี้ (Charms)</h3>
                         <div id="charm-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
@@ -181,7 +192,7 @@
             <form id="customer-form" class="p-6 md:p-8">
                 <header class="flex justify-between items-start mb-6 pb-4 border-b">
                     <h2 class="text-2xl font-bold text-stone-800">เพิ่มลูกค้าใหม่</h2>
-                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
+                    <button type="button" id="close-customer-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
                         <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </header>
@@ -194,6 +205,24 @@
                 </div>
                 <div class="mt-6 pt-6 border-t"><button type="submit" id="modal-submit-button" class="w-full justify-center py-2.5 px-5 text-white bg-sky-600 hover:bg-sky-700 rounded-md">บันทึก</button></div>
             </form>
+        </div>
+    </div>
+
+    <!-- === โค้ดใหม่: Stone Selection Modal === -->
+    <div id="stone-select-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <header class="p-4 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold text-stone-800">เลือกหิน</h2>
+                <button type="button" id="close-stone-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
+                    <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </header>
+            <div class="p-4">
+                <input type="text" id="modal-search-input" placeholder="ค้นหาหิน..." class="w-full px-4 py-2 border border-stone-300 rounded-md">
+            </div>
+            <div id="modal-stone-grid" class="p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Stone items will be populated here by JavaScript -->
+            </div>
         </div>
     </div>
 
@@ -224,7 +253,7 @@
         const isFreeCheckbox = document.getElementById('is-free-checkbox');
         const stoneFields = document.getElementById('stone-fields');
         const decorationCheckboxList = document.getElementById('decoration-checkbox-list');
-        const charmCheckboxList = document.getElementById('charm-checkbox-list'); // New
+        const charmCheckboxList = document.getElementById('charm-checkbox-list');
         const laborCostInput = document.getElementById('laborCost');
         const wireTypeInput = document.getElementById('wireType');
         const wireCostInput = document.getElementById('wireCost');
@@ -236,7 +265,7 @@
         const depositAmountContainer = document.getElementById('deposit-amount-container');
         const totalStonePriceEl = document.getElementById('total-stone-price');
         const totalDecorationPriceEl = document.getElementById('total-decoration-price');
-        const totalCharmPriceEl = document.getElementById('total-charm-price'); // New
+        const totalCharmPriceEl = document.getElementById('total-charm-price');
         const costPriceEl = document.getElementById('cost-price');
         const sellingPriceInput = document.getElementById('selling-price-input');
         const profitPriceEl = document.getElementById('profit-price');
@@ -247,23 +276,46 @@
         const orderDateInput = document.getElementById('orderDate');
         const backLink = document.getElementById('back-link');
         const braceletNote = document.getElementById('bracelet-note');
-
-        // Product Type Elements
         const productTypeRadios = document.querySelectorAll('input[name="productType"]');
         const necklaceOptionsContainer = document.getElementById('necklace-options');
         const designSectionHeader = document.querySelector('#design-section h2');
         const necklaceChainTypeSelect = document.getElementById('necklaceChainType');
         const necklaceChainOtherContainer = document.getElementById('necklace-chain-other-container');
-
-        // Modal elements
         const addCustomerBtn = document.getElementById('add-customer-btn');
         const customerModal = document.getElementById('customer-modal');
-        const closeModalBtn = document.getElementById('close-modal-btn');
+        const closeCustomerModalBtn = document.getElementById('close-customer-modal-btn');
         const customerForm = document.getElementById('customer-form');
+        
+        // --- โค้ดใหม่: DOM Elements สำหรับ Modal เลือกหิน ---
+        const stoneSelectModal = document.getElementById('stone-select-modal');
+        const modalStoneGrid = document.getElementById('modal-stone-grid');
+        const modalSearchInput = document.getElementById('modal-search-input');
+        const closeStoneModalBtn = document.getElementById('close-stone-modal-btn');
+        let activeStoneRow = null; // สำหรับเก็บแถวของหินที่กำลังเลือก
 
         // --- Functions ---
-        const openModal = () => customerModal.classList.remove('hidden');
-        const closeModal = () => customerModal.classList.add('hidden');
+        const openCustomerModal = () => customerModal.classList.remove('hidden');
+        const closeCustomerModal = () => customerModal.classList.add('hidden');
+
+        // --- โค้ดใหม่: ฟังก์ชันสำหรับจัดการ Modal เลือกหิน ---
+        function populateStoneModal(searchTerm = '') {
+            modalStoneGrid.innerHTML = '';
+            const filteredStones = availableStones.filter(stone => 
+                stone.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            filteredStones.forEach(stone => {
+                const item = document.createElement('div');
+                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center';
+                item.dataset.id = stone.id;
+                item.innerHTML = `
+                    <img src="${stone.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img'}" class="w-20 h-20 rounded-md object-cover mb-2">
+                    <p class="text-xs text-center font-semibold text-stone-700">${stone.name}</p>
+                    <p class="text-xs text-stone-500">${stone.size} mm</p>
+                `;
+                modalStoneGrid.appendChild(item);
+            });
+        }
 
         async function refreshCustomerList(selectedId = null) {
             const customersQuery = query(collection(db, "customers"), orderBy("name"));
@@ -281,22 +333,26 @@
 
         function calculateTotals() {
             let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
-            // Calculate stone prices
+            
+            // --- โค้ดใหม่: คำนวณราคาหินจาก UI แบบใหม่ ---
             document.querySelectorAll('.stone-row').forEach(row => {
-                const select = row.querySelector('select');
+                const stoneIdInput = row.querySelector('.stone-id-input');
                 const quantityInput = row.querySelector('input[type="number"]');
-                const selectedOption = select.options[select.selectedIndex];
                 const subtotalEl = row.querySelector('.material-subtotal');
-                if (!selectedOption || !selectedOption.value || !quantityInput.value) {
+                const stoneId = stoneIdInput.value;
+                const quantity = parseInt(quantityInput.value, 10) || 0;
+
+                if (!stoneId || quantity === 0) {
                     if(subtotalEl) subtotalEl.textContent = '0.00 ฿';
                     return;
                 }
-                const price = parseFloat(selectedOption.dataset.price) || 0;
-                const quantity = parseInt(quantityInput.value, 10) || 0;
+                const stone = availableStones.find(s => s.id === stoneId);
+                const price = stone ? (stone.avgPricePerPiece || 0) : 0;
                 const subtotal = price * quantity;
                 if(subtotalEl) subtotalEl.textContent = `${subtotal.toFixed(2)} ฿`;
                 totalStonePrice += subtotal;
             });
+
             // Calculate decoration prices
             document.querySelectorAll('.decoration-item-row input[type="checkbox"]').forEach(checkbox => {
                 if (checkbox.checked) {
@@ -324,19 +380,41 @@
             profitPriceEl.textContent = `${profit.toFixed(2)} ฿`;
         }
 
+        // --- โค้ดใหม่: สร้างแถวสำหรับเลือกหิน (ใช้ปุ่มแทน select) ---
         function createMaterialRow() {
             const row = document.createElement('div');
             row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
-            row.innerHTML = `<div class="col-span-7"><select class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="">-- เลือกหิน --</option></select></div><div class="col-span-2"><input type="number" min="1" placeholder="_ _" class="w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500"></div><div class="col-span-3 text-right"><p class="material-subtotal text-sm font-medium text-stone-600">0.00 ฿</p></div>`;
+            row.innerHTML = `
+                <div class="col-span-7">
+                    <input type="hidden" class="stone-id-input">
+                    <button type="button" class="select-stone-btn w-full h-12 flex items-center text-left bg-stone-50 border border-stone-300 rounded-md p-2 hover:bg-stone-100 transition-colors">
+                        <img src="https://placehold.co/40x40/e2e8f0/64748b?text=เลือก" class="selected-stone-img w-8 h-8 rounded-md object-cover mr-2">
+                        <span class="selected-stone-name text-sm text-stone-500">-- เลือกหิน --</span>
+                    </button>
+                </div>
+                <div class="col-span-2">
+                    <input type="number" min="1" placeholder="_ _" class="w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                </div>
+                <div class="col-span-3 text-right">
+                    <p class="material-subtotal text-sm font-medium text-stone-600">0.00 ฿</p>
+                </div>
+            `;
             return row;
         }
 
+        // --- โค้ดใหม่: สร้าง checkbox ที่มีรูปภาพ ---
         function createCheckboxItem(item, type) {
             const container = document.createElement('div');
             container.className = `${type}-item-row flex items-center`;
             const checkboxId = `${type}-${item.id}`;
             const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
-            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size || 'N/A'}mm)</label>`;
+            container.innerHTML = `
+                <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
+                <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
+                    <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
+                    <span>${item.name} (${item.size || 'N/A'}mm)</span>
+                </label>
+            `;
             return container;
         }
 
@@ -374,16 +452,6 @@
                 
                 availableDecorations.forEach(item => decorationCheckboxList.appendChild(createCheckboxItem(item, 'decoration')));
                 availableCharms.forEach(item => charmCheckboxList.appendChild(createCheckboxItem(item, 'charm')));
-
-                const stoneSelects = document.querySelectorAll('.stone-row select');
-                stoneSelects.forEach(select => {
-                    availableStones.forEach(item => {
-                        const option = new Option(`${item.name} (${item.size}mm) - เหลือ ${item.stockRemaining} ชิ้น`, item.id);
-                        option.dataset.price = item.avgPricePerPiece;
-                        option.dataset.stock = item.stockRemaining;
-                        select.add(option);
-                    });
-                });
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
@@ -402,9 +470,9 @@
         }
 
         // --- Event Listeners ---
-        addCustomerBtn.addEventListener('click', openModal);
-        closeModalBtn.addEventListener('click', closeModal);
-        customerModal.addEventListener('click', (e) => { if (e.target === customerModal) closeModal(); });
+        addCustomerBtn.addEventListener('click', openCustomerModal);
+        closeCustomerModalBtn.addEventListener('click', closeCustomerModal);
+        customerModal.addEventListener('click', (e) => { if (e.target === customerModal) closeCustomerModal(); });
 
         customerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -424,11 +492,40 @@
                 const docRef = await addDoc(collection(db, "customers"), customerData);
                 showToast('เพิ่มลูกค้าใหม่สำเร็จ');
                 customerForm.reset();
-                closeModal();
+                closeCustomerModal();
                 await refreshCustomerList(docRef.id);
             } catch (error) {
                 showToast("เกิดข้อผิดพลาด: " + error.message, true);
             }
+        });
+
+        // --- โค้ดใหม่: Event Listeners สำหรับ Modal เลือกหิน ---
+        stoneFields.addEventListener('click', (e) => {
+            const button = e.target.closest('.select-stone-btn');
+            if (button) {
+                activeStoneRow = button.closest('.stone-row');
+                populateStoneModal();
+                stoneSelectModal.classList.remove('hidden');
+            }
+        });
+        modalStoneGrid.addEventListener('click', (e) => {
+            const selectedItem = e.target.closest('.modal-item');
+            if (selectedItem && activeStoneRow) {
+                const stoneId = selectedItem.dataset.id;
+                const stone = availableStones.find(s => s.id === stoneId);
+                activeStoneRow.querySelector('.stone-id-input').value = stoneId;
+                activeStoneRow.querySelector('.selected-stone-img').src = stone.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
+                activeStoneRow.querySelector('.selected-stone-name').textContent = stone.name;
+                activeStoneRow.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                stoneSelectModal.classList.add('hidden');
+                activeStoneRow = null;
+                calculateTotals();
+            }
+        });
+        modalSearchInput.addEventListener('input', () => populateStoneModal(modalSearchInput.value));
+        closeStoneModalBtn.addEventListener('click', () => stoneSelectModal.classList.add('hidden'));
+        stoneSelectModal.addEventListener('click', (e) => {
+            if (e.target === stoneSelectModal) stoneSelectModal.classList.add('hidden');
         });
 
         orderForm.addEventListener('change', calculateTotals);
@@ -485,7 +582,6 @@
             }
             calculateTotals();
         });
-
         productTypeRadios.forEach(radio => {
             radio.addEventListener('change', (e) => {
                 const isNecklace = e.target.value === 'สร้อย';
@@ -493,7 +589,6 @@
                 designSectionHeader.textContent = isNecklace ? '3. ออกแบบสร้อย' : '3. ออกแบบสินค้า';
             });
         });
-
         necklaceChainTypeSelect.addEventListener('change', (e) => {
             necklaceChainOtherContainer.classList.toggle('hidden', e.target.value !== 'อื่นๆ');
         });
@@ -531,18 +626,31 @@
             const usedMaterials = [];
             let stockValidationError = null;
             
-            // Gather stones
+            // --- โค้ดใหม่: รวบรวมข้อมูลหินจาก UI แบบใหม่ ---
             document.querySelectorAll('.stone-row').forEach(row => {
-                const select = row.querySelector('select');
+                const stoneIdInput = row.querySelector('.stone-id-input');
                 const quantityInput = row.querySelector('input[type="number"]');
                 const quantity = parseInt(quantityInput.value, 10);
-                if (select.value && quantity > 0) {
-                    const selectedOption = select.options[select.selectedIndex];
-                    const stock = parseInt(selectedOption.dataset.stock, 10);
-                    if (quantity > stock) stockValidationError = `สินค้าไม่พอ: ${selectedOption.text.split(' - ')[0]}`;
-                    usedMaterials.push({ materialId: select.value, quantityUsed: quantity, name: selectedOption.text.split(' (')[0], pricePerPiece: parseFloat(selectedOption.dataset.price) });
+                const stoneId = stoneIdInput.value;
+
+                if (stoneId && quantity > 0) {
+                    const stone = availableStones.find(s => s.id === stoneId);
+                    if (!stone) {
+                        stockValidationError = `ไม่พบข้อมูลหิน ID: ${stoneId}`;
+                        return;
+                    }
+                    if (quantity > stone.stockRemaining) {
+                        stockValidationError = `สินค้าไม่พอ: ${stone.name}`;
+                    }
+                    usedMaterials.push({ 
+                        materialId: stoneId, 
+                        quantityUsed: quantity, 
+                        name: stone.name, 
+                        pricePerPiece: stone.avgPricePerPiece || 0 
+                    });
                 }
             });
+
             // Gather decorations and charms
             document.querySelectorAll('.decoration-item-row input:checked, .charm-item-row input:checked').forEach(checkbox => {
                 const stock = parseInt(checkbox.dataset.stock, 10);
