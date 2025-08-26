@@ -12,11 +12,10 @@
         body { font-family: 'Kanit', sans-serif; }
         input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
         #customer-modal.hidden { display: none; }
-        /* Custom styles for radio button labels */
         input[type="radio"]:checked + label {
             border-color: #0ea5e9; /* sky-500 */
             ring-width: 2px;
-            --tw-ring-color: #0ea5e9; /* sky-500 */
+            --tw-ring-color: #0ea5e9;
             box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
         }
     </style>
@@ -106,7 +105,6 @@
                             </label>
                         </div>
                     </div>
-                    <!-- Necklace specific options -->
                     <div id="necklace-options" class="hidden mt-4 space-y-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
                         <div>
                             <label for="necklaceRings" class="block text-sm font-medium text-stone-700 mb-1">จำนวนวงแหวน</label>
@@ -115,7 +113,6 @@
                                 <option value="2">2 วงแหวน</option>
                             </select>
                         </div>
-                        <!-- NEW: Chain Type Selection -->
                         <div>
                             <label for="necklaceChainType" class="block text-sm font-medium text-stone-700 mb-1">รูปแบบสร้อย</label>
                             <select id="necklaceChainType" name="necklaceChainType" class="w-full px-3 py-2 border border-stone-300 rounded-md">
@@ -141,9 +138,14 @@
                         <h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3>
                         <div id="decoration-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
                     </div>
+                    <!-- NEW: Charms Section -->
+                    <div class="mb-6">
+                        <h3 class="font-semibold text-stone-600 mb-2">จี้ (Charms)</h3>
+                        <div id="charm-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
+                    </div>
                     <div>
-                        <label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียงของหิน)</label>
-                        <textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, อความารีน 1, ไหมทอง 5, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                        <label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียง)</label>
+                        <textarea id="bracelet-note" rows="3" placeholder="เช่น ไหมทอง 5, จี้ 1, อความารีน 1, ..." class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></textarea>
                     </div>
                 </section>
 
@@ -151,16 +153,21 @@
                 
                 <section id="pricing-section">
                     <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">4. สรุปราคาและรายละเอียด</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
                         <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
                         <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
-                        <div class="grid grid-cols-2 gap-4"><div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div><div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div></div>
-                        <div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div>
-                        <div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div>
-                        <div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
-                        <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"><div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div><div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div><div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div></div>
+                        <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาจี้รวม</label><p id="total-charm-price" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                        
+                        <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-4">
+                            <div class="grid grid-cols-2 gap-4"><div><label for="wireType" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType" name="wireType" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div><div><label for="wireCost" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost" name="wireCost" value="100" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div></div>
+                            <div><label for="laborCost" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost" name="laborCost" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                            <div><label for="shipping-method-input" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-input" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง</option></select></div>
+                            <div id="shipping-cost-container" class="hidden"><label for="shipping-cost-input" class="block text-sm font-medium text-stone-700 mb-1">ค่าขนส่ง (บาท)</label><input type="number" id="shipping-cost-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                            <div class="space-y-2"><label for="payment-status-select" class="block text-sm font-medium text-stone-700">สถานะการชำระเงิน *</label><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select></div>
+                            <div id="deposit-amount-container" class="space-y-2 hidden"><label for="deposit-input" class="block text-sm font-medium text-stone-700">ยอดมัดจำ (บาท)</label><input type="number" id="deposit-input" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500"></div>
+                        </div>
+
+                        <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"><div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price" class="text-2xl font-bold text-red-700">0.00 ฿</p></div><div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-input" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-input" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div><div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price" class="text-2xl font-bold text-green-700">0.00 ฿</p></div></div>
                     </div>
                 </section>
                 <div class="mt-8 pt-6 border-t"><button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400"><span id="button-text">สร้างออเดอร์</span><span id="button-loader" class="hidden items-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>กำลังบันทึก...</span></button></div>
@@ -200,7 +207,7 @@
         const db = getFirestore(app);
 
         // --- DOM Elements ---
-        let allCustomers = [], availableStones = [], availableDecorations = [];
+        let allCustomers = [], availableStones = [], availableDecorations = [], availableCharms = [];
         const loadingOverlay = document.getElementById('loading-overlay');
         const customerSelect = document.getElementById('customer-select');
         const customerInfoDisplay = document.getElementById('customer-info-display');
@@ -217,6 +224,7 @@
         const isFreeCheckbox = document.getElementById('is-free-checkbox');
         const stoneFields = document.getElementById('stone-fields');
         const decorationCheckboxList = document.getElementById('decoration-checkbox-list');
+        const charmCheckboxList = document.getElementById('charm-checkbox-list'); // New
         const laborCostInput = document.getElementById('laborCost');
         const wireTypeInput = document.getElementById('wireType');
         const wireCostInput = document.getElementById('wireCost');
@@ -228,6 +236,7 @@
         const depositAmountContainer = document.getElementById('deposit-amount-container');
         const totalStonePriceEl = document.getElementById('total-stone-price');
         const totalDecorationPriceEl = document.getElementById('total-decoration-price');
+        const totalCharmPriceEl = document.getElementById('total-charm-price'); // New
         const costPriceEl = document.getElementById('cost-price');
         const sellingPriceInput = document.getElementById('selling-price-input');
         const profitPriceEl = document.getElementById('profit-price');
@@ -271,7 +280,8 @@
         }
 
         function calculateTotals() {
-            let totalStonePrice = 0, totalDecorationPrice = 0;
+            let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
+            // Calculate stone prices
             document.querySelectorAll('.stone-row').forEach(row => {
                 const select = row.querySelector('select');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -287,20 +297,29 @@
                 if(subtotalEl) subtotalEl.textContent = `${subtotal.toFixed(2)} ฿`;
                 totalStonePrice += subtotal;
             });
+            // Calculate decoration prices
             document.querySelectorAll('.decoration-item-row input[type="checkbox"]').forEach(checkbox => {
                 if (checkbox.checked) {
-                    const price = parseFloat(checkbox.dataset.price) || 0;
-                    totalDecorationPrice += price;
+                    totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0;
                 }
             });
+            // Calculate charm prices
+            document.querySelectorAll('.charm-item-row input[type="checkbox"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    totalCharmPrice += parseFloat(checkbox.dataset.price) || 0;
+                }
+            });
+
             const laborCost = parseFloat(laborCostInput.value) || 0;
             const wireCost = parseFloat(wireCostInput.value) || 0;
             const shippingCost = parseFloat(shippingCostInput.value) || 0;
-            const costPrice = totalStonePrice + totalDecorationPrice + laborCost + wireCost + shippingCost;
+            const costPrice = totalStonePrice + totalDecorationPrice + totalCharmPrice + laborCost + wireCost + shippingCost;
             const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
             const profit = sellingPrice - costPrice;
+
             totalStonePriceEl.textContent = `${totalStonePrice.toFixed(2)} ฿`;
             totalDecorationPriceEl.textContent = `${totalDecorationPrice.toFixed(2)} ฿`;
+            totalCharmPriceEl.textContent = `${totalCharmPrice.toFixed(2)} ฿`;
             costPriceEl.textContent = `${costPrice.toFixed(2)} ฿`;
             profitPriceEl.textContent = `${profit.toFixed(2)} ฿`;
         }
@@ -312,11 +331,12 @@
             return row;
         }
 
-        function createDecorationCheckbox(item) {
+        function createCheckboxItem(item, type) {
             const container = document.createElement('div');
-            container.className = 'decoration-item-row flex items-center';
-            const checkboxId = `deco-${item.id}`;
-            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size}mm)</label>`;
+            container.className = `${type}-item-row flex items-center`;
+            const checkboxId = `${type}-${item.id}`;
+            const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
+            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700">${item.name} (${item.size || 'N/A'}mm)</label>`;
             return container;
         }
 
@@ -348,8 +368,13 @@
                 const allMaterials = materialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
                 availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
+                availableCharms = allMaterials.filter(m => m.type === 'จี้').sort((a,b) => a.name.localeCompare(b.name));
+
                 for (let i = 0; i < 9; i++) stoneFields.appendChild(createMaterialRow());
-                availableDecorations.forEach(item => decorationCheckboxList.appendChild(createDecorationCheckbox(item)));
+                
+                availableDecorations.forEach(item => decorationCheckboxList.appendChild(createCheckboxItem(item, 'decoration')));
+                availableCharms.forEach(item => charmCheckboxList.appendChild(createCheckboxItem(item, 'charm')));
+
                 const stoneSelects = document.querySelectorAll('.stone-row select');
                 stoneSelects.forEach(select => {
                     availableStones.forEach(item => {
@@ -362,7 +387,7 @@
                 
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
-                await refreshCustomerList(customerIdFromUrl); // Initial load
+                await refreshCustomerList(customerIdFromUrl);
                 if (customerIdFromUrl) {
                     backLink.href = "customers.html";
                     backLink.innerHTML = "&larr; กลับไปหน้าข้อมูลลูกค้า";
@@ -400,7 +425,7 @@
                 showToast('เพิ่มลูกค้าใหม่สำเร็จ');
                 customerForm.reset();
                 closeModal();
-                await refreshCustomerList(docRef.id); // Refresh list and select the new one
+                await refreshCustomerList(docRef.id);
             } catch (error) {
                 showToast("เกิดข้อผิดพลาด: " + error.message, true);
             }
@@ -505,6 +530,8 @@
 
             const usedMaterials = [];
             let stockValidationError = null;
+            
+            // Gather stones
             document.querySelectorAll('.stone-row').forEach(row => {
                 const select = row.querySelector('select');
                 const quantityInput = row.querySelector('input[type="number"]');
@@ -516,7 +543,8 @@
                     usedMaterials.push({ materialId: select.value, quantityUsed: quantity, name: selectedOption.text.split(' (')[0], pricePerPiece: parseFloat(selectedOption.dataset.price) });
                 }
             });
-            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
+            // Gather decorations and charms
+            document.querySelectorAll('.decoration-item-row input:checked, .charm-item-row input:checked').forEach(checkbox => {
                 const stock = parseInt(checkbox.dataset.stock, 10);
                 if (stock < 1) stockValidationError = `สินค้าไม่พอ: ${checkbox.dataset.name}`;
                 usedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1, name: checkbox.dataset.name, pricePerPiece: parseFloat(checkbox.dataset.price) });
