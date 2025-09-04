@@ -139,7 +139,6 @@
                 <section id="design-section" class="mb-8 border-t pt-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-2 mb-4">
                         <h2 class="text-xl font-bold text-stone-700">3. ออกแบบสินค้า</h2>
-                        <!-- *** อัปเดต: เพิ่มปุ่มลบ *** -->
                         <div class="flex items-center gap-2 mt-2 sm:mt-0">
                             <select id="load-template-select" class="text-sm border-stone-300 rounded-md shadow-sm">
                                 <option value="">-- โหลดแบบร่าง --</option>
@@ -158,7 +157,8 @@
                     </div>
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">จี้ (Charms)</h3>
-                        <div id="charm-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
+                        <!-- *** อัปเดต: ปรับแก้ gap-y *** -->
+                        <div id="charm-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2"></div>
                     </div>
                     <div>
                         <label for="bracelet-note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียง)</label>
@@ -321,7 +321,6 @@
         const saveTemplateForm = document.getElementById('save-template-form');
         const cancelSaveTemplateBtn = document.getElementById('cancel-save-template-btn');
         const templateNameInput = document.getElementById('template-name-input');
-        // *** อัปเดต: เพิ่ม DOM element สำหรับปุ่มลบ ***
         const deleteTemplateBtn = document.getElementById('delete-template-btn');
 
         // --- Functions ---
@@ -428,23 +427,39 @@
             return row;
         }
 
+        // *** อัปเดต: ปรับปรุงฟังก์ชันนี้เพื่อแสดงรูปจี้ให้ใหญ่ขึ้น ***
         function createCheckboxItem(item, type) {
             const container = document.createElement('div');
             container.className = `${type}-item-row flex items-center`;
             const checkboxId = `${type}-${item.id}`;
             const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
             
-            const sizeText = item.size ? `(${item.size}mm)` : '';
-
-            container.innerHTML = `
-                <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
-                <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
-                    <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
-                    <span>${item.name} ${sizeText}</span>
-                </label>
-            `;
+            // แยกการแสดงผลสำหรับ 'จี้' และ 'อุปกรณ์ตกแต่ง'
+            if (type === 'charm') {
+                const sizeText = item.size ? `${item.size} mm` : '';
+                container.innerHTML = `
+                    <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-5 w-5 rounded border-gray-300 ${colorClass}">
+                    <label for="${checkboxId}" class="ml-3 text-sm text-stone-700 flex items-center gap-4 cursor-pointer w-full p-2 rounded-lg hover:bg-rose-50 transition-colors">
+                        <img src="${item.imageUrl || 'https://placehold.co/80x80/fecdd3/9f1239?text=Charm'}" alt="${item.name}" class="w-14 h-14 rounded-md object-cover bg-stone-100 flex-shrink-0">
+                        <div class="flex-grow">
+                            <span class="font-semibold text-stone-800">${item.name}</span>
+                            <span class="text-xs text-stone-500 block">${sizeText}</span>
+                        </div>
+                    </label>
+                `;
+            } else { // สำหรับ 'อุปกรณ์ตกแต่ง'
+                const sizeText = item.size ? `(${item.size}mm)` : '';
+                container.innerHTML = `
+                    <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
+                    <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
+                        <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
+                        <span>${item.name} ${sizeText}</span>
+                    </label>
+                `;
+            }
             return container;
         }
+
 
         function updateCustomerDisplay(customerId) {
             if (!customerId) {
@@ -670,7 +685,6 @@
             e.target.value = '';
         });
 
-        // *** อัปเดต: เพิ่ม Event Listener สำหรับปุ่มลบ Template ***
         deleteTemplateBtn.addEventListener('click', async () => {
             const templateId = loadTemplateSelect.value;
             if (!templateId) {
