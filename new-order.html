@@ -157,7 +157,6 @@
                     </div>
                     <div class="mb-6">
                         <h3 class="font-semibold text-stone-600 mb-2">จี้ (Charms)</h3>
-                        <!-- *** อัปเดต: ปรับแก้ gap-y *** -->
                         <div id="charm-checkbox-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2"></div>
                     </div>
                     <div>
@@ -327,6 +326,7 @@
         const openCustomerModal = () => customerModal.classList.remove('hidden');
         const closeCustomerModal = () => customerModal.classList.add('hidden');
 
+        // *** อัปเดต: แสดงสต็อกในหน้าเลือกหิน ***
         function populateStoneModal(searchTerm = '') {
             modalStoneGrid.innerHTML = '';
             const filteredStones = availableStones.filter(stone => 
@@ -335,12 +335,14 @@
 
             filteredStones.forEach(stone => {
                 const item = document.createElement('div');
-                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center';
+                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center text-center';
                 item.dataset.id = stone.id;
+                const stockColor = stone.stockRemaining < 5 ? 'text-red-500' : 'text-gray-500';
                 item.innerHTML = `
                     <img src="${stone.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img'}" class="w-20 h-20 rounded-md object-cover mb-2">
-                    <p class="text-xs text-center font-semibold text-stone-700">${stone.name}</p>
+                    <p class="text-xs font-semibold text-stone-700">${stone.name}</p>
                     <p class="text-xs text-stone-500">${stone.size} mm</p>
+                    <p class="text-xs font-bold ${stockColor}">เหลือ: ${stone.stockRemaining}</p>
                 `;
                 modalStoneGrid.appendChild(item);
             });
@@ -405,7 +407,8 @@
             costPriceEl.textContent = `${costPrice.toFixed(2)} ฿`;
             profitPriceEl.textContent = `${profit.toFixed(2)} ฿`;
         }
-
+        
+        // *** อัปเดต: เพิ่มพื้นที่สำหรับแสดงสต็อกในปุ่มเลือกหิน ***
         function createMaterialRow() {
             const row = document.createElement('div');
             row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
@@ -413,8 +416,11 @@
                 <div class="col-span-7">
                     <input type="hidden" class="stone-id-input">
                     <button type="button" class="select-stone-btn w-full h-12 flex items-center text-left bg-stone-50 border border-stone-300 rounded-md p-2 hover:bg-stone-100 transition-colors">
-                        <img src="https://placehold.co/40x40/e2e8f0/64748b?text=เลือก" class="selected-stone-img w-8 h-8 rounded-md object-cover mr-2">
-                        <span class="selected-stone-name text-sm text-stone-500">-- เลือกหิน --</span>
+                        <img src="https://placehold.co/40x40/e2e8f0/64748b?text=เลือก" class="selected-stone-img w-8 h-8 rounded-md object-cover mr-2 flex-shrink-0">
+                        <div class="flex-grow overflow-hidden">
+                            <span class="selected-stone-name block text-sm text-stone-500 leading-tight truncate">-- เลือกหิน --</span>
+                            <span class="selected-stone-stock block text-xs text-stone-400 leading-tight"></span>
+                        </div>
                     </button>
                 </div>
                 <div class="col-span-2">
@@ -427,14 +433,15 @@
             return row;
         }
 
-        // *** อัปเดต: ปรับปรุงฟังก์ชันนี้เพื่อแสดงรูปจี้ให้ใหญ่ขึ้น ***
+        // *** อัปเดต: แสดงสต็อกสำหรับจี้และอุปกรณ์ตกแต่ง ***
         function createCheckboxItem(item, type) {
             const container = document.createElement('div');
             container.className = `${type}-item-row flex items-center`;
             const checkboxId = `${type}-${item.id}`;
             const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
-            
-            // แยกการแสดงผลสำหรับ 'จี้' และ 'อุปกรณ์ตกแต่ง'
+            const stockColor = item.stockRemaining < 5 ? 'text-red-500' : 'text-gray-500';
+            const stockText = `<span class="text-xs font-bold ${stockColor}">เหลือ: ${item.stockRemaining} ชิ้น</span>`;
+
             if (type === 'charm') {
                 const sizeText = item.size ? `${item.size} mm` : '';
                 container.innerHTML = `
@@ -444,22 +451,22 @@
                         <div class="flex-grow">
                             <span class="font-semibold text-stone-800">${item.name}</span>
                             <span class="text-xs text-stone-500 block">${sizeText}</span>
+                            ${stockText}
                         </div>
                     </label>
                 `;
-            } else { // สำหรับ 'อุปกรณ์ตกแต่ง'
+            } else { 
                 const sizeText = item.size ? `(${item.size}mm)` : '';
                 container.innerHTML = `
                     <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
                     <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
                         <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
-                        <span>${item.name} ${sizeText}</span>
+                        <span>${item.name} ${sizeText} <span class="font-semibold ${stockColor}">(เหลือ ${item.stockRemaining})</span></span>
                     </label>
                 `;
             }
             return container;
         }
-
 
         function updateCustomerDisplay(customerId) {
             if (!customerId) {
@@ -491,27 +498,39 @@
                 loadTemplateSelect.add(option);
             });
         }
-
+        
+        // *** อัปเดต: เพิ่มการเคลียร์ค่าสต็อก ***
         function clearDesignForm() {
             document.querySelectorAll('.stone-row').forEach(row => {
                 row.querySelector('.stone-id-input').value = '';
                 row.querySelector('.selected-stone-img').src = 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
                 row.querySelector('.selected-stone-name').textContent = '-- เลือกหิน --';
                 row.querySelector('.selected-stone-name').classList.add('text-stone-500');
+                row.querySelector('.selected-stone-stock').textContent = '';
                 row.querySelector('input[type="number"]').value = '';
             });
             document.querySelectorAll('.decoration-item-row input, .charm-item-row input').forEach(checkbox => {
                 checkbox.checked = false;
             });
+            calculateTotals();
         }
 
         async function initializePage() {
             loadingOverlay.classList.remove('hidden');
             orderDateInput.valueAsDate = new Date();
-            const materialsQuery = query(collection(db, "materials"), where("stockRemaining", ">", 0));
+            // *** อัปเดต: ดึงข้อมูล Material ทั้งหมด ไม่กรองสต็อก > 0 เพื่อให้แสดงของที่สต็อกเป็น 0 ได้ ***
+            const materialsQuery = query(collection(db, "materials"));
             try {
                 const materialsSnapshot = await getDocs(materialsQuery);
                 const allMaterials = materialsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // จัดการกับ Material ที่อาจไม่มี stockRemaining (ค่าเก่า)
+                allMaterials.forEach(m => {
+                    if (typeof m.stockRemaining === 'undefined') {
+                        m.stockRemaining = 0;
+                    }
+                });
+
                 availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
                 availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
                 availableCharms = allMaterials.filter(m => m.type === 'จี้').sort((a,b) => a.name.localeCompare(b.name));
@@ -580,15 +599,26 @@
                 stoneSelectModal.classList.remove('hidden');
             }
         });
+
+        // *** อัปเดต: แสดงสต็อกในปุ่มเมื่อเลือกหิน ***
         modalStoneGrid.addEventListener('click', (e) => {
             const selectedItem = e.target.closest('.modal-item');
             if (selectedItem && activeStoneRow) {
                 const stoneId = selectedItem.dataset.id;
                 const stone = availableStones.find(s => s.id === stoneId);
+                
                 activeStoneRow.querySelector('.stone-id-input').value = stoneId;
                 activeStoneRow.querySelector('.selected-stone-img').src = stone.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
-                activeStoneRow.querySelector('.selected-stone-name').textContent = stone.name;
-                activeStoneRow.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                
+                const nameEl = activeStoneRow.querySelector('.selected-stone-name');
+                const stockEl = activeStoneRow.querySelector('.selected-stone-stock');
+
+                nameEl.textContent = stone.name;
+                nameEl.classList.remove('text-stone-500');
+                
+                stockEl.textContent = `เหลือ: ${stone.stockRemaining} ชิ้น`;
+                stockEl.className = `selected-stone-stock block text-xs leading-tight ${stone.stockRemaining < 5 ? 'text-red-500 font-semibold' : 'text-stone-500'}`;
+
                 stoneSelectModal.classList.add('hidden');
                 activeStoneRow = null;
                 calculateTotals();
@@ -646,10 +676,14 @@
                 showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
             }
         });
-
+        
+        // *** อัปเดต: แสดงสต็อกเมื่อโหลดแบบร่าง ***
         loadTemplateSelect.addEventListener('change', (e) => {
             const templateId = e.target.value;
-            if (!templateId) return;
+            if (!templateId) {
+                clearDesignForm();
+                return;
+            }
 
             const selectedTemplate = allTemplates.find(t => t.id === templateId);
             if (!selectedTemplate) return;
@@ -666,8 +700,14 @@
                     if (stoneData) {
                         row.querySelector('.stone-id-input').value = item.materialId;
                         row.querySelector('.selected-stone-img').src = stoneData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
-                        row.querySelector('.selected-stone-name').textContent = stoneData.name;
-                        row.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                        
+                        const nameEl = row.querySelector('.selected-stone-name');
+                        const stockEl = row.querySelector('.selected-stone-stock');
+                        nameEl.textContent = stoneData.name;
+                        nameEl.classList.remove('text-stone-500');
+                        stockEl.textContent = `เหลือ: ${stoneData.stockRemaining} ชิ้น`;
+                        stockEl.className = `selected-stone-stock block text-xs leading-tight ${stoneData.stockRemaining < 5 ? 'text-red-500 font-semibold' : 'text-stone-500'}`;
+
                         row.querySelector('input[type="number"]').value = item.quantityUsed;
                     }
                     stoneIndex++;
@@ -919,3 +959,4 @@
     </script>
 </body>
 </html>
+
