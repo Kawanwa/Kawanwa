@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
     <style>
         body { 
             font-family: 'Kanit', sans-serif; 
@@ -46,13 +47,13 @@
             
             <nav class="mt-10 flex-grow">
                 <ul class="space-y-2">
-                    <li><a href="#" class="nav-link active flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>Dashboard</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" /></svg>จัดการออเดอร์</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>จัดการสต็อค</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>รับของเข้า</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 12.293a1 1 0 00-1.414 0l-4 4a1 1 0 001.414 1.414L10 14.414l2.293 2.293a1 1 0 001.414-1.414l-4-4z" /><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v8a1 1 0 11-2 0V3a1 1 0 011-1z" clip-rule="evenodd" /></svg>บัญชี</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3.005 3.005 0 013.75-2.906z" /></svg>ลูกค้า</a></li>
-                    <li><a href="#" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>รายงาน</a></li>
+                    <li><a href="index.html" class="nav-link active flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>Dashboard</a></li>
+                    <li><a href="order-history.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" /><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd" /></svg>จัดการออเดอร์</a></li>
+                    <li><a href="stock.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>จัดการสต็อค</a></li>
+                    <li><a href="intake.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>รับของเข้า</a></li>
+                    <li><a href="expenses.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 12.293a1 1 0 00-1.414 0l-4 4a1 1 0 001.414 1.414L10 14.414l2.293 2.293a1 1 0 001.414-1.414l-4-4z" /><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v8a1 1 0 11-2 0V3a1 1 0 011-1z" clip-rule="evenodd" /></svg>บัญชี</a></li>
+                    <li><a href="customers.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3.005 3.005 0 013.75-2.906z" /></svg>ลูกค้า</a></li>
+                    <li><a href="report.html" class="nav-link flex items-center gap-3 p-3 rounded-lg font-medium"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" /></svg>รายงาน</a></li>
                 </ul>
             </nav>
         </aside>
@@ -60,18 +61,19 @@
         <!-- Main Content -->
         <main class="flex-1 lg:ml-64">
             <div class="p-6 lg:p-10">
-                <!-- Header -->
-                <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                    <div>
+                <header class="flex items-center justify-between mb-8">
+                    <div class="flex items-center">
                         <button id="open-sidebar-btn" class="lg:hidden text-slate-500 mr-4">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                         </button>
-                        <h2 class="text-3xl font-bold text-slate-800">Dashboard</h2>
-                        <p class="text-slate-500">ภาพรวมร้านค้าของคุณน็อต</p>
+                        <div>
+                            <h2 class="text-3xl font-bold text-slate-800">Dashboard</h2>
+                            <p class="text-slate-500">ภาพรวมร้านค้าของคุณน็อต</p>
+                        </div>
                     </div>
-                    <a href="#" class="mt-4 sm:mt-0 w-full sm:w-auto flex-shrink-0 text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg px-5 py-2.5 text-center transition-colors shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2">
+                    <a href="new-order.html" class="hidden sm:flex items-center justify-center gap-2 text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg px-5 py-2.5 text-center transition-colors shadow-lg shadow-indigo-500/30">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
-                        สร้างออเดอร์
+                        <span>สร้างออเดอร์</span>
                     </a>
                 </header>
 
@@ -80,11 +82,8 @@
                     <div class="kpi-card bg-white p-5 rounded-xl shadow-sm flex items-start justify-between">
                         <div>
                             <h3 class="font-medium text-slate-500">ยอดขายเดือนนี้</h3>
-                            <p class="text-3xl font-bold text-slate-800 mt-1">12,580.00 ฿</p>
-                            <p class="text-sm text-emerald-500 flex items-center mt-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12 7a1 1 0 11-2 0 1 1 0 012 0zm-4 4a1 1 0 100 2h8a1 1 0 100-2H8z" clip-rule="evenodd" /><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v2a1 1 0 102 0V5z" clip-rule="evenodd" /></svg>
-                                <span>+15.2% จากเดือนที่แล้ว</span>
-                            </p>
+                            <p id="monthly-sales" class="text-3xl font-bold text-slate-800 mt-1">...</p>
+                            <p id="sales-comparison" class="text-sm text-slate-500 flex items-center mt-2">...</p>
                         </div>
                         <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-sky-100 text-sky-600 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
@@ -93,11 +92,8 @@
                      <div class="kpi-card bg-white p-5 rounded-xl shadow-sm flex items-start justify-between">
                         <div>
                             <h3 class="font-medium text-slate-500">ออเดอร์ที่ต้องทำ</h3>
-                            <p class="text-3xl font-bold text-slate-800 mt-1">5 <span class="text-lg font-medium text-slate-500">รายการ</span></p>
-                            <p class="text-sm text-slate-500 flex items-center mt-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>
-                                <span>2 รายการเพิ่มมาวันนี้</span>
-                            </p>
+                            <p id="pending-orders-count" class="text-3xl font-bold text-slate-800 mt-1">...</p>
+                            <p id="new-orders-today" class="text-sm text-slate-500 flex items-center mt-2">...</p>
                         </div>
                         <div class="flex-shrink-0 h-12 w-12 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -109,37 +105,19 @@
                 <section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
                         <h2 class="text-xl font-semibold text-slate-700 mb-4">ยอดขาย 7 วันล่าสุด</h2>
-                        <canvas id="salesChart"></canvas>
+                        <div class="h-80"><canvas id="salesChart"></canvas></div>
                     </div>
                     <div class="space-y-8">
                         <div class="info-card bg-white p-6 rounded-xl shadow-sm">
                             <h2 class="text-xl font-semibold text-slate-700 mb-4">ออเดอร์ล่าสุด</h2>
-                            <div class="space-y-3">
-                                <a href="#" class="block bg-slate-50 p-3 rounded-lg border border-transparent hover:border-slate-200 transition-colors">
-                                    <div class="flex justify-between items-center">
-                                        <div><p class="font-semibold text-slate-800">คุณสมชาย</p><p class="text-sm text-slate-500">1,250.00 ฿</p></div>
-                                        <div><span class="bg-stone-200 text-stone-800 text-xs font-medium px-2.5 py-0.5 rounded-full">รอดำเนินการ</span></div>
-                                    </div>
-                                </a>
-                                 <a href="#" class="block bg-slate-50 p-3 rounded-lg border border-transparent hover:border-slate-200 transition-colors">
-                                    <div class="flex justify-between items-center">
-                                        <div><p class="font-semibold text-slate-800">คุณจินตนา</p><p class="text-sm text-slate-500">890.00 ฿</p></div>
-                                        <div><span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">จัดส่งแล้ว</span></div>
-                                    </div>
-                                </a>
+                            <div id="recent-orders-container" class="space-y-3">
+                                <p class="text-slate-500 text-center py-8">กำลังโหลด...</p>
                             </div>
                         </div>
                         <div class="info-card bg-white p-6 rounded-xl shadow-sm">
                             <h2 class="text-xl font-semibold text-slate-700 mb-4">สินค้าใกล้หมด</h2>
-                            <div class="space-y-3">
-                                <div class="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
-                                    <div><p class="font-semibold text-slate-800">หินไหมทอง (10mm)</p></div>
-                                    <div><p class="font-bold text-lg text-amber-500">8</p></div>
-                                </div>
-                                <div class="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
-                                    <div><p class="font-semibold text-slate-800">จี้พระพิฆเนศ (12mm)</p></div>
-                                    <div><p class="font-bold text-lg text-red-500">2</p></div>
-                                </div>
+                            <div id="low-stock-container" class="space-y-3">
+                                <p class="text-slate-500 text-center py-8">กำลังโหลด...</p>
                             </div>
                         </div>
                     </div>
@@ -150,69 +128,166 @@
     
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
 
-    <script>
+    <script type="module">
+        // --- config.js ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
+            authDomain: "kawanwa-stone.firebaseapp.com",
+            projectId: "kawanwa-stone",
+            storageBucket: "kawanwa-stone.firebasestorage.app",
+            messagingSenderId: "678984987842",
+            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
+        };
+        
+        // --- utils.js ---
+        const formatCurrency = (number) => (number || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿';
+        const getProcessingStatusBadge = (status) => {
+            switch (status) {
+                case 'จัดส่งแล้ว': return `<span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
+                case 'ดำเนินการเสร็จสิ้น': return `<span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
+                default: return `<span class="bg-stone-200 text-stone-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status || 'N/A'}</span>`;
+            }
+        };
+
+        // --- Firebase SDK ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, query, where, onSnapshot, getDocs, limit, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // --- Page Script ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Sidebar toggle logic
             const sidebar = document.getElementById('sidebar');
             const openSidebarBtn = document.getElementById('open-sidebar-btn');
             const closeSidebarBtn = document.getElementById('close-sidebar-btn');
             const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-            const openSidebar = () => {
-                sidebar.classList.remove('-translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            };
-
-            const closeSidebar = () => {
-                sidebar.classList.add('-translate-x-full');
-                sidebarOverlay.classList.add('hidden');
-            };
+            
+            const openSidebar = () => { sidebar.classList.remove('-translate-x-full'); sidebarOverlay.classList.remove('hidden'); };
+            const closeSidebar = () => { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); };
 
             openSidebarBtn.addEventListener('click', openSidebar);
             closeSidebarBtn.addEventListener('click', closeSidebar);
             sidebarOverlay.addEventListener('click', closeSidebar);
 
-            // --- Chart.js Sample ---
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์', 'อาทิตย์'],
-                    datasets: [{
-                        label: 'ยอดขาย',
-                        data: [1200, 1900, 900, 2500, 2100, 3200, 2900],
-                        backgroundColor: '#4f46e5', // indigo-600
-                        borderRadius: 6,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) { return value.toLocaleString() + ' ฿' }
-                            }
-                        },
-                        x: {
-                            grid: { display: false }
+            let salesChartInstance = null;
+
+            async function fetchDashboardData() {
+                const today = new Date();
+                const startOfThisMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), 1));
+                const startOfLastMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth() - 1, 1));
+                const endOfLastMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59));
+                const startOfToday = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+
+                // --- KPI Cards Data Fetching ---
+                const monthlyOrdersQuery = query(collection(db, "orders"), where("orderDate", ">=", startOfThisMonth));
+                onSnapshot(monthlyOrdersQuery, (snapshot) => {
+                    let totalSales = snapshot.docs.reduce((sum, doc) => {
+                        const order = doc.data();
+                        if (order.paymentStatus === 'ชำระแล้ว') return sum + (order.totalAmount || 0);
+                        if (order.paymentStatus === 'มัดจำ') return sum + (order.depositAmount || 0);
+                        return sum;
+                    }, 0);
+                    document.getElementById('monthly-sales').textContent = formatCurrency(totalSales);
+                });
+                
+                const pendingOrdersQuery = query(collection(db, "orders"), where("processingStatus", "==", "รอดำเนินการ"));
+                onSnapshot(pendingOrdersQuery, (snapshot) => {
+                    document.getElementById('pending-orders-count').innerHTML = `${snapshot.size} <span class="text-lg font-medium text-slate-500">รายการ</span>`;
+                    const newTodayQuery = query(collection(db, "orders"), where("orderDate", ">=", startOfToday), where("processingStatus", "==", "รอดำเนินการ"));
+                    getDocs(newTodayQuery).then(newSnapshot => {
+                        const newOrdersText = document.getElementById('new-orders-today');
+                        if (newSnapshot.size > 0) {
+                             newOrdersText.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg><span>${newSnapshot.size} รายการเพิ่มมาวันนี้</span>`;
+                        } else {
+                            newOrdersText.textContent = 'ไม่มีออเดอร์ใหม่วันนี้';
                         }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'ยอดขาย: ' + context.raw.toLocaleString() + ' ฿';
-                                }
-                            }
-                        }
+                    });
+                });
+
+                // --- Chart Data Fetching ---
+                const sevenDaysAgo = Timestamp.fromDate(new Date(today.setDate(today.getDate() - 6)));
+                const salesLast7DaysQuery = query(collection(db, "orders"), where("orderDate", ">=", sevenDaysAgo));
+                onSnapshot(salesLast7DaysQuery, (snapshot) => {
+                    const salesByDay = {};
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date();
+                        d.setDate(d.getDate() - i);
+                        const label = d.toLocaleDateString('th-TH', { weekday: 'short' });
+                        salesByDay[label] = { sales: 0, date: d };
                     }
+
+                    snapshot.forEach(doc => {
+                        const order = doc.data();
+                        const orderDate = order.orderDate.toDate();
+                        const label = orderDate.toLocaleDateString('th-TH', { weekday: 'short' });
+                         if (salesByDay[label] && (order.paymentStatus === 'ชำระแล้ว' || order.paymentStatus === 'มัดจำ')) {
+                            salesByDay[label].sales += (order.paymentStatus === 'ชำระแล้ว' ? order.totalAmount : order.depositAmount) || 0;
+                        }
+                    });
+
+                    const sortedLabels = Object.keys(salesByDay).sort((a,b) => salesByDay[a].date - salesByDay[b].date);
+                    const chartLabels = sortedLabels;
+                    const chartData = sortedLabels.map(label => salesByDay[label].sales);
+
+                    updateSalesChart(chartLabels, chartData);
+                });
+
+                // --- Right Column Data Fetching ---
+                const recentOrdersContainer = document.getElementById('recent-orders-container');
+                const lowStockContainer = document.getElementById('low-stock-container');
+                const customersSnapshot = await getDocs(collection(db, "customers"));
+                const customersMap = new Map(customersSnapshot.docs.map(doc => [doc.id, doc.data()]));
+
+                onSnapshot(query(collection(db, "orders"), orderBy("orderDate", "desc"), limit(3)), (snapshot) => {
+                    recentOrdersContainer.innerHTML = '';
+                    if (snapshot.empty) { recentOrdersContainer.innerHTML = '<p class="text-slate-500">ไม่มีออเดอร์ล่าสุด</p>'; return; }
+                    snapshot.forEach(doc => {
+                        const order = doc.data();
+                        const customerName = customersMap.get(order.customerId)?.name || 'N/A';
+                        recentOrdersContainer.innerHTML += `
+                            <a href="order-details.html?orderId=${doc.id}" class="block bg-slate-50 p-3 rounded-lg border border-transparent hover:border-slate-200 transition-colors">
+                                <div class="flex justify-between items-center">
+                                    <div><p class="font-semibold text-slate-800">${customerName}</p><p class="text-sm text-slate-500">${formatCurrency(order.totalAmount)}</p></div>
+                                    <div>${getProcessingStatusBadge(order.processingStatus)}</div>
+                                </div>
+                            </a>`;
+                    });
+                });
+                
+                onSnapshot(query(collection(db, "materials"), where("stockRemaining", "<=", 10), orderBy("stockRemaining", "asc"), limit(3)), (snapshot) => {
+                    lowStockContainer.innerHTML = '';
+                    if (snapshot.empty) { lowStockContainer.innerHTML = '<p class="text-slate-500">ไม่มีสินค้าใกล้หมด</p>'; return; }
+                    snapshot.forEach(doc => {
+                        const item = doc.data();
+                        lowStockContainer.innerHTML += `
+                            <div class="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
+                                <div><p class="font-semibold text-slate-800">${item.name} ${item.size ? `(${item.size}mm)`:''}</p></div>
+                                <div><p class="font-bold text-lg ${item.stockRemaining <= 5 ? 'text-red-500' : 'text-amber-500'}">${item.stockRemaining}</p></div>
+                            </div>`;
+                    });
+                });
+            }
+
+            function updateSalesChart(labels, data) {
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                if (salesChartInstance) {
+                    salesChartInstance.destroy();
                 }
-            });
+                salesChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [{ label: 'ยอดขาย', data, backgroundColor: '#4f46e5', borderRadius: 6 }] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { y: { beginAtZero: true, ticks: { callback: value => value.toLocaleString() + ' ฿' } }, x: { grid: { display: false } } },
+                        plugins: { legend: { display: false }, tooltip: { callbacks: { label: context => 'ยอดขาย: ' + context.raw.toLocaleString() + ' ฿' } } }
+                    }
+                });
+            }
+
+            fetchDashboardData();
         });
     </script>
 </body>
 </html>
-
