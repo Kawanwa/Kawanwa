@@ -1,0 +1,24 @@
+body { 
+    font-family: 'Kanit', sans-serif; 
+}
+.sidebar {
+    transition: transform 0.3s ease-in-out;
+}
+.nav-link {
+    transition: all 0.2s ease-in-out;
+}
+.nav-link:hover, .nav-link.active {
+    background-color: #eef2ff; /* indigo-50 */
+    color: #4f46e5; /* indigo-600 */
+}
+.kpi-card {
+    transition: all 0.2s ease-in-out;
+}
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px -5px rgba(0,0,0,0.08);
+}
+/* Styles for various modals, keeping them consistent */
+.modal.hidden {
+    display: none;
+}
