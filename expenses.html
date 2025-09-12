@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>บัญชีและค่าใช้จ่าย - ระบบจัดการร้านกำไลหิน</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Kanit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,135 +20,75 @@
         }
     </style>
 </head>
-<body class="bg-stone-100">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 py-10">
-        <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="w-full">
-                    <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
-                    <h1 class="text-3xl font-bold text-stone-800">บัญชีและค่าใช้จ่าย</h1>
-                </div>
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <!-- Month Navigator -->
-                    <div class="flex items-center justify-center gap-2">
-                        <button id="prev-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&lt;</button>
-                        <h2 id="current-month-display" class="text-lg font-semibold text-purple-700 w-40 text-center"></h2>
-                        <button id="next-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&gt;</button>
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="w-full">
+                        <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">บัญชีและค่าใช้จ่าย</h1>
                     </div>
-                    <button id="add-expense-btn" class="flex-shrink-0 text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                        &#43; เพิ่มรายการ
-                    </button>
-                </div>
-            </header>
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="flex items-center justify-center gap-2">
+                            <button id="prev-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&lt;</button>
+                            <h2 id="current-month-display" class="text-lg font-semibold text-purple-700 w-40 text-center"></h2>
+                            <button id="next-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&gt;</button>
+                        </div>
+                        <button id="add-expense-btn" class="flex-shrink-0 text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                            &#43; เพิ่มรายการ
+                        </button>
+                    </div>
+                </header>
 
-            <!-- Summary Section -->
-            <section id="summary-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-teal-700">รายรับ (เดือนนี้)</h2>
-                    <p id="summary-income" class="text-2xl font-bold text-teal-900">0.00 ฿</p>
-                </div>
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-blue-700">ค่าใช้จ่ายร้าน (เดือนนี้)</h2>
-                    <p id="summary-shop-expense" class="text-2xl font-bold text-blue-900">0.00 ฿</p>
-                </div>
-                <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-orange-700">กำไร/ขาดทุน (เดือนนี้)</h2>
-                    <p id="summary-profit" class="text-2xl font-bold text-orange-900">0.00 ฿</p>
-                </div>
-                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-green-700">พี่พีชออกให้ (คงเหลือ)</h2>
-                    <p id="summary-peach-total" class="text-2xl font-bold text-green-900">0.00 ฿</p>
-                </div>
-                <div class="bg-pink-50 border-l-4 border-pink-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-pink-700">น็อตออกให้ (คงเหลือ)</h2>
-                    <p id="summary-knot-total" class="text-2xl font-bold text-pink-900">0.00 ฿</p>
-                </div>
-                <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded-r-lg">
-                    <h2 class="text-sm font-medium text-gray-700">ทุนร้านสะสม (สิ้นเดือน)</h2>
-                    <p id="summary-capital" class="text-2xl font-bold text-gray-900">0.00 ฿</p>
-                </div>
-            </section>
+                <section id="summary-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-teal-50 border-l-4 border-teal-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-teal-700">รายรับ (เดือนนี้)</h2><p id="summary-income" class="text-2xl font-bold text-teal-900">0.00 ฿</p></div>
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-blue-700">ค่าใช้จ่ายร้าน (เดือนนี้)</h2><p id="summary-shop-expense" class="text-2xl font-bold text-blue-900">0.00 ฿</p></div>
+                    <div class="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-orange-700">กำไร/ขาดทุน (เดือนนี้)</h2><p id="summary-profit" class="text-2xl font-bold text-orange-900">0.00 ฿</p></div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-green-700">พี่พีชออกให้ (คงเหลือ)</h2><p id="summary-peach-total" class="text-2xl font-bold text-green-900">0.00 ฿</p></div>
+                    <div class="bg-pink-50 border-l-4 border-pink-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-pink-700">น็อตออกให้ (คงเหลือ)</h2><p id="summary-knot-total" class="text-2xl font-bold text-pink-900">0.00 ฿</p></div>
+                    <div class="bg-gray-50 border-l-4 border-gray-500 p-4 rounded-r-lg"><h2 class="text-sm font-medium text-gray-700">ทุนร้านสะสม (สิ้นเดือน)</h2><p id="summary-capital" class="text-2xl font-bold text-gray-900">0.00 ฿</p></div>
+                </section>
 
-            <div id="expense-list-container" class="overflow-x-auto border-t pt-6">
-                <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</p>
+                <div id="expense-list-container" class="overflow-x-auto border-t pt-6">
+                    <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</p>
+                </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- Expense Modal (Popup) -->
     <div id="expense-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out opacity-0">
         <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
             <form id="expense-form" class="p-6 md:p-8">
                 <header class="flex justify-between items-start mb-6 pb-4 border-b">
                     <h2 id="form-title" class="text-2xl font-bold text-stone-800">เพิ่มรายการ</h2>
-                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
-                        <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors"><svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </header>
-                
                 <input type="hidden" id="expenseId">
                 <div class="space-y-4">
-                    <div>
-                        <label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภทรายการ *</label>
-                        <select id="type" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                            <option value="expense">ค่าใช้จ่าย</option>
-                            <option value="reimbursement">คืนทุน</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="expenseDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่ *</label>
-                        <input type="date" id="expenseDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                    </div>
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-stone-700 mb-1">รายการ *</label>
-                        <input type="text" id="description" required placeholder="เช่น ค่ากล่องพัสดุ, ค่าโฆษณา" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                    </div>
-                    <div>
-                        <label for="amount" class="block text-sm font-medium text-stone-700 mb-1">จำนวนเงิน (บาท) *</label>
-                        <input type="number" id="amount" required min="0" step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                    </div>
-                    <div id="source-container">
-                        <label id="source-label" for="source" class="block text-sm font-medium text-stone-700 mb-1">ใช้เงินจาก *</label>
-                        <select id="source" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
-                        </select>
-                    </div>
-                    <div>
-                        <label for="attachment" class="block text-sm font-medium text-stone-700 mb-1">แนบไฟล์ (ถ้ามี)</label>
-                        <input type="file" id="attachment" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
-                        <p id="current-attachment" class="text-xs text-stone-500 mt-2 hidden"></p>
-                    </div>
+                    <div><label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภทรายการ *</label><select id="type" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"><option value="expense">ค่าใช้จ่าย</option><option value="reimbursement">คืนทุน</option></select></div>
+                    <div><label for="expenseDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่ *</label><input type="date" id="expenseDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></div>
+                    <div><label for="description" class="block text-sm font-medium text-stone-700 mb-1">รายการ *</label><input type="text" id="description" required placeholder="เช่น ค่ากล่องพัสดุ, ค่าโฆษณา" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></div>
+                    <div><label for="amount" class="block text-sm font-medium text-stone-700 mb-1">จำนวนเงิน (บาท) *</label><input type="number" id="amount" required min="0" step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></div>
+                    <div id="source-container"><label id="source-label" for="source" class="block text-sm font-medium text-stone-700 mb-1">ใช้เงินจาก *</label><select id="source" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></select></div>
+                    <div><label for="attachment" class="block text-sm font-medium text-stone-700 mb-1">แนบไฟล์ (ถ้ามี)</label><input type="file" id="attachment" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"><p id="current-attachment" class="text-xs text-stone-500 mt-2 hidden"></p></div>
                 </div>
-                <div class="mt-6 pt-6 border-t">
-                    <button type="submit" id="submit-button" class="w-full justify-center py-2.5 px-5 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
-                        บันทึก
-                    </button>
-                </div>
+                <div class="mt-6 pt-6 border-t"><button type="submit" id="submit-button" class="w-full justify-center py-2.5 px-5 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">บันทึก</button></div>
             </form>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, deleteDoc, addDoc, setDoc, serverTimestamp, query, where, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        // --- DOM Elements ---
         const expenseListContainer = document.getElementById('expense-list-container');
         const addExpenseBtn = document.getElementById('add-expense-btn');
         const monthDisplay = document.getElementById('current-month-display');
@@ -163,7 +101,6 @@
         const summaryKnotTotal = document.getElementById('summary-knot-total');
         const summaryCapital = document.getElementById('summary-capital');
         
-        // Modal Elements
         const modal = document.getElementById('expense-modal');
         const modalPanel = document.getElementById('modal-panel');
         const closeModalBtn = document.getElementById('close-modal-btn');
@@ -181,378 +118,90 @@
         let allExpenses = [];
         let allOrders = [];
 
-        // --- Helper Functions ---
         const formatCurrency = (number) => number.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        
-        const updateMonthDisplay = () => {
-            const thaiYear = currentDate.getFullYear() + 543;
-            const thaiMonth = new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(currentDate);
-            monthDisplay.textContent = `${thaiMonth} ${thaiYear}`;
-        };
-
-        // --- Modal Control & Logic ---
-        const openModal = () => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalPanel.classList.remove('opacity-0', 'scale-95');
-            }, 10);
-        };
-        const closeModal = () => {
-            modal.classList.add('opacity-0');
-            modalPanel.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                expenseForm.reset();
-                expenseIdField.value = '';
-                currentAttachment.classList.add('hidden');
-            }, 300);
-        };
+        const updateMonthDisplay = () => { const thaiYear = currentDate.getFullYear() + 543; const thaiMonth = new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(currentDate); monthDisplay.textContent = `${thaiMonth} ${thaiYear}`; };
+        const openModal = () => { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modalPanel.classList.remove('opacity-0', 'scale-95'); }, 10); };
+        const closeModal = () => { modal.classList.add('opacity-0'); modalPanel.classList.add('opacity-0', 'scale-95'); setTimeout(() => { modal.classList.add('hidden'); expenseForm.reset(); expenseIdField.value = ''; currentAttachment.classList.add('hidden'); }, 300); };
         
         const setupFormForType = (type) => {
             if (type === 'reimbursement') {
                 formTitle.textContent = 'บันทึกการคืนทุน';
                 sourceLabel.textContent = 'คืนทุนให้ *';
-                sourceSelect.innerHTML = `
-                    <option value="ส่วนตัวพี่พีช">ส่วนตัวพี่พีช</option>
-                    <option value="ส่วนตัวน็อต">ส่วนตัวน็อต</option>
-                `;
-            } else { // expense
+                sourceSelect.innerHTML = `<option value="ส่วนตัวพี่พีช">ส่วนตัวพี่พีช</option><option value="ส่วนตัวน็อต">ส่วนตัวน็อต</option>`;
+            } else {
                 formTitle.textContent = 'เพิ่มรายการค่าใช้จ่าย';
                 sourceLabel.textContent = 'ใช้เงินจาก *';
-                sourceSelect.innerHTML = `
-                    <option value="ทุนร้าน">ทุนร้าน</option>
-                    <option value="ส่วนตัวพี่พีช">ส่วนตัวพี่พีช</option>
-                    <option value="ส่วนตัวน็อต">ส่วนตัวน็อต</option>
-                `;
+                sourceSelect.innerHTML = `<option value="ทุนร้าน">ทุนร้าน</option><option value="ส่วนตัวพี่พีช">ส่วนตัวพี่พีช</option><option value="ส่วนตัวน็อต">ส่วนตัวน็อต</option>`;
             }
         };
 
-        // --- Render Function ---
         const renderExpenses = (expenses) => {
             expenseListContainer.innerHTML = '';
-            if (expenses.length === 0) {
-                expenseListContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบรายการในเดือนนี้</p>';
-                return;
-            }
+            if (expenses.length === 0) { expenseListContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบรายการในเดือนนี้</p>'; return; }
             const table = document.createElement('table');
             table.className = 'w-full text-sm text-left text-stone-700';
-            table.innerHTML = `
-                <thead class="text-xs text-stone-700 uppercase bg-stone-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">วันที่</th>
-                        <th scope="col" class="px-6 py-3">รายการ</th>
-                        <th scope="col" class="px-6 py-3">แหล่งเงิน/คืนให้</th>
-                        <th scope="col" class="px-6 py-3 text-right">จำนวนเงิน</th>
-                        <th scope="col" class="px-6 py-3 text-center">จัดการ</th>
-                    </tr>
-                </thead>`;
+            table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th scope="col" class="px-6 py-3">วันที่</th><th scope="col" class="px-6 py-3">รายการ</th><th scope="col" class="px-6 py-3">แหล่งเงิน/คืนให้</th><th scope="col" class="px-6 py-3 text-right">จำนวนเงิน</th><th scope="col" class="px-6 py-3 text-center">จัดการ</th></tr></thead>`;
             const tbody = document.createElement('tbody');
             expenses.forEach(expense => {
                 const row = document.createElement('tr');
                 const isReimbursement = expense.type === 'reimbursement';
                 row.className = `bg-white border-b hover:bg-stone-50 ${isReimbursement ? 'text-green-700' : ''}`;
                 const expenseDate = expense.expenseDate.toDate().toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' });
-                
                 let attachmentLink = '';
-                if (expense.attachmentUrl) {
-                    attachmentLink = `<a href="${expense.attachmentUrl}" target="_blank" class="text-purple-600 hover:underline">[ไฟล์]</a>`;
-                }
-
-                row.innerHTML = `
-                    <td class="px-6 py-4">${expenseDate}</td>
-                    <td class="px-6 py-4 font-medium ${isReimbursement ? '' : 'text-stone-900'}">${isReimbursement ? 'คืนทุน: ' : ''}${expense.description} ${attachmentLink}</td>
-                    <td class="px-6 py-4">${expense.source}</td>
-                    <td class="px-6 py-4 text-right font-semibold">${formatCurrency(expense.amount)} ฿</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button data-id="${expense.id}" class="edit-btn font-medium text-sky-600 hover:underline">แก้ไข</button>
-                        <button data-id="${expense.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button>
-                    </td>`;
+                if (expense.attachmentUrl) { attachmentLink = `<a href="${expense.attachmentUrl}" target="_blank" class="text-purple-600 hover:underline">[ไฟล์]</a>`; }
+                row.innerHTML = `<td class="px-6 py-4">${expenseDate}</td><td class="px-6 py-4 font-medium ${isReimbursement ? '' : 'text-stone-900'}">${isReimbursement ? 'คืนทุน: ' : ''}${expense.description} ${attachmentLink}</td><td class="px-6 py-4">${expense.source}</td><td class="px-6 py-4 text-right font-semibold">${formatCurrency(expense.amount)} ฿</td><td class="px-6 py-4 text-center whitespace-nowrap"><button data-id="${expense.id}" class="edit-btn font-medium text-sky-600 hover:underline">แก้ไข</button><button data-id="${expense.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`;
                 tbody.appendChild(row);
             });
             table.appendChild(tbody);
             expenseListContainer.appendChild(table);
         };
 
-        // --- Main Calculation and Rendering Logic ---
         const calculateAndRender = () => {
             expenseListContainer.innerHTML = '<p class="text-center py-10 text-stone-500">กำลังคำนวณ...</p>';
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const startDate = new Date(year, month, 1);
-            const endDate = new Date(year, month + 1, 1);
-
+            const year = currentDate.getFullYear(); const month = currentDate.getMonth(); const startDate = new Date(year, month, 1); const endDate = new Date(year, month + 1, 1);
             const prevExpenses = allExpenses.filter(ex => ex.expenseDate.toDate() < startDate);
-            const currentMonthExpenses = allExpenses.filter(ex => {
-                const d = ex.expenseDate.toDate();
-                return d >= startDate && d < endDate;
-            });
-            const currentMonthOrders = allOrders.filter(or => {
-                const d = or.orderDate.toDate();
-                return d >= startDate && d < endDate;
-            });
+            const currentMonthExpenses = allExpenses.filter(ex => { const d = ex.expenseDate.toDate(); return d >= startDate && d < endDate; });
+            const currentMonthOrders = allOrders.filter(or => { const d = or.orderDate.toDate(); return d >= startDate && d < endDate; });
             const prevOrders = allOrders.filter(or => or.orderDate.toDate() < startDate);
-
             let openingShopCapital = 0;
-            // *** FIX START: Correctly calculate opening capital based on actual payments ***
-            prevOrders.forEach(order => {
-                if (order.paymentStatus === 'ชำระแล้ว') {
-                    openingShopCapital += order.totalAmount || 0;
-                } else if (order.paymentStatus === 'มัดจำ') {
-                    openingShopCapital += order.depositAmount || 0;
-                }
-            });
-            // *** FIX END ***
-
+            prevOrders.forEach(order => { if (order.paymentStatus === 'ชำระแล้ว') { openingShopCapital += order.totalAmount || 0; } else if (order.paymentStatus === 'มัดจำ') { openingShopCapital += order.depositAmount || 0; } });
             const openingPersonalBalance = { 'ส่วนตัวพี่พีช': 0, 'ส่วนตัวน็อต': 0 };
-            prevExpenses.forEach(ex => {
-                const amount = ex.amount || 0;
-                if (ex.type === 'reimbursement') {
-                    openingShopCapital -= amount;
-                    if (openingPersonalBalance[ex.source] !== undefined) openingPersonalBalance[ex.source] -= amount;
-                } else {
-                    if (ex.source === 'ทุนร้าน') {
-                        openingShopCapital -= amount;
-                    } else if (openingPersonalBalance[ex.source] !== undefined) {
-                        openingPersonalBalance[ex.source] += amount;
-                    }
-                }
-            });
-
-            // *** FIX START: Correctly calculate current month's income based on actual payments ***
+            prevExpenses.forEach(ex => { const amount = ex.amount || 0; if (ex.type === 'reimbursement') { openingShopCapital -= amount; if (openingPersonalBalance[ex.source] !== undefined) openingPersonalBalance[ex.source] -= amount; } else { if (ex.source === 'ทุนร้าน') { openingShopCapital -= amount; } else if (openingPersonalBalance[ex.source] !== undefined) { openingPersonalBalance[ex.source] += amount; } } });
             let currentMonthIncome = 0;
-            currentMonthOrders.forEach(order => {
-                if (order.paymentStatus === 'ชำระแล้ว') {
-                    currentMonthIncome += order.totalAmount || 0;
-                } else if (order.paymentStatus === 'มัดจำ') {
-                    currentMonthIncome += order.depositAmount || 0;
-                }
-                // Orders with 'ยังไม่ได้ชำระ' or 'ฟรี' contribute 0 to income.
-            });
-            // *** FIX END ***
-            
-            const currentMonthShopExpense = currentMonthExpenses
-                .filter(ex => ex.source === 'ทุนร้าน' || ex.type === 'reimbursement')
-                .reduce((sum, ex) => sum + (ex.amount || 0), 0);
-            
-            const currentMonthPeachPaid = currentMonthExpenses
-                .filter(ex => ex.source === 'ส่วนตัวพี่พีช' && ex.type === 'expense')
-                .reduce((sum, ex) => sum + (ex.amount || 0), 0);
-            const currentMonthKnotPaid = currentMonthExpenses
-                .filter(ex => ex.source === 'ส่วนตัวน็อต' && ex.type === 'expense')
-                .reduce((sum, ex) => sum + (ex.amount || 0), 0);
-            const currentMonthPeachReimbursed = currentMonthExpenses
-                .filter(ex => ex.source === 'ส่วนตัวพี่พีช' && ex.type === 'reimbursement')
-                .reduce((sum, ex) => sum + (ex.amount || 0), 0);
-            const currentMonthKnotReimbursed = currentMonthExpenses
-                .filter(ex => ex.source === 'ส่วนตัวน็อต' && ex.type === 'reimbursement')
-                .reduce((sum, ex) => sum + (ex.amount || 0), 0);
-
+            currentMonthOrders.forEach(order => { if (order.paymentStatus === 'ชำระแล้ว') { currentMonthIncome += order.totalAmount || 0; } else if (order.paymentStatus === 'มัดจำ') { currentMonthIncome += order.depositAmount || 0; } });
+            const currentMonthShopExpense = currentMonthExpenses.filter(ex => ex.source === 'ทุนร้าน' || ex.type === 'reimbursement').reduce((sum, ex) => sum + (ex.amount || 0), 0);
+            const currentMonthPeachPaid = currentMonthExpenses.filter(ex => ex.source === 'ส่วนตัวพี่พีช' && ex.type === 'expense').reduce((sum, ex) => sum + (ex.amount || 0), 0);
+            const currentMonthKnotPaid = currentMonthExpenses.filter(ex => ex.source === 'ส่วนตัวน็อต' && ex.type === 'expense').reduce((sum, ex) => sum + (ex.amount || 0), 0);
+            const currentMonthPeachReimbursed = currentMonthExpenses.filter(ex => ex.source === 'ส่วนตัวพี่พีช' && ex.type === 'reimbursement').reduce((sum, ex) => sum + (ex.amount || 0), 0);
+            const currentMonthKnotReimbursed = currentMonthExpenses.filter(ex => ex.source === 'ส่วนตัวน็อต' && ex.type === 'reimbursement').reduce((sum, ex) => sum + (ex.amount || 0), 0);
             const currentMonthProfit = currentMonthIncome - currentMonthShopExpense;
             const finalCapital = openingShopCapital + currentMonthProfit;
             const finalPeachBalance = openingPersonalBalance['ส่วนตัวพี่พีช'] + currentMonthPeachPaid - currentMonthPeachReimbursed;
             const finalKnotBalance = openingPersonalBalance['ส่วนตัวน็อต'] + currentMonthKnotPaid - currentMonthKnotReimbursed;
-
-            summaryIncome.textContent = `${formatCurrency(currentMonthIncome)} ฿`;
-            summaryShopExpense.textContent = `${formatCurrency(currentMonthShopExpense)} ฿`;
-            summaryProfit.textContent = `${formatCurrency(currentMonthProfit)} ฿`;
-            summaryPeachTotal.textContent = `${formatCurrency(finalPeachBalance)} ฿`;
-            summaryKnotTotal.textContent = `${formatCurrency(finalKnotBalance)} ฿`;
-            summaryCapital.textContent = `${formatCurrency(finalCapital)} ฿`;
-
+            summaryIncome.textContent = `${formatCurrency(currentMonthIncome)} ฿`; summaryShopExpense.textContent = `${formatCurrency(currentMonthShopExpense)} ฿`; summaryProfit.textContent = `${formatCurrency(currentMonthProfit)} ฿`; summaryPeachTotal.textContent = `${formatCurrency(finalPeachBalance)} ฿`; summaryKnotTotal.textContent = `${formatCurrency(finalKnotBalance)} ฿`; summaryCapital.textContent = `${formatCurrency(finalCapital)} ฿`;
             renderExpenses(currentMonthExpenses.sort((a, b) => b.expenseDate.toDate() - a.expenseDate.toDate()));
         };
         
-        // --- Initial Data Fetching ---
         const initializePage = () => {
             updateMonthDisplay();
-            
             const expensesQuery = query(collection(db, "expenses"));
-            const paidOrdersQuery = query(collection(db, "orders"), where("paymentStatus", "==", "ชำระแล้ว"));
-            const shippedOrdersQuery = query(collection(db, "orders"), where("processingStatus", "==", "จัดส่งแล้ว"));
-            const depositOrdersQuery = query(collection(db, "orders"), where("paymentStatus", "==", "มัดจำ"));
-
-
+            const paidOrdersQuery = query(collection(db, "orders"), where("paymentStatus", "in", ["ชำระแล้ว", "มัดจำ"]));
             let expensesLoaded = false;
-            let paidOrders = [];
-            let shippedOrders = [];
-            let depositOrders = [];
-            let paidOrdersLoaded = false;
-            let shippedOrdersLoaded = false;
-            let depositOrdersLoaded = false;
-
-            const mergeAndRecalculate = () => {
-                if (!expensesLoaded || !paidOrdersLoaded || !shippedOrdersLoaded || !depositOrdersLoaded) return;
-
-                const ordersMap = new Map();
-                // Add all order types to the map to get a unique list of all relevant orders
-                paidOrders.forEach(order => ordersMap.set(order.id, order));
-                shippedOrders.forEach(order => ordersMap.set(order.id, order));
-                depositOrders.forEach(order => ordersMap.set(order.id, order));
-                
-                allOrders = Array.from(ordersMap.values());
-                calculateAndRender();
-            };
-
-            onSnapshot(expensesQuery, (snapshot) => {
-                allExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                expensesLoaded = true;
-                mergeAndRecalculate();
-            });
-
-            onSnapshot(paidOrdersQuery, (snapshot) => {
-                paidOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                paidOrdersLoaded = true;
-                mergeAndRecalculate();
-            }, (error) => console.error("Error fetching paid orders:", error));
-
-            onSnapshot(shippedOrdersQuery, (snapshot) => {
-                shippedOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                shippedOrdersLoaded = true;
-                mergeAndRecalculate();
-            }, (error) => console.error("Error fetching shipped orders:", error));
-            
-            onSnapshot(depositOrdersQuery, (snapshot) => {
-                depositOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                depositOrdersLoaded = true;
-                mergeAndRecalculate();
-            }, (error) => console.error("Error fetching deposit orders:", error));
+            let ordersLoaded = false;
+            const mergeAndRecalculate = () => { if (expensesLoaded && ordersLoaded) { calculateAndRender(); } };
+            onSnapshot(expensesQuery, (snapshot) => { allExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); expensesLoaded = true; mergeAndRecalculate(); });
+            onSnapshot(paidOrdersQuery, (snapshot) => { allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); ordersLoaded = true; mergeAndRecalculate(); });
         };
 
-        // --- Event Listeners ---
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            updateMonthDisplay();
-            calculateAndRender();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            updateMonthDisplay();
-            calculateAndRender();
-        });
-
-        addExpenseBtn.addEventListener('click', () => {
-            setupFormForType('expense');
-            const now = new Date();
-            const selectedMonth = new Date(currentDate);
-            if(now.getFullYear() === selectedMonth.getFullYear() && now.getMonth() === selectedMonth.getMonth()) {
-                 document.getElementById('expenseDate').valueAsDate = now;
-            } else {
-                 document.getElementById('expenseDate').valueAsDate = selectedMonth;
-            }
-            openModal();
-        });
-        
+        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateMonthDisplay(); calculateAndRender(); });
+        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateMonthDisplay(); calculateAndRender(); });
+        addExpenseBtn.addEventListener('click', () => { setupFormForType('expense'); const now = new Date(); const selectedMonth = new Date(currentDate); if(now.getFullYear() === selectedMonth.getFullYear() && now.getMonth() === selectedMonth.getMonth()) { document.getElementById('expenseDate').valueAsDate = now; } else { document.getElementById('expenseDate').valueAsDate = selectedMonth; } openModal(); });
         typeSelect.addEventListener('change', (e) => setupFormForType(e.target.value));
-        
-        expenseForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitButton.disabled = true;
-            submitButton.textContent = 'กำลังบันทึก...';
-            
-            const expenseId = expenseIdField.value;
-            const attachmentFile = document.getElementById('attachment').files[0];
-            let attachmentUrl = document.getElementById('current-attachment').dataset.url || '';
-            let attachmentPath = document.getElementById('current-attachment').dataset.path || '';
-
-            try {
-                if (attachmentFile) {
-                    if (expenseId && attachmentPath) {
-                        const oldFileRef = ref(storage, attachmentPath);
-                        await deleteObject(oldFileRef).catch(err => console.log("Old file not found, continuing...", err));
-                    }
-                    const newAttachmentPath = `expense_receipts/${Date.now()}-${attachmentFile.name}`;
-                    const fileRef = ref(storage, newAttachmentPath);
-                    await uploadBytes(fileRef, attachmentFile);
-                    attachmentUrl = await getDownloadURL(fileRef);
-                    attachmentPath = newAttachmentPath;
-                }
-
-                const data = {
-                    type: typeSelect.value,
-                    expenseDate: new Date(document.getElementById('expenseDate').value),
-                    description: document.getElementById('description').value,
-                    amount: parseFloat(document.getElementById('amount').value),
-                    source: sourceSelect.value,
-                    attachmentUrl: attachmentUrl,
-                    attachmentPath: attachmentPath,
-                };
-
-                if (expenseId) {
-                    await setDoc(doc(db, "expenses", expenseId), data, { merge: true });
-                } else {
-                    data.createdAt = serverTimestamp();
-                    await addDoc(collection(db, "expenses"), data);
-                }
-                closeModal();
-
-            } catch (error) {
-                console.error("Error saving expense:", error);
-                alert("เกิดข้อผิดพลาดในการบันทึก");
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'บันทึก';
-            }
-        });
-        
-        expenseListContainer.addEventListener('click', async (e) => {
-            const button = e.target;
-            const id = button.dataset.id;
-            if (!id) return;
-
-            if (button.classList.contains('edit-btn')) {
-                const docRef = doc(db, "expenses", id);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const type = data.type || 'expense';
-                    
-                    setupFormForType(type);
-                    
-                    expenseIdField.value = id;
-                    typeSelect.value = type;
-                    document.getElementById('expenseDate').value = data.expenseDate.toDate().toISOString().split('T')[0];
-                    document.getElementById('description').value = data.description;
-                    document.getElementById('amount').value = data.amount;
-                    sourceSelect.value = data.source;
-
-                    if (data.attachmentUrl) {
-                        currentAttachment.textContent = `ไฟล์ปัจจุบัน: ${data.attachmentPath.split('/').pop()}`;
-                        currentAttachment.dataset.url = data.attachmentUrl;
-                        currentAttachment.dataset.path = data.attachmentPath;
-                        currentAttachment.classList.remove('hidden');
-                    }
-                    formTitle.textContent = 'แก้ไขรายการ';
-                    openModal();
-                }
-            } else if (button.classList.contains('delete-btn')) {
-                if (confirm('ต้องการลบรายการค่าใช้จ่ายนี้ใช่หรือไม่?')) {
-                    try {
-                        const docRef = doc(db, "expenses", id);
-                        const docSnap = await getDoc(docRef);
-                        if (docSnap.exists() && docSnap.data().attachmentPath) {
-                            const fileRef = ref(storage, docSnap.data().attachmentPath);
-                            await deleteObject(fileRef).catch(err => {
-                                if (err.code !== 'storage/object-not-found') throw err;
-                            });
-                        }
-                        await deleteDoc(docRef);
-                    } catch (error) {
-                        console.error("Error deleting expense:", error);
-                        alert("เกิดข้อผิดพลาดในการลบ");
-                    }
-                }
-            }
-        });
-
-        // --- Initialization ---
+        expenseForm.addEventListener('submit', async (e) => { e.preventDefault(); submitButton.disabled = true; submitButton.textContent = 'กำลังบันทึก...'; const expenseId = expenseIdField.value; const attachmentFile = document.getElementById('attachment').files[0]; let attachmentUrl = document.getElementById('current-attachment').dataset.url || ''; let attachmentPath = document.getElementById('current-attachment').dataset.path || ''; try { if (attachmentFile) { if (expenseId && attachmentPath) { const oldFileRef = ref(storage, attachmentPath); await deleteObject(oldFileRef).catch(err => console.log("Old file not found, continuing...", err)); } const newAttachmentPath = `expense_receipts/${Date.now()}-${attachmentFile.name}`; const fileRef = ref(storage, newAttachmentPath); await uploadBytes(fileRef, attachmentFile); attachmentUrl = await getDownloadURL(fileRef); attachmentPath = newAttachmentPath; } const data = { type: typeSelect.value, expenseDate: new Date(document.getElementById('expenseDate').value), description: document.getElementById('description').value, amount: parseFloat(document.getElementById('amount').value), source: sourceSelect.value, attachmentUrl: attachmentUrl, attachmentPath: attachmentPath, }; if (expenseId) { await setDoc(doc(db, "expenses", expenseId), data, { merge: true }); } else { data.createdAt = serverTimestamp(); await addDoc(collection(db, "expenses"), data); } closeModal(); } catch (error) { console.error("Error saving expense:", error); alert("เกิดข้อผิดพลาดในการบันทึก"); } finally { submitButton.disabled = false; submitButton.textContent = 'บันทึก'; } });
+        expenseListContainer.addEventListener('click', async (e) => { const button = e.target; const id = button.dataset.id; if (!id) return; if (button.classList.contains('edit-btn')) { const docRef = doc(db, "expenses", id); const docSnap = await getDoc(docRef); if (docSnap.exists()) { const data = docSnap.data(); const type = data.type || 'expense'; setupFormForType(type); expenseIdField.value = id; typeSelect.value = type; document.getElementById('expenseDate').value = data.expenseDate.toDate().toISOString().split('T')[0]; document.getElementById('description').value = data.description; document.getElementById('amount').value = data.amount; sourceSelect.value = data.source; if (data.attachmentUrl) { currentAttachment.textContent = `ไฟล์ปัจจุบัน: ${data.attachmentPath.split('/').pop()}`; currentAttachment.dataset.url = data.attachmentUrl; currentAttachment.dataset.path = data.attachmentPath; currentAttachment.classList.remove('hidden'); } formTitle.textContent = 'แก้ไขรายการ'; openModal(); } } else if (button.classList.contains('delete-btn')) { if (confirm('ต้องการลบรายการค่าใช้จ่ายนี้ใช่หรือไม่?')) { try { const docRef = doc(db, "expenses", id); const docSnap = await getDoc(docRef); if (docSnap.exists() && docSnap.data().attachmentPath) { const fileRef = ref(storage, docSnap.data().attachmentPath); await deleteObject(fileRef).catch(err => { if (err.code !== 'storage/object-not-found') throw err; }); } await deleteDoc(docRef); } catch (error) { console.error("Error deleting expense:", error); alert("เกิดข้อผิดพลาดในการลบ"); } } } });
         initializePage();
         closeModalBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
     </script>
 </body>
 </html>

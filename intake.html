@@ -21,130 +21,127 @@
         }
     </style>
 </head>
-<body class="bg-stone-100">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <div class="container mx-auto px-4 py-10">
-        <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg">
             
-            <header class="mb-8 border-b pb-4">
-                 <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-4 inline-block">&larr; กลับไปหน้าหลัก</a>
-                <h1 class="text-3xl font-bold text-stone-800">บันทึกการรับเข้า / เพิ่มสต็อค</h1>
-                <p class="text-stone-600 mt-1">กรอกข้อมูลเพื่อบันทึกของใหม่ หรือเพิ่มสต็อคของเดิม</p>
-            </header>
+                <header class="mb-8 border-b pb-4">
+                    <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">บันทึกการรับเข้า / เพิ่มสต็อค</h1>
+                    <p class="text-stone-600 mt-1">กรอกข้อมูลเพื่อบันทึกของใหม่ หรือเพิ่มสต็อคของเดิม</p>
+                </header>
 
-            <div class="mb-6">
-                <fieldset class="flex gap-6">
-                    <legend class="sr-only">เลือกโหมดการบันทึก</legend>
-                    <div>
-                        <input type="radio" name="intakeMode" value="existing" id="mode-existing" class="peer hidden" checked>
-                        <label for="mode-existing" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-sky-500 peer-checked:ring-2 peer-checked:ring-sky-500">
-                            <p class="font-semibold text-stone-700">เพิ่มสต็อคให้ของที่มีอยู่แล้ว</p>
-                            <p class="text-sm text-stone-500">สำหรับซื้อของชนิดเดิมมาเพิ่ม</p>
-                        </label>
-                    </div>
-                    <div>
-                        <input type="radio" name="intakeMode" value="new" id="mode-new" class="peer hidden">
-                        <label for="mode-new" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500">
-                            <p class="font-semibold text-stone-700">บันทึกเป็นของใหม่</p>
-                            <p class="text-sm text-stone-500">สำหรับของที่ไม่เคยมีในสต็อค</p>
-                        </label>
-                    </div>
-                </fieldset>
-            </div>
-
-            <form id="intake-form">
-                <!-- Section for EXISTING items -->
-                <div id="existing-item-section" class="form-section">
-                    <div class="space-y-6 p-4 border-l-4 border-sky-300 bg-sky-50 rounded-r-lg">
+                <div class="mb-6">
+                    <fieldset class="flex gap-6">
+                        <legend class="sr-only">เลือกโหมดการบันทึก</legend>
                         <div>
-                            <label for="existing-item-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกรายการจากสต็อค *</label>
-                            <select id="existing-item-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
-                                <option value="">-- กำลังโหลดรายการ --</option>
-                            </select>
+                            <input type="radio" name="intakeMode" value="existing" id="mode-existing" class="peer hidden" checked>
+                            <label for="mode-existing" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-sky-500 peer-checked:ring-2 peer-checked:ring-sky-500">
+                                <p class="font-semibold text-stone-700">เพิ่มสต็อคให้ของที่มีอยู่แล้ว</p>
+                                <p class="text-sm text-stone-500">สำหรับซื้อของชนิดเดิมมาเพิ่ม</p>
+                            </label>
                         </div>
-                    </div>
+                        <div>
+                            <input type="radio" name="intakeMode" value="new" id="mode-new" class="peer hidden">
+                            <label for="mode-new" class="block cursor-pointer rounded-lg border border-stone-300 p-4 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500">
+                                <p class="font-semibold text-stone-700">บันทึกเป็นของใหม่</p>
+                                <p class="text-sm text-stone-500">สำหรับของที่ไม่เคยมีในสต็อค</p>
+                            </label>
+                        </div>
+                    </fieldset>
                 </div>
 
-                <!-- Section for NEW items -->
-                <div id="new-item-section" class="form-section hidden opacity-0 max-h-0">
-                     <div class="space-y-6 p-4 border-l-4 border-emerald-300 bg-emerald-50 rounded-r-lg">
-                        <div>
-                            <label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภท *</label>
-                            <select id="type" name="type" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                                <option value="หิน">หิน</option>
-                                <option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</option>
-                                <option value="จี้">จี้</option>
-                            </select>
+                <form id="intake-form">
+                    <div id="existing-item-section" class="form-section">
+                        <div class="space-y-6 p-4 border-l-4 border-sky-300 bg-sky-50 rounded-r-lg">
+                            <div>
+                                <label for="existing-item-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกรายการจากสต็อค *</label>
+                                <select id="existing-item-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
+                                    <option value="">-- กำลังโหลดรายการ --</option>
+                                </select>
+                            </div>
                         </div>
+                    </div>
+
+                    <div id="new-item-section" class="form-section hidden opacity-0 max-h-0">
+                        <div class="space-y-6 p-4 border-l-4 border-emerald-300 bg-emerald-50 rounded-r-lg">
+                            <div>
+                                <label for="type" class="block text-sm font-medium text-stone-700 mb-1">ประเภท *</label>
+                                <select id="type" name="type" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                    <option value="หิน">หิน</option>
+                                    <option value="อุปกรณ์ตกแต่ง">อุปกรณ์ตกแต่ง</option>
+                                    <option value="จี้">จี้</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อ *</label>
+                                    <input type="text" id="name" name="name" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="size" class="block text-sm font-medium text-stone-700 mb-1">ขนาด (mm)</label>
+                                    <input type="number" id="size" name="size" step="0.1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                </div>
+                            </div>
+                            <div>
+                                <label for="image" class="block text-sm font-medium text-stone-700 mb-1">รูปภาพ</label>
+                                <input type="file" id="image" name="image" accept="image/*" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อ *</label>
-                                <input type="text" id="name" name="name" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <label for="importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
+                                <input type="date" id="importDate" name="importDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md">
                             </div>
                             <div>
-                                <label for="size" class="block text-sm font-medium text-stone-700 mb-1">ขนาด (mm)</label>
-                                <input type="number" id="size" name="size" step="0.1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                <label for="supplier-select" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
+                                <select id="supplier-select" name="supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                    <option value="">-- ไม่ระบุ --</option>
+                                    <option value="other">อื่นๆ (กรอกเอง)</option>
+                                </select>
+                            </div>
+                            <div id="other-supplier-container" class="hidden md:col-span-2">
+                                <label for="other-supplier" class="block text-sm font-medium text-stone-700 mb-1">ระบุชื่อผู้ขายอื่น</label>
+                                <input type="text" id="other-supplier" name="other-supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
+                                <input type="number" id="totalPrice" name="totalPrice" required step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="quantity" class="block text-sm font-medium text-stone-700 mb-1">จำนวนที่เพิ่ม (ชิ้น/เม็ด) *</label>
+                                <input type="number" id="quantity" name="quantity" required min="1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
                             </div>
                         </div>
-                        <div>
-                            <label for="image" class="block text-sm font-medium text-stone-700 mb-1">รูปภาพ</label>
-                            <input type="file" id="image" name="image" accept="image/*" class="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
-                        </div>
                     </div>
-                </div>
 
-                <!-- Common fields for BOTH modes -->
-                <div class="mt-6 space-y-6">
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label for="importDate" class="block text-sm font-medium text-stone-700 mb-1">วันที่รับเข้า *</label>
-                            <input type="date" id="importDate" name="importDate" required class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                        </div>
-                        <!-- *** อัปเดต: เปลี่ยนช่องผู้ขายเป็น Dropdown *** -->
-                        <div>
-                            <label for="supplier-select" class="block text-sm font-medium text-stone-700 mb-1">ผู้ขาย</label>
-                            <select id="supplier-select" name="supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                                <option value="">-- ไม่ระบุ --</option>
-                                <option value="other">อื่นๆ (กรอกเอง)</option>
-                            </select>
-                        </div>
-                        <div id="other-supplier-container" class="hidden md:col-span-2">
-                             <label for="other-supplier" class="block text-sm font-medium text-stone-700 mb-1">ระบุชื่อผู้ขายอื่น</label>
-                             <input type="text" id="other-supplier" name="other-supplier" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                        </div>
-                        <div>
-                            <label for="totalPrice" class="block text-sm font-medium text-stone-700 mb-1">ราคาที่ซื้อมา (บาท) *</label>
-                            <input type="number" id="totalPrice" name="totalPrice" required step="0.01" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                        </div>
-                        <div>
-                            <label for="quantity" class="block text-sm font-medium text-stone-700 mb-1">จำนวนที่เพิ่ม (ชิ้น/เม็ด) *</label>
-                            <input type="number" id="quantity" name="quantity" required min="1" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                        </div>
+                    <div class="mt-8 pt-6 border-t">
+                        <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400">
+                            <span id="button-text">บันทึกข้อมูล</span>
+                        </button>
                     </div>
-                </div>
+                </form>
 
-                <div class="mt-8 pt-6 border-t">
-                    <button type="submit" id="submit-button" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-400">
-                        <span id="button-text">บันทึกข้อมูล</span>
-                    </button>
-                </div>
-            </form>
-
-            <div class="mt-12">
-                <div class="flex justify-between items-center mb-4 border-t pt-6">
-                    <h2 class="text-2xl font-bold text-stone-800">รายการล่าสุด (3)</h2>
-                    <a href="stock.html" class="text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                        ไปที่หน้าสต็อคทั้งหมด &rarr;
-                    </a>
-                </div>
-                <div id="recent-items-container" class="space-y-4">
-                    <p class="text-stone-500 text-center py-4">กำลังโหลดรายการล่าสุด...</p>
+                <div class="mt-12">
+                    <div class="flex justify-between items-center mb-4 border-t pt-6">
+                        <h2 class="text-2xl font-bold text-stone-800">รายการล่าสุด (3)</h2>
+                        <a href="stock.html" class="text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                            ไปที่หน้าสต็อคทั้งหมด &rarr;
+                        </a>
+                    </div>
+                    <div id="recent-items-container" class="space-y-4">
+                        <p class="text-stone-500 text-center py-4">กำลังโหลดรายการล่าสุด...</p>
+                    </div>
                 </div>
             </div>
-
-        </div>
+        </main>
     </div>
 
+    <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, doc, updateDoc, orderBy, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -164,7 +161,6 @@
         const existingItemSection = document.getElementById('existing-item-section');
         const newItemSection = document.getElementById('new-item-section');
         const existingItemSelect = document.getElementById('existing-item-select');
-        // *** อัปเดต: เพิ่ม DOM elements สำหรับผู้ขาย ***
         const supplierSelect = document.getElementById('supplier-select');
         const otherSupplierContainer = document.getElementById('other-supplier-container');
         const otherSupplierInput = document.getElementById('other-supplier');
@@ -198,7 +194,6 @@
             });
         }
 
-        // *** อัปเดต: ฟังก์ชันสำหรับดึงข้อมูลผู้ขาย ***
         async function populateSuppliers() {
             const q = query(collection(db, "suppliers"), orderBy("name"));
             const snapshot = await getDocs(q);
@@ -249,7 +244,6 @@
             const newTotalPrice = parseFloat(formData.get('totalPrice'));
             const newQuantity = parseInt(formData.get('quantity'), 10);
 
-            // *** อัปเดต: Logic การดึงชื่อผู้ขาย ***
             let supplierName = supplierSelect.value;
             if (supplierName === 'other') {
                 supplierName = otherSupplierInput.value.trim();
@@ -333,7 +327,6 @@
             }
         });
 
-        // *** อัปเดต: Event listener สำหรับ dropdown ผู้ขาย ***
         supplierSelect.addEventListener('change', (e) => {
             otherSupplierContainer.classList.toggle('hidden', e.target.value !== 'other');
         });
@@ -342,7 +335,7 @@
             document.getElementById('importDate').valueAsDate = new Date();
             await Promise.all([
                 populateExistingItems(),
-                populateSuppliers() // ดึงข้อมูลผู้ขาย
+                populateSuppliers()
             ]);
             handleModeChange();
 

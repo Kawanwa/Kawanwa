@@ -13,82 +13,54 @@
     <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
     <style> body { font-family: 'Kanit', sans-serif; } </style>
 </head>
-<body class="bg-stone-100">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <div class="container mx-auto px-4 py-10">
-        <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-            <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="w-full">
-                     <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
-                    <h1 class="text-3xl font-bold text-stone-800">สรุปรายงานการขาย</h1>
-                </div>
-                <button class="bg-slate-700 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors whitespace-nowrap" onclick="window.print()">พิมพ์รายงาน</button>
-            </header>
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="w-full">
+                        <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">สรุปรายงานการขาย</h1>
+                    </div>
+                    <button class="bg-slate-700 text-white px-4 py-2 rounded-md hover:bg-slate-800 transition-colors whitespace-nowrap" onclick="window.print()">พิมพ์รายงาน</button>
+                </header>
 
-            <div class="flex flex-col md:flex-row gap-4 items-center mb-6 p-4 bg-stone-50 rounded-lg">
-                <div class="flex items-center gap-2">
-                    <label for="startDate" class="text-sm font-medium text-stone-700">ตั้งแต่:</label>
-                    <input type="date" id="startDate" class="border-stone-300 rounded-md shadow-sm">
+                <div class="flex flex-col md:flex-row gap-4 items-center mb-6 p-4 bg-stone-50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <label for="startDate" class="text-sm font-medium text-stone-700">ตั้งแต่:</label>
+                        <input type="date" id="startDate" class="border-stone-300 rounded-md shadow-sm">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="endDate" class="text-sm font-medium text-stone-700">ถึง:</label>
+                        <input type="date" id="endDate" class="border-stone-300 rounded-md shadow-sm">
+                    </div>
+                    <button id="generateReportBtn" class="w-full md:w-auto bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                        สร้างรายงาน
+                    </button>
                 </div>
-                <div class="flex items-center gap-2">
-                    <label for="endDate" class="text-sm font-medium text-stone-700">ถึง:</label>
-                    <input type="date" id="endDate" class="border-stone-300 rounded-md shadow-sm">
-                </div>
-                <button id="generateReportBtn" class="w-full md:w-auto bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
-                    สร้างรายงาน
-                </button>
-            </div>
-            
-            <div id="reportContent">
-                <!-- *** อัปเดต: เพิ่มการ์ดสรุปยอดใหม่ *** -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                    <div class="bg-blue-50 p-4 rounded-lg border-b-4 border-blue-400">
-                        <h3 class="text-sm font-medium text-blue-700">ยอดขายรวม</h3>
-                        <p class="text-2xl font-bold text-blue-900" id="totalSales">0.00 ฿</p>
+                
+                <div id="reportContent">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                        <div class="bg-blue-50 p-4 rounded-lg border-b-4 border-blue-400"><h3 class="text-sm font-medium text-blue-700">ยอดขายรวม</h3><p class="text-2xl font-bold text-blue-900" id="totalSales">0.00 ฿</p></div>
+                        <div class="bg-orange-50 p-4 rounded-lg border-b-4 border-orange-400"><h3 class="text-sm font-medium text-orange-700">ต้นทุนสินค้า</h3><p class="text-2xl font-bold text-orange-900" id="totalCost">0.00 ฿</p></div>
+                        <div class="bg-emerald-50 p-4 rounded-lg border-b-4 border-emerald-400"><h3 class="text-sm font-medium text-emerald-700">กำไรขั้นต้น</h3><p class="text-2xl font-bold text-emerald-900" id="grossProfit">0.00 ฿</p></div>
+                        <div class="bg-rose-50 p-4 rounded-lg border-b-4 border-rose-400"><h3 class="text-sm font-medium text-rose-700">ค่าใช้จ่ายร้าน</h3><p class="text-2xl font-bold text-rose-900" id="totalExpenses">0.00 ฿</p></div>
+                        <div class="bg-green-100 p-4 rounded-lg border-b-4 border-green-500"><h3 class="text-sm font-medium text-green-800">กำไรสุทธิ</h3><p class="text-3xl font-extrabold text-green-900" id="netProfit">0.00 ฿</p></div>
                     </div>
-                    <div class="bg-orange-50 p-4 rounded-lg border-b-4 border-orange-400">
-                        <h3 class="text-sm font-medium text-orange-700">ต้นทุนสินค้า</h3>
-                        <p class="text-2xl font-bold text-orange-900" id="totalCost">0.00 ฿</p>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
+                         <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md border"><h2 class="text-xl font-bold text-stone-800 mb-4">ภาพรวมยอดขายรายวัน</h2><canvas id="salesChart"></canvas></div>
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border"><h2 class="text-xl font-bold text-stone-800 mb-4">สินค้าขายดี 5 อันดับ</h2><div id="bestSellersContainer"><p class="text-center py-10 text-stone-500">ไม่มีข้อมูล</p></div></div>
                     </div>
-                    <div class="bg-emerald-50 p-4 rounded-lg border-b-4 border-emerald-400">
-                        <h3 class="text-sm font-medium text-emerald-700">กำไรขั้นต้น</h3>
-                        <p class="text-2xl font-bold text-emerald-900" id="grossProfit">0.00 ฿</p>
-                    </div>
-                    <div class="bg-rose-50 p-4 rounded-lg border-b-4 border-rose-400">
-                        <h3 class="text-sm font-medium text-rose-700">ค่าใช้จ่ายร้าน</h3>
-                        <p class="text-2xl font-bold text-rose-900" id="totalExpenses">0.00 ฿</p>
-                    </div>
-                    <div class="bg-green-100 p-4 rounded-lg border-b-4 border-green-500">
-                        <h3 class="text-sm font-medium text-green-800">กำไรสุทธิ</h3>
-                        <p class="text-3xl font-extrabold text-green-900" id="netProfit">0.00 ฿</p>
-                    </div>
-                </div>
-
-                <!-- Charts and Best Sellers -->
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
-                     <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-md border">
-                        <h2 class="text-xl font-bold text-stone-800 mb-4">ภาพรวมยอดขายรายวัน</h2>
-                        <canvas id="salesChart"></canvas>
-                    </div>
-                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-md border">
-                        <h2 class="text-xl font-bold text-stone-800 mb-4">สินค้าขายดี 5 อันดับ</h2>
-                        <div id="bestSellersContainer">
-                            <p class="text-center py-10 text-stone-500">ไม่มีข้อมูล</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Detailed Orders -->
-                <div class="bg-white p-6 rounded-xl shadow-md border">
-                    <h2 class="text-xl font-bold text-stone-800 mb-4">รายการออเดอร์ที่สำเร็จ</h2>
-                    <div id="ordersTableContainer" class="overflow-x-auto">
-                         <p class="text-center py-10 text-stone-500">กรุณากด "สร้างรายงาน" เพื่อดูข้อมูล</p>
+                    <div class="bg-white p-6 rounded-xl shadow-md border">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4">รายการออเดอร์ที่สำเร็จ</h2>
+                        <div id="ordersTableContainer" class="overflow-x-auto"><p class="text-center py-10 text-stone-500">กรุณากด "สร้างรายงาน" เพื่อดูข้อมูล</p></div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
+    <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -105,7 +77,6 @@
             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             document.getElementById('startDate').valueAsDate = firstDayOfMonth;
             document.getElementById('endDate').valueAsDate = today;
-
             document.getElementById('generateReportBtn').addEventListener('click', generateReport);
         });
 
@@ -113,7 +84,6 @@
             const generateBtn = document.getElementById('generateReportBtn');
             generateBtn.disabled = true;
             generateBtn.textContent = 'กำลังโหลด...';
-
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
 
@@ -127,40 +97,18 @@
             try {
                 const startTimestamp = Timestamp.fromDate(new Date(startDate));
                 const endTimestamp = Timestamp.fromDate(new Date(`${endDate}T23:59:59`));
-
-                const ordersQuery = query(collection(db, "orders"),
-                    where("orderDate", ">=", startTimestamp),
-                    where("orderDate", "<=", endTimestamp)
-                );
-                
-                // *** อัปเดต: ดึงข้อมูลค่าใช้จ่ายมาด้วย ***
-                const expensesQuery = query(collection(db, "expenses"),
-                    where("expenseDate", ">=", startTimestamp),
-                    where("expenseDate", "<=", endTimestamp),
-                    where("type", "==", "expense"), // ดึงมาเฉพาะรายการที่เป็น 'ค่าใช้จ่าย'
-                    where("source", "==", "ทุนร้าน") // และใช้เงินจาก 'ทุนร้าน' เท่านั้น
-                );
-
-                const [ordersSnapshot, expensesSnapshot] = await Promise.all([
-                    getDocs(ordersQuery),
-                    getDocs(expensesQuery)
-                ]);
-                
-                const successfulOrders = ordersSnapshot.docs
-                    .map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(order => (order.paymentStatus === 'ชำระแล้ว' || order.processingStatus === 'จัดส่งแล้ว') && !order.isFree);
-                
+                const ordersQuery = query(collection(db, "orders"), where("orderDate", ">=", startTimestamp), where("orderDate", "<=", endTimestamp));
+                const expensesQuery = query(collection(db, "expenses"), where("expenseDate", ">=", startTimestamp), where("expenseDate", "<=", endTimestamp), where("type", "==", "expense"), where("source", "==", "ทุนร้าน"));
+                const [ordersSnapshot, expensesSnapshot] = await Promise.all([ getDocs(ordersQuery), getDocs(expensesQuery) ]);
+                const successfulOrders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).filter(order => (order.paymentStatus === 'ชำระแล้ว' || order.processingStatus === 'จัดส่งแล้ว') && !order.isFree);
                 const shopExpenses = expensesSnapshot.docs.map(doc => doc.data());
-
                 const customersMap = new Map();
                 const customersSnapshot = await getDocs(collection(db, "customers"));
                 customersSnapshot.forEach(doc => customersMap.set(doc.id, doc.data()));
-
                 updateKPIs(successfulOrders, shopExpenses);
                 updateSalesChart(successfulOrders);
                 updateOrdersTable(successfulOrders, customersMap);
                 await updateBestSellers(successfulOrders);
-
             } catch (error) {
                 console.error("Error generating report:", error);
                 showToast("เกิดข้อผิดพลาดในการสร้างรายงาน: " + error.message, true);
@@ -170,33 +118,24 @@
             }
         }
 
-        // *** อัปเดต: ฟังก์ชัน updateKPIs รับพารามิเตอร์ expenses เพิ่ม ***
         function updateKPIs(orders, expenses) {
             const totalSales = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
             const totalCost = orders.reduce((sum, order) => sum + (order.totalCost || 0), 0);
             const grossProfit = totalSales - totalCost;
             const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
             const netProfit = grossProfit - totalExpenses;
-            
             document.getElementById('totalSales').textContent = formatCurrency(totalSales);
             document.getElementById('totalCost').textContent = formatCurrency(totalCost);
             document.getElementById('grossProfit').textContent = formatCurrency(grossProfit);
             document.getElementById('totalExpenses').textContent = formatCurrency(totalExpenses);
             document.getElementById('netProfit').textContent = formatCurrency(netProfit);
-            // document.getElementById('orderCount').textContent = orders.length; // (Optional: Can be re-added if needed)
         }
 
         function updateSalesChart(orders) {
             const ctx = document.getElementById('salesChart').getContext('2d');
             const salesByDate = {};
-
-            orders.forEach(order => {
-                const date = dateFns.format(order.orderDate.toDate(), 'yyyy-MM-dd');
-                salesByDate[date] = (salesByDate[date] || 0) + (order.totalAmount || 0);
-            });
-            
+            orders.forEach(order => { const date = dateFns.format(order.orderDate.toDate(), 'yyyy-MM-dd'); salesByDate[date] = (salesByDate[date] || 0) + (order.totalAmount || 0); });
             const sortedDates = Object.keys(salesByDate).sort();
-            
             const chartData = {
                 labels: sortedDates,
                 datasets: [{
@@ -211,107 +150,39 @@
                     type: 'line',
                 }]
             };
-
             if (salesChartInstance) salesChartInstance.destroy();
-
-            salesChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: chartData,
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
-            });
+            salesChartInstance = new Chart(ctx, { type: 'bar', data: chartData, options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } } });
         }
 
         async function updateBestSellers(orders) {
             const container = document.getElementById('bestSellersContainer');
-            if (orders.length === 0) {
-                 container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีข้อมูล</p>';
-                 return;
-            }
-
+            if (orders.length === 0) { container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีข้อมูล</p>'; return; }
             const itemCounts = new Map();
             const braceletIds = orders.map(o => o.braceletId).filter(id => id);
-
             if (braceletIds.length > 0) {
                  const braceletsQuery = query(collection(db, "bracelets"), where("__name__", "in", braceletIds));
                  const braceletsSnapshot = await getDocs(braceletsQuery);
-                 
-                 braceletsSnapshot.forEach(doc => {
-                    const bracelet = doc.data();
-                    if(bracelet.usedMaterials) {
-                        bracelet.usedMaterials.forEach(item => {
-                            const currentQty = itemCounts.get(item.materialId) || 0;
-                            itemCounts.set(item.materialId, currentQty + item.quantityUsed);
-                        });
-                    }
-                 });
+                 braceletsSnapshot.forEach(doc => { const bracelet = doc.data(); if(bracelet.usedMaterials) { bracelet.usedMaterials.forEach(item => { const currentQty = itemCounts.get(item.materialId) || 0; itemCounts.set(item.materialId, currentQty + item.quantityUsed); }); } });
             }
-
             const materialsMap = new Map();
             const materialsSnapshot = await getDocs(collection(db, "materials"));
             materialsSnapshot.forEach(doc => materialsMap.set(doc.id, doc.data()));
-
-            const sortedItems = Array.from(itemCounts.entries())
-                .map(([materialId, quantity]) => {
-                    const material = materialsMap.get(materialId);
-                    return {
-                        name: material ? `${material.name} (${material.size || 'N/A'})` : 'ไม่พบข้อมูล',
-                        quantity
-                    };
-                })
-                .sort((a, b) => b.quantity - a.quantity)
-                .slice(0, 5);
-
-            if (sortedItems.length === 0) {
-                container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีข้อมูลสินค้าขายดี</p>';
-                return;
-            }
-
-            container.innerHTML = `
-                <ol class="space-y-3 list-decimal list-inside text-stone-700">
-                    ${sortedItems.map(item => `
-                        <li>
-                            <span class="font-semibold">${item.name}</span>
-                            <span class="text-sm text-stone-500 float-right">${item.quantity.toLocaleString()} ชิ้น</span>
-                        </li>
-                    `).join('')}
-                </ol>
-            `;
+            const sortedItems = Array.from(itemCounts.entries()).map(([materialId, quantity]) => { const material = materialsMap.get(materialId); return { name: material ? `${material.name} (${material.size || 'N/A'})` : 'ไม่พบข้อมูล', quantity }; }).sort((a, b) => b.quantity - a.quantity).slice(0, 5);
+            if (sortedItems.length === 0) { container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีข้อมูลสินค้าขายดี</p>'; return; }
+            container.innerHTML = `<ol class="space-y-3 list-decimal list-inside text-stone-700">${sortedItems.map(item => `<li><span class="font-semibold">${item.name}</span><span class="text-sm text-stone-500 float-right">${item.quantity.toLocaleString()} ชิ้น</span></li>`).join('')}</ol>`;
         }
 
         function updateOrdersTable(orders, customersMap) {
             const container = document.getElementById('ordersTableContainer');
-            if (orders.length === 0) {
-                container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีออเดอร์ที่สำเร็จในช่วงวันที่เลือก</p>';
-                return;
-            }
-            
+            if (orders.length === 0) { container.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่มีออเดอร์ที่สำเร็จในช่วงวันที่เลือก</p>'; return; }
             const table = document.createElement('table');
             table.className = 'w-full text-sm text-left text-stone-700';
-            table.innerHTML = `
-                <thead class="text-xs text-stone-700 uppercase bg-stone-50">
-                    <tr>
-                        <th class="px-4 py-3">วันที่</th>
-                        <th class="px-4 py-3">ลูกค้า</th>
-                        <th class="px-4 py-3 text-right">ยอดขาย</th>
-                        <th class="px-4 py-3 text-right">กำไรขั้นต้น</th>
-                        <th class="px-4 py-3 text-center">สถานะชำระเงิน</th>
-                    </tr>
-                </thead>
-            `;
+            table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th class="px-4 py-3">วันที่</th><th class="px-4 py-3">ลูกค้า</th><th class="px-4 py-3 text-right">ยอดขาย</th><th class="px-4 py-3 text-right">กำไรขั้นต้น</th><th class="px-4 py-3 text-center">สถานะชำระเงิน</th></tr></thead>`;
             const tbody = document.createElement('tbody');
             orders.sort((a,b) => b.orderDate.toMillis() - a.orderDate.toMillis()).forEach(order => {
                 const row = tbody.insertRow();
                 row.className = 'bg-white border-b hover:bg-stone-50';
-                row.innerHTML = `
-                    <td class="px-4 py-4">${dateFns.format(order.orderDate.toDate(), 'dd MMM yyyy')}</td>
-                    <td class="px-4 py-4 font-medium">${customersMap.get(order.customerId)?.name || 'N/A'}</td>
-                    <td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)}</td>
-                    <td class="px-4 py-4 text-right text-green-600">${formatCurrency(order.profit)}</td>
-                    <td class="px-4 py-4 text-center"><span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${order.paymentStatus}</span></td>
-                `;
+                row.innerHTML = `<td class="px-4 py-4">${dateFns.format(order.orderDate.toDate(), 'dd MMM yyyy')}</td><td class="px-4 py-4 font-medium">${customersMap.get(order.customerId)?.name || 'N/A'}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)}</td><td class="px-4 py-4 text-right text-green-600">${formatCurrency(order.profit)}</td><td class="px-4 py-4 text-center"><span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${order.paymentStatus}</span></td>`;
             });
             table.appendChild(tbody);
             container.innerHTML = '';

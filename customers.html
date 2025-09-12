@@ -13,32 +13,34 @@
         #customer-modal.hidden { display: none; }
     </style>
 </head>
-<body class="bg-stone-100">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <div class="container mx-auto px-4 py-10">
-        <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="w-full">
-                    <a href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
-                    <h1 class="text-3xl font-bold text-stone-800">รายชื่อลูกค้าทั้งหมด</h1>
-                </div>
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <div class="relative flex-grow">
-                        <input type="text" id="search-input" placeholder="ค้นหาลูกค้า..." class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                           <svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                        </div>
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="w-full">
+                        <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">รายชื่อลูกค้าทั้งหมด</h1>
                     </div>
-                    <button id="add-customer-btn" class="flex-shrink-0 text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
-                        &#43; เพิ่มลูกค้าใหม่
-                    </button>
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <div class="relative flex-grow">
+                            <input type="text" id="search-input" placeholder="ค้นหาลูกค้า..." class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            </div>
+                        </div>
+                        <button id="add-customer-btn" class="flex-shrink-0 text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">
+                            &#43; เพิ่มลูกค้าใหม่
+                        </button>
+                    </div>
+                </header>
+                <div id="customer-list-container" class="overflow-x-auto">
+                    <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูลลูกค้า...</p>
                 </div>
-            </header>
-            <div id="customer-list-container" class="overflow-x-auto">
-                <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูลลูกค้า...</p>
             </div>
-        </div>
+        </main>
     </div>
+
     <div id="customer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out opacity-0">
         <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
             <form id="customer-form" class="p-6 md:p-8">
@@ -51,53 +53,30 @@
                         <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </header>
-                
                 <input type="hidden" id="customerId" name="customerId">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อลูกค้า *</label>
-                        <input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label for="contactChannel" class="block text-sm font-medium text-stone-700 mb-1">ช่องทางการติดต่อ</label>
-                        <input type="text" id="contactChannel" name="contactChannel" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทร</label>
-                        <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                    </div>
-                    <div class="md:col-span-2">
-                        <!-- IMPROVEMENT: Clarified label -->
-                        <label for="shippingAddress" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่หลัก (สำหรับจัดส่งเริ่มต้น)</label>
-                        <textarea id="shippingAddress" name="shippingAddress" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ</label>
-                        <input type="text" id="note" name="note" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500">
-                    </div>
+                    <div><label for="name" class="block text-sm font-medium text-stone-700 mb-1">ชื่อลูกค้า *</label><input type="text" id="name" name="name" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></div>
+                    <div><label for="contactChannel" class="block text-sm font-medium text-stone-700 mb-1">ช่องทางการติดต่อ</label><input type="text" id="contactChannel" name="contactChannel" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></div>
+                    <div><label for="phone" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทร</label><input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></div>
+                    <div class="md:col-span-2"><label for="shippingAddress" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่หลัก (สำหรับจัดส่งเริ่มต้น)</label><textarea id="shippingAddress" name="shippingAddress" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></textarea></div>
+                    <div class="md:col-span-2"><label for="note" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ</label><input type="text" id="note" name="note" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500"></div>
                 </div>
                 <div class="mt-6 pt-6 border-t flex items-center gap-4">
-                    <button type="submit" id="submit-button" class="w-full justify-center py-2.5 px-5 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:bg-stone-400 transition-colors">
-                        บันทึก
-                    </button>
-                    <button type="button" id="cancel-btn-in-modal" class="w-full justify-center py-2.5 px-5 border border-stone-300 rounded-md shadow-sm text-base font-medium text-stone-700 bg-white hover:bg-stone-50 transition-colors">
-                        ยกเลิก
-                    </button>
+                    <button type="submit" id="submit-button" class="w-full justify-center py-2.5 px-5 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500 disabled:bg-stone-400 transition-colors">บันทึก</button>
+                    <button type="button" id="cancel-btn-in-modal" class="w-full justify-center py-2.5 px-5 border border-stone-300 rounded-md shadow-sm text-base font-medium text-stone-700 bg-white hover:bg-stone-50 transition-colors">ยกเลิก</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, setDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { firebaseConfig } from './config.js';
         import { showToast } from './utils.js';
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
-        // --- DOM Elements ---
         const customerListContainer = document.getElementById('customer-list-container');
         const searchInput = document.getElementById('search-input');
         const addCustomerBtn = document.getElementById('add-customer-btn');
@@ -110,155 +89,17 @@
         const formTitle = document.getElementById('form-title');
         const formSubtitle = document.getElementById('form-subtitle');
         const submitButton = document.getElementById('submit-button');
-        
-        // --- State ---
         let allCustomers = [];
-
-        // --- Functions ---
-        const openModal = () => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                modalPanel.classList.remove('opacity-0', 'scale-95');
-            }, 10);
-        };
-
-        const closeModal = () => {
-            modal.classList.add('opacity-0');
-            modalPanel.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                customerForm.reset();
-                customerIdField.value = '';
-            }, 300);
-        };
-
-        const renderCustomers = (customersToRender) => {
-            customerListContainer.innerHTML = '';
-            if (customersToRender.length === 0) {
-                customerListContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลลูกค้า</p>';
-                return;
-            }
-            const table = document.createElement('table');
-            table.className = 'w-full text-sm text-left text-stone-700';
-            table.innerHTML = `
-                <thead class="text-xs text-stone-700 uppercase bg-stone-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">ชื่อลูกค้า</th>
-                        <th scope="col" class="px-6 py-3">เบอร์โทร</th>
-                        <th scope="col" class="px-6 py-3">วันที่บันทึก</th>
-                        <th scope="col" class="px-6 py-3 text-center">จัดการ</th>
-                    </tr>
-                </thead>`;
-            const tbody = document.createElement('tbody');
-            customersToRender.forEach(customer => {
-                const row = document.createElement('tr');
-                row.className = 'bg-white border-b hover:bg-stone-50';
-                const createdDate = customer.createdDate?.toDate().toLocaleDateString('th-TH') || 'N/A';
-                row.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-stone-900">
-                        ${customer.name}
-                        <span class="block font-normal text-stone-500">${customer.contactChannel || ''}</span>
-                    </td>
-                    <td class="px-6 py-4">${customer.phone || '-'}</td>
-                    <td class="px-6 py-4">${createdDate}</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <a href="new-order.html?customerId=${customer.id}" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-colors">สร้างออเดอร์</a>
-                        <a href="customer-orders.html?customerId=${customer.id}" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-colors ml-2">ดูออเดอร์</a>
-                        <button data-id="${customer.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไข</button>
-                        <button data-id="${customer.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-2">ลบ</button>
-                    </td>`;
-                tbody.appendChild(row);
-            });
-            table.appendChild(tbody);
-            customerListContainer.appendChild(table);
-        };
-        
-        const filterAndRender = () => {
-            const searchTerm = searchInput.value.toLowerCase();
-            const filtered = allCustomers.filter(c => c.name.toLowerCase().includes(searchTerm));
-            renderCustomers(filtered);
-        };
-
-        // --- Data Fetching ---
-        const customersRef = collection(db, "customers");
-        const q = query(customersRef, orderBy("createdDate", "desc"));
-        onSnapshot(q, (snapshot) => {
-            allCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            filterAndRender();
-        });
-
-        // --- Event Listeners ---
-        addCustomerBtn.addEventListener('click', () => {
-            formTitle.textContent = 'เพิ่มลูกค้าใหม่';
-            formSubtitle.textContent = 'กรอกข้อมูลเพื่อบันทึกลูกค้า';
-            submitButton.textContent = 'บันทึก';
-            openModal();
-        });
-
-        closeModalBtn.addEventListener('click', closeModal);
-        cancelBtnInModal.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
-        customerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const customerId = customerIdField.value;
-            const customerData = {
-                name: document.getElementById('name').value,
-                contactChannel: document.getElementById('contactChannel').value,
-                phone: document.getElementById('phone').value,
-                shippingAddress: document.getElementById('shippingAddress').value,
-                note: document.getElementById('note').value,
-            };
-
-            try {
-                if (customerId) {
-                    await setDoc(doc(db, "customers", customerId), customerData, { merge: true });
-                    showToast('อัปเดตข้อมูลลูกค้าสำเร็จ');
-                } else {
-                    customerData.createdDate = serverTimestamp();
-                    await addDoc(collection(db, "customers"), customerData);
-                    showToast('เพิ่มลูกค้าใหม่สำเร็จ');
-                }
-                closeModal();
-            } catch (error) {
-                console.error("Error saving customer: ", error);
-                showToast("เกิดข้อผิดพลาด: " + error.message, true);
-            }
-        });
-
+        const openModal = () => { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modalPanel.classList.remove('opacity-0', 'scale-95'); }, 10); };
+        const closeModal = () => { modal.classList.add('opacity-0'); modalPanel.classList.add('opacity-0', 'scale-95'); setTimeout(() => { modal.classList.add('hidden'); customerForm.reset(); customerIdField.value = ''; }, 300); };
+        const renderCustomers = (customersToRender) => { customerListContainer.innerHTML = ''; if (customersToRender.length === 0) { customerListContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลลูกค้า</p>'; return; } const table = document.createElement('table'); table.className = 'w-full text-sm text-left text-stone-700'; table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th scope="col" class="px-6 py-3">ชื่อลูกค้า</th><th scope="col" class="px-6 py-3">เบอร์โทร</th><th scope="col" class="px-6 py-3">วันที่บันทึก</th><th scope="col" class="px-6 py-3 text-center">จัดการ</th></tr></thead>`; const tbody = document.createElement('tbody'); customersToRender.forEach(customer => { const row = document.createElement('tr'); row.className = 'bg-white border-b hover:bg-stone-50'; const createdDate = customer.createdDate?.toDate().toLocaleDateString('th-TH') || 'N/A'; row.innerHTML = `<td class="px-6 py-4 font-medium text-stone-900">${customer.name}<span class="block font-normal text-stone-500">${customer.contactChannel || ''}</span></td><td class="px-6 py-4">${customer.phone || '-'}</td><td class="px-6 py-4">${createdDate}</td><td class="px-6 py-4 text-center whitespace-nowrap"><a href="new-order.html?customerId=${customer.id}" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-colors">สร้างออเดอร์</a><a href="customer-orders.html?customerId=${customer.id}" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1 px-3 rounded-md text-xs transition-colors ml-2">ดูออเดอร์</a><button data-id="${customer.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไข</button><button data-id="${customer.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-2">ลบ</button></td>`; tbody.appendChild(row); }); table.appendChild(tbody); customerListContainer.appendChild(table); };
+        const filterAndRender = () => { const searchTerm = searchInput.value.toLowerCase(); const filtered = allCustomers.filter(c => c.name.toLowerCase().includes(searchTerm)); renderCustomers(filtered); };
+        const customersRef = collection(db, "customers"); const q = query(customersRef, orderBy("createdDate", "desc")); onSnapshot(q, (snapshot) => { allCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); filterAndRender(); });
+        addCustomerBtn.addEventListener('click', () => { formTitle.textContent = 'เพิ่มลูกค้าใหม่'; formSubtitle.textContent = 'กรอกข้อมูลเพื่อบันทึกลูกค้า'; submitButton.textContent = 'บันทึก'; openModal(); });
+        closeModalBtn.addEventListener('click', closeModal); cancelBtnInModal.addEventListener('click', closeModal); modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+        customerForm.addEventListener('submit', async (e) => { e.preventDefault(); const customerId = customerIdField.value; const customerData = { name: document.getElementById('name').value, contactChannel: document.getElementById('contactChannel').value, phone: document.getElementById('phone').value, shippingAddress: document.getElementById('shippingAddress').value, note: document.getElementById('note').value, }; try { if (customerId) { await setDoc(doc(db, "customers", customerId), customerData, { merge: true }); showToast('อัปเดตข้อมูลลูกค้าสำเร็จ'); } else { customerData.createdDate = serverTimestamp(); await addDoc(collection(db, "customers"), customerData); showToast('เพิ่มลูกค้าใหม่สำเร็จ'); } closeModal(); } catch (error) { console.error("Error saving customer: ", error); showToast("เกิดข้อผิดพลาด: " + error.message, true); } });
         searchInput.addEventListener('input', filterAndRender);
-
-        customerListContainer.addEventListener('click', async (e) => {
-            const button = e.target;
-            const targetElement = button.closest('[data-id]');
-            if (!targetElement) return;
-
-            const id = targetElement.dataset.id;
-            if (!id) return;
-
-            if (targetElement.classList.contains('delete-btn')) {
-                if (confirm(`ต้องการลบลูกค้าคนนี้ใช่หรือไม่?`)) {
-                    await deleteDoc(doc(db, "customers", id)).catch(err => showToast("Error: " + err.message, true));
-                }
-            } else if (targetElement.classList.contains('edit-btn')) {
-                const customerToEdit = allCustomers.find(c => c.id === id);
-                if (customerToEdit) {
-                    customerIdField.value = customerToEdit.id;
-                    document.getElementById('name').value = customerToEdit.name;
-                    document.getElementById('contactChannel').value = customerToEdit.contactChannel || '';
-                    document.getElementById('phone').value = customerToEdit.phone || '';
-                    document.getElementById('shippingAddress').value = customerToEdit.shippingAddress || '';
-                    document.getElementById('note').value = customerToEdit.note || '';
-                    formTitle.textContent = 'แก้ไขข้อมูลลูกค้า';
-                    formSubtitle.textContent = `กำลังแก้ไข: ${customerToEdit.name}`;
-                    submitButton.textContent = 'อัปเดตข้อมูล';
-                    openModal();
-                }
-            }
-        });
+        customerListContainer.addEventListener('click', async (e) => { const button = e.target; const targetElement = button.closest('[data-id]'); if (!targetElement) return; const id = targetElement.dataset.id; if (!id) return; if (targetElement.classList.contains('delete-btn')) { if (confirm(`ต้องการลบลูกค้าคนนี้ใช่หรือไม่?`)) { await deleteDoc(doc(db, "customers", id)).catch(err => showToast("Error: " + err.message, true)); } } else if (targetElement.classList.contains('edit-btn')) { const customerToEdit = allCustomers.find(c => c.id === id); if (customerToEdit) { customerIdField.value = customerToEdit.id; document.getElementById('name').value = customerToEdit.name; document.getElementById('contactChannel').value = customerToEdit.contactChannel || ''; document.getElementById('phone').value = customerToEdit.phone || ''; document.getElementById('shippingAddress').value = customerToEdit.shippingAddress || ''; document.getElementById('note').value = customerToEdit.note || ''; formTitle.textContent = 'แก้ไขข้อมูลลูกค้า'; formSubtitle.textContent = `กำลังแก้ไข: ${customerToEdit.name}`; submitButton.textContent = 'อัปเดตข้อมูล'; openModal(); } } });
     </script>
 </body>
 </html>

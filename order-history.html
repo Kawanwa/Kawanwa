@@ -5,81 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>จัดการออเดอร์ - ระบบจัดการร้านกำไลหิน</title>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts (Kanit) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body {
-            font-family: 'Kanit', sans-serif;
-        }
-        #edit-modal.hidden {
-            display: none;
-        }
+        body { font-family: 'Kanit', sans-serif; }
+        #edit-modal.hidden { display: none; }
+        .filter-btn { padding: 6px 16px; border-radius: 9999px; font-size: 14px; font-weight: 500; transition: all 0.2s ease-in-out; border: 1px solid #e7e5e4; /* stone-200 */ color: #57534e; /* stone-600 */ }
+        .filter-btn.active { background-color: #38bdf8; /* sky-400 */ color: white; border-color: #38bdf8; }
+        .filter-btn:not(.active):hover { background-color: #f5f5f4; /* stone-100 */ }
     </style>
 </head>
-<body class="bg-stone-100">
+<body class="flex h-screen overflow-hidden bg-slate-50">
 
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 py-10">
-        <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-             <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <div class="w-full">
-                    <a id="back-link" href="index.html" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้าหลัก</a>
-                    <h1 id="page-title" class="text-3xl font-bold text-stone-800">จัดการออเดอร์</h1>
-                </div>
-                <div class="flex items-center gap-4 w-full md:w-auto">
-                    <div class="relative flex-grow">
-                         <input type="text" id="search-input" placeholder="ค้นหาด้วยชื่อลูกค้า..." 
-                                class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                         </div>
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                 <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="w-full">
+                        <h1 id="page-title" class="text-3xl font-bold text-stone-800 hidden lg:block">จัดการออเดอร์</h1>
                     </div>
-                    <div id="month-navigator" class="flex items-center justify-center gap-2">
-                        <button id="prev-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&lt;</button>
-                        <h2 id="current-month-display" class="text-lg font-semibold text-indigo-700 w-40 text-center"></h2>
-                        <button id="next-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&gt;</button>
+                    <div class="flex items-center gap-4 w-full md:w-auto flex-wrap">
+                        <div class="relative flex-grow min-w-[200px]"><input type="text" id="search-input" placeholder="ค้นหาด้วยชื่อลูกค้า..." class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"><div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg class="h-5 w-5 text-stone-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></div></div>
+                        <div id="month-navigator" class="flex items-center justify-center gap-2"><button id="prev-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&lt;</button><h2 id="current-month-display" class="text-lg font-semibold text-indigo-700 w-40 text-center"></h2><button id="next-month-btn" class="p-2 rounded-full hover:bg-stone-200 transition-colors">&gt;</button></div>
+                        <a href="new-order.html" class="flex-shrink-0 text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">&#43; สร้างออเดอร์ใหม่</a>
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <!-- Summary Section -->
-            <section id="summary-section" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                <div class="bg-gray-100 p-4 rounded-lg border-b-4 border-gray-400">
-                    <h2 class="text-sm font-medium text-gray-700">ยอดทั้งหมด</h2>
-                    <p id="summary-total" class="text-2xl font-bold text-gray-900">0.00 ฿</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg border-b-4 border-green-400">
-                    <h2 class="text-sm font-medium text-green-700">ยอดที่ชำระแล้ว</h2>
-                    <p id="summary-paid" class="text-2xl font-bold text-green-900">0.00 ฿</p>
-                </div>
-                <div class="bg-blue-50 p-4 rounded-lg border-b-4 border-blue-400">
-                    <h2 class="text-sm font-medium text-blue-700">ยอดที่ยังไม่ได้ชำระ</h2>
-                    <p id="summary-unpaid" class="text-2xl font-bold text-blue-900">0.00 ฿</p>
-                </div>
-                <div class="bg-yellow-50 p-4 rounded-lg border-b-4 border-yellow-400">
-                    <h2 class="text-sm font-medium text-yellow-700">ยอดมัดจำ</h2>
-                    <p id="summary-deposit" class="text-2xl font-bold text-yellow-900">0.00 ฿</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg border-b-4 border-purple-400">
-                    <h2 class="text-sm font-medium text-purple-700">ค่าจัดส่งรวม</h2>
-                    <p id="summary-shipping" class="text-2xl font-bold text-purple-900">0.00 ฿</p>
-                </div>
-            </section>
+                <section id="summary-section" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                    <div class="bg-gray-100 p-4 rounded-lg border-b-4 border-gray-400"><h2 class="text-sm font-medium text-gray-700">ยอดทั้งหมด</h2><p id="summary-total" class="text-2xl font-bold text-gray-900">0.00 ฿</p></div>
+                    <div class="bg-green-50 p-4 rounded-lg border-b-4 border-green-400"><h2 class="text-sm font-medium text-green-700">ยอดที่ชำระแล้ว</h2><p id="summary-paid" class="text-2xl font-bold text-green-900">0.00 ฿</p></div>
+                    <div class="bg-blue-50 p-4 rounded-lg border-b-4 border-blue-400"><h2 class="text-sm font-medium text-blue-700">ยอดที่ยังไม่ได้ชำระ</h2><p id="summary-unpaid" class="text-2xl font-bold text-blue-900">0.00 ฿</p></div>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-b-4 border-yellow-400"><h2 class="text-sm font-medium text-yellow-700">ยอดมัดจำ</h2><p id="summary-deposit" class="text-2xl font-bold text-yellow-900">0.00 ฿</p></div>
+                    <div class="bg-purple-50 p-4 rounded-lg border-b-4 border-purple-400"><h2 class="text-sm font-medium text-purple-700">ค่าจัดส่งรวม</h2><p id="summary-shipping" class="text-2xl font-bold text-purple-900">0.00 ฿</p></div>
+                </section>
 
-            <!-- Order Table -->
-            <main id="order-table-container" class="overflow-x-auto border-t pt-6">
-                <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</p>
-            </main>
-        </div>
+                <div id="type-filter-controls" class="flex items-center gap-3 mb-4 p-2 bg-stone-50 rounded-lg">
+                    <button data-filter="all" class="filter-btn active">ทั้งหมด</button>
+                    <button data-filter="กำไล" class="filter-btn">กำไล</button>
+                    <button data-filter="สร้อย" class="filter-btn">สร้อย</button>
+                </div>
+
+                <main id="order-table-container" class="overflow-x-auto border-t pt-2">
+                    <p class="text-center py-10 text-stone-500">กำลังโหลดข้อมูล...</p>
+                </main>
+            </div>
+        </main>
     </div>
 
-    <!-- Edit Order Modal (Popup) -->
     <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ease-in-out opacity-0">
         <div id="modal-panel" class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-in-out scale-95 opacity-0">
             <form id="edit-order-form" class="p-6 md:p-8">
@@ -88,65 +64,22 @@
                         <h2 id="modal-title" class="text-2xl font-bold text-stone-800">แก้ไขออเดอร์</h2>
                         <p id="modal-customer-name" class="text-stone-600 mt-1">ลูกค้า: -</p>
                     </div>
-                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
-                        <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                    </button>
+                    <button type="button" id="close-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors"><svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                 </header>
-                
                 <div class="space-y-6">
-                    <div class="bg-stone-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-stone-700 mb-2">1. สถานะการชำระเงิน</h3>
-                        <div class="space-y-3">
-                             <select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
-                                <option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option>
-                                <option value="มัดจำ">มัดจำ</option>
-                                <option value="ชำระแล้ว">ชำระแล้ว</option>
-                            </select>
-                            <div id="deposit-amount-container" class="hidden">
-                                <label for="deposit-amount-input" class="block text-sm font-medium text-stone-700 mb-1">จำนวนเงินที่มัดจำ</label>
-                                <input type="number" id="deposit-amount-input" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                            </div>
-                        </div>
-                    </div>
-
-                     <div class="bg-stone-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-stone-700 mb-2">2. สถานะการดำเนินการ</h3>
-                         <div class="space-y-3">
-                             <select id="processing-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm">
-                                <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                <option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option>
-                                <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
-                            </select>
-                            <div id="tracking-number-container" class="hidden">
-                                <label for="tracking-number-input" class="block text-sm font-medium text-stone-700 mb-1">เลข Tracking</label>
-                                <input type="text" id="tracking-number-input" class="w-full px-3 py-2 border border-stone-300 rounded-md">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="bg-stone-50 p-4 rounded-lg"><h3 class="font-semibold text-stone-700 mb-2">1. สถานะการชำระเงิน</h3><div class="space-y-3"><select id="payment-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option></select><div id="deposit-amount-container" class="hidden"><label for="deposit-amount-input" class="block text-sm font-medium text-stone-700 mb-1">จำนวนเงินที่มัดจำ</label><input type="number" id="deposit-amount-input" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div></div></div>
+                    <div class="bg-stone-50 p-4 rounded-lg"><h3 class="font-semibold text-stone-700 mb-2">2. สถานะการดำเนินการ</h3><div class="space-y-3"><select id="processing-status-select" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="รอดำเนินการ">รอดำเนินการ</option><option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option><option value="จัดส่งแล้ว">จัดส่งแล้ว</option></select><div id="tracking-number-container" class="hidden"><label for="tracking-number-input" class="block text-sm font-medium text-stone-700 mb-1">เลข Tracking</label><input type="text" id="tracking-number-input" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div></div></div>
                 </div>
-
-                <div class="mt-6 pt-6 border-t">
-                    <button type="submit" id="save-changes-btn" class="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg px-5 py-2.5 text-center transition-colors">
-                        บันทึกการเปลี่ยนแปลง
-                    </button>
-                </div>
+                <div class="mt-6 pt-6 border-t"><button type="submit" id="save-changes-btn" class="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg px-5 py-2.5 text-center transition-colors">บันทึกการเปลี่ยนแปลง</button></div>
             </form>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, doc, getDoc, getDocs, updateDoc, query, where, orderBy, Timestamp, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC0FFHNoma6TkX5GbKdki6B5h2peYOsUu0",
-            authDomain: "kawanwa-stone.firebaseapp.com",
-            projectId: "kawanwa-stone",
-            storageBucket: "kawanwa-stone.appspot.com",
-            messagingSenderId: "678984987842",
-            appId: "1:678984987842:web:952c3f4a8822b23590f75b"
-        };
+        import { firebaseConfig } from './config.js';
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -157,6 +90,8 @@
             const prevMonthBtn = document.getElementById('prev-month-btn');
             const nextMonthBtn = document.getElementById('next-month-btn');
             const searchInput = document.getElementById('search-input');
+            const typeFilterControls = document.getElementById('type-filter-controls');
+            
             const summaryTotal = document.getElementById('summary-total');
             const summaryPaid = document.getElementById('summary-paid');
             const summaryUnpaid = document.getElementById('summary-unpaid');
@@ -181,379 +116,77 @@
             let currentDate = new Date();
             currentDate.setDate(1);
             let currentSort = { key: 'orderDate', direction: 'desc' };
-            let currentFilters = { payment: 'all', processing: 'all' };
+            let currentFilters = { payment: 'all', processing: 'all', productType: 'all' };
 
             const formatCurrency = (number) => (number || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const updateMonthDisplay = () => { const thaiYear = currentDate.getFullYear() + 543; const thaiMonth = new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(currentDate); monthDisplay.textContent = `${thaiMonth} ${thaiYear}`; };
+            const openModal = () => { modal.classList.remove('hidden'); setTimeout(() => { modal.classList.remove('opacity-0'); modalPanel.classList.remove('opacity-0', 'scale-95'); }, 10); };
+            const closeModal = () => { modal.classList.add('opacity-0'); modalPanel.classList.add('opacity-0', 'scale-95'); setTimeout(() => { modal.classList.add('hidden'); currentEditingOrderId = null; }, 300); };
+            const getPaymentStatusBadge = (status) => { if (status === 'ฟรี') return `<span class="bg-rose-100 text-rose-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`; switch (status) { case 'ชำระแล้ว': return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`; case 'มัดจำ': return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`; default: return `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status || 'N/A'}</span>`; } };
+            const getProcessingStatusBadge = (status) => { switch (status) { case 'จัดส่งแล้ว': return `<span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`; case 'ดำเนินการเสร็จสิ้น': return `<span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`; default: return `<span class="bg-stone-100 text-stone-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status || 'N/A'}</span>`; } };
 
-            const updateMonthDisplay = () => {
-                const thaiYear = currentDate.getFullYear() + 543;
-                const thaiMonth = new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(currentDate);
-                monthDisplay.textContent = `${thaiMonth} ${thaiYear}`;
-            };
-
-            const openModal = () => {
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modalPanel.classList.remove('opacity-0', 'scale-95');
-                }, 10);
-            };
-            const closeModal = () => {
-                modal.classList.add('opacity-0');
-                modalPanel.classList.add('opacity-0', 'scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    currentEditingOrderId = null;
-                }, 300);
-            };
-
-            const getPaymentStatusBadge = (status) => {
-                if (status === 'ฟรี') return `<span class="bg-rose-100 text-rose-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
-                switch (status) {
-                    case 'ชำระแล้ว': return `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
-                    case 'มัดจำ': return `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
-                    default: return `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status || 'N/A'}</span>`;
-                }
-            };
-
-            const getProcessingStatusBadge = (status) => {
-                switch (status) {
-                    case 'จัดส่งแล้ว': return `<span class="bg-teal-100 text-teal-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
-                    case 'ดำเนินการเสร็จสิ้น': return `<span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status}</span>`;
-                    default: return `<span class="bg-stone-100 text-stone-800 text-xs font-medium px-2.5 py-0.5 rounded-full">${status || 'N/A'}</span>`;
-                }
-            };
-
-            const renderOrders = (orders) => {
-                let filteredAndSortedOrders = [...orders];
-                
+            const renderOrders = () => {
+                let filteredAndSortedOrders = [...allOrdersForMonth];
                 const searchTerm = searchInput.value.toLowerCase();
-                if (searchTerm) {
-                    filteredAndSortedOrders = filteredAndSortedOrders.filter(order => {
-                        const customerName = customersMap.get(order.customerId)?.name || '';
-                        return customerName.toLowerCase().includes(searchTerm);
-                    });
-                }
-
-                if (currentFilters.payment !== 'all') {
-                    filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.paymentStatus === currentFilters.payment);
-                }
-                if (currentFilters.processing !== 'all') {
-                    filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.processingStatus === currentFilters.processing);
-                }
-
-                filteredAndSortedOrders.sort((a, b) => {
-                    const valA = currentSort.key === 'orderDate' ? a.orderDate.toDate() : a.totalAmount;
-                    const valB = currentSort.key === 'orderDate' ? b.orderDate.toDate() : b.totalAmount;
-                    if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
-                    if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
-                    return 0;
-                });
-
+                if (searchTerm) { filteredAndSortedOrders = filteredAndSortedOrders.filter(order => (customersMap.get(order.customerId)?.name || '').toLowerCase().includes(searchTerm)); }
+                if (currentFilters.productType !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.productType === currentFilters.productType); }
+                if (currentFilters.payment !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.paymentStatus === currentFilters.payment); }
+                if (currentFilters.processing !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.processingStatus === currentFilters.processing); }
+                filteredAndSortedOrders.sort((a, b) => { const valA = currentSort.key === 'orderDate' ? a.orderDate.toDate() : a.totalAmount; const valB = currentSort.key === 'orderDate' ? b.orderDate.toDate() : b.totalAmount; if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1; if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1; return 0; });
                 orderTableContainer.innerHTML = '';
-                if (filteredAndSortedOrders.length === 0) {
-                    orderTableContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลออเดอร์ที่ตรงตามเงื่อนไข</p>';
-                    return;
-                }
-                const table = document.createElement('table');
-                table.className = 'w-full text-sm text-left text-stone-700';
-                table.innerHTML = `
-                    <thead class="text-xs text-stone-700 uppercase bg-stone-50">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 cursor-pointer" data-sort-key="orderDate">วันที่ <span class="sort-arrow"></span></th>
-                            <th scope="col" class="px-4 py-3">ลูกค้า</th>
-                            <th scope="col" class="px-4 py-3 text-right cursor-pointer" data-sort-key="totalAmount">ยอดรวม <span class="sort-arrow"></span></th>
-                            <th scope="col" class="px-4 py-3 text-center relative">
-                                <select class="filter-select bg-transparent font-semibold" data-filter-key="payment">
-                                    <option value="all">สถานะชำระเงิน</option>
-                                    <option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option>
-                                    <option value="มัดจำ">มัดจำ</option>
-                                    <option value="ชำระแล้ว">ชำระแล้ว</option>
-                                    <option value="ฟรี">ฟรี</option>
-                                </select>
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center relative">
-                                 <select class="filter-select bg-transparent font-semibold" data-filter-key="processing">
-                                    <option value="all">สถานะดำเนินการ</option>
-                                    <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                    <option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option>
-                                    <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
-                                </select>
-                            </th>
-                            <th scope="col" class="px-4 py-3 text-center">จัดการ</th>
-                        </tr>
-                    </thead>`;
+                if (filteredAndSortedOrders.length === 0) { orderTableContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลออเดอร์ที่ตรงตามเงื่อนไข</p>'; return; }
+                const table = document.createElement('table'); table.className = 'w-full text-sm text-left text-stone-700';
+                table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th scope="col" class="px-4 py-3 cursor-pointer" data-sort-key="orderDate">วันที่ <span class="sort-arrow"></span></th><th scope="col" class="px-4 py-3">ลูกค้า</th><th scope="col" class="px-4 py-3 text-right cursor-pointer" data-sort-key="totalAmount">ยอดรวม <span class="sort-arrow"></span></th><th scope="col" class="px-4 py-3 text-center">ประเภท</th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="payment"><option value="all">สถานะชำระเงิน</option><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option><option value="ฟรี">ฟรี</option></select></th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="processing"><option value="all">สถานะดำเนินการ</option><option value="รอดำเนินการ">รอดำเนินการ</option><option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option><option value="จัดส่งแล้ว">จัดส่งแล้ว</option></select></th><th scope="col" class="px-4 py-3 text-center">จัดการ</th></tr></thead>`;
                 const tbody = document.createElement('tbody');
-                filteredAndSortedOrders.forEach(order => {
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b hover:bg-stone-50';
-                    
-                    const orderDate = order.orderDate?.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) || 'N/A';
-                    const customerName = customersMap.get(order.customerId)?.name || 'ไม่พบข้อมูลลูกค้า';
-                    
-                    row.innerHTML = `
-                        <td class="px-4 py-4">${orderDate}</td>
-                        <td class="px-4 py-4 font-medium text-stone-900">${customerName}</td>
-                        <td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td>
-                        <td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td>
-                        <td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td>
-                        <td class="px-4 py-4 text-center whitespace-nowrap">
-                            <a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a>
-                            <button data-order-id="${order.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไขด่วน</button>
-                            <!-- NEW: Move Order Button -->
-                            <button data-order-id="${order.id}" class="move-btn font-medium text-orange-600 hover:underline ml-3">เลื่อนเดือน</button>
-                            <button data-order-id="${order.id}" data-bracelet-id="${order.braceletId}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button>
-                        </td>`;
-                    tbody.appendChild(row);
-                });
-                table.appendChild(tbody);
-                orderTableContainer.appendChild(table);
-
-                document.querySelector('.filter-select[data-filter-key="payment"]').value = currentFilters.payment;
-                document.querySelector('.filter-select[data-filter-key="processing"]').value = currentFilters.processing;
-
-                document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '');
-                const activeSortHeader = document.querySelector(`th[data-sort-key="${currentSort.key}"] .sort-arrow`);
-                if (activeSortHeader) {
-                    activeSortHeader.textContent = currentSort.direction === 'asc' ? '▲' : '▼';
-                }
+                filteredAndSortedOrders.forEach(order => { const row = document.createElement('tr'); row.className = 'bg-white border-b hover:bg-stone-50'; const orderDate = order.orderDate?.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) || 'N/A'; const customerName = customersMap.get(order.customerId)?.name || 'N/A'; row.innerHTML = `<td class="px-4 py-4">${orderDate}</td><td class="px-4 py-4 font-medium text-stone-900">${customerName}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td><td class="px-4 py-4 text-center">${order.productType || 'N/A'}</td><td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td><td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td><td class="px-4 py-4 text-center whitespace-nowrap"><a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a><button data-order-id="${order.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไขด่วน</button><button data-order-id="${order.id}" class="move-btn font-medium text-orange-600 hover:underline ml-3">เลื่อนเดือน</button><button data-order-id="${order.id}" data-bracelet-id="${order.braceletId}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`; tbody.appendChild(row); });
+                table.appendChild(tbody); orderTableContainer.appendChild(table);
+                document.querySelector('.filter-select[data-filter-key="payment"]').value = currentFilters.payment; document.querySelector('.filter-select[data-filter-key="processing"]').value = currentFilters.processing;
+                document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = ''); const activeSortHeader = document.querySelector(`th[data-sort-key="${currentSort.key}"] .sort-arrow`); if (activeSortHeader) { activeSortHeader.textContent = currentSort.direction === 'asc' ? '▲' : '▼'; }
             };
 
             const listenForOrders = () => {
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const startDate = new Date(year, month, 1);
-                const endDate = new Date(year, month + 1, 1);
-
-                const q = query(collection(db, "orders"), 
-                    where("orderDate", ">=", Timestamp.fromDate(startDate)),
-                    where("orderDate", "<", Timestamp.fromDate(endDate)),
-                    orderBy("orderDate", "desc")
-                );
-
-                onSnapshot(q, (snapshot) => {
-                    allOrdersForMonth = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    
+                const year = currentDate.getFullYear(); const month = currentDate.getMonth(); const startDate = new Date(year, month, 1); const endDate = new Date(year, month + 1, 1);
+                const q = query(collection(db, "orders"), where("orderDate", ">=", Timestamp.fromDate(startDate)), where("orderDate", "<", Timestamp.fromDate(endDate)), orderBy("orderDate", "desc"));
+                onSnapshot(q, async (snapshot) => {
+                    const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const braceletIds = ordersData.map(o => o.braceletId).filter(id => id);
+                    let braceletsMap = new Map();
+                    if (braceletIds.length > 0) {
+                        const braceletsQuery = query(collection(db, "bracelets"), where("__name__", "in", braceletIds));
+                        const braceletsSnapshot = await getDocs(braceletsQuery);
+                        braceletsSnapshot.forEach(doc => { braceletsMap.set(doc.id, doc.data()); });
+                    }
+                    allOrdersForMonth = ordersData.map(order => { const bracelet = braceletsMap.get(order.braceletId); return { ...order, productType: bracelet?.productType || 'กำไล' }; });
                     let totalSum = 0, paidSum = 0, unpaidSum = 0, depositSum = 0, shippingSum = 0;
-                    
-                    allOrdersForMonth.forEach(order => {
-                        const total = order.totalAmount || 0;
-                        const deposit = order.depositAmount || 0;
-                        totalSum += total;
-                        depositSum += deposit;
-                        shippingSum += order.shippingCost || 0;
-
-                        if (order.paymentStatus === 'ยังไม่ได้ชำระ') {
-                            unpaidSum += total;
-                        } else if (order.paymentStatus === 'มัดจำ') {
-                            unpaidSum += (total - deposit);
-                            paidSum += deposit;
-                        } else if (order.paymentStatus === 'ชำระแล้ว') {
-                            paidSum += total;
-                        }
-                    });
-
-                    summaryTotal.textContent = `${formatCurrency(totalSum)} ฿`;
-                    summaryPaid.textContent = `${formatCurrency(paidSum)} ฿`;
-                    summaryUnpaid.textContent = `${formatCurrency(unpaidSum)} ฿`;
-                    summaryDeposit.textContent = `${formatCurrency(depositSum)} ฿`;
-                    summaryShipping.textContent = `${formatCurrency(shippingSum)} ฿`;
-
-                    renderOrders(allOrdersForMonth);
-                }, (error) => {
-                    console.error("Error fetching orders:", error);
-                    orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`;
-                });
+                    allOrdersForMonth.forEach(order => { const total = order.totalAmount || 0; const deposit = order.depositAmount || 0; totalSum += total; depositSum += deposit; shippingSum += order.shippingCost || 0; if (order.paymentStatus === 'ยังไม่ได้ชำระ') { unpaidSum += total; } else if (order.paymentStatus === 'มัดจำ') { unpaidSum += (total - deposit); paidSum += deposit; } else if (order.paymentStatus === 'ชำระแล้ว') { paidSum += total; } });
+                    summaryTotal.textContent = `${formatCurrency(totalSum)} ฿`; summaryPaid.textContent = `${formatCurrency(paidSum)} ฿`; summaryUnpaid.textContent = `${formatCurrency(unpaidSum)} ฿`; summaryDeposit.textContent = `${formatCurrency(depositSum)} ฿`; summaryShipping.textContent = `${formatCurrency(shippingSum)} ฿`;
+                    renderOrders();
+                }, (error) => { console.error("Error fetching orders:", error); orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`; });
             };
 
-            // NEW: Function to move an order to the next month
-            async function moveOrderToNextMonth(orderId) {
-                if (!confirm('คุณต้องการเลื่อนออเดอร์นี้ไปเดือนถัดไปใช่หรือไม่?\nวันที่จะถูกเปลี่ยนเป็นวันแรกของเดือนถัดไป')) {
-                    return;
-                }
-
-                try {
-                    const orderRef = doc(db, "orders", orderId);
-                    const orderSnap = await getDoc(orderRef);
-
-                    if (!orderSnap.exists()) {
-                        throw new Error("ไม่พบออเดอร์ที่ต้องการเลื่อน");
-                    }
-
-                    const currentOrderDate = orderSnap.data().orderDate.toDate();
-                    
-                    // Calculate the first day of the next month from its current date
-                    const nextMonthDate = new Date(currentOrderDate.getFullYear(), currentOrderDate.getMonth() + 1, 1);
-
-                    // Update the document in Firestore
-                    await updateDoc(orderRef, {
-                        orderDate: Timestamp.fromDate(nextMonthDate)
-                    });
-
-                    alert(`ออเดอร์ได้ถูกย้ายไปที่เดือน ${new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(nextMonthDate)} เรียบร้อยแล้ว`);
-                    // The onSnapshot listener will handle the UI update automatically.
-
-                } catch (error) {
-                    console.error("Error moving order: ", error);
-                    alert("เกิดข้อผิดพลาดในการเลื่อนออเดอร์: " + error.message);
-                }
-            }
-
-            async function deleteOrder(orderId, braceletId) {
-                if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์นี้? การกระทำนี้จะคืนสต็อคสินค้าและไม่สามารถย้อนกลับได้')) {
-                    return;
-                }
-
-                try {
-                    await runTransaction(db, async (transaction) => {
-                        const orderRef = doc(db, "orders", orderId);
-                        const braceletRef = doc(db, "bracelets", braceletId);
-
-                        const braceletDoc = await transaction.get(braceletRef);
-                        if (!braceletDoc.exists()) {
-                            transaction.delete(orderRef);
-                            return;
-                        }
-                        const usedMaterials = braceletDoc.data().usedMaterials;
-
-                        if (usedMaterials && usedMaterials.length > 0) {
-                            const materialRefs = usedMaterials.map(item => doc(db, "materials", item.materialId));
-                            const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
-
-                            for (let i = 0; i < usedMaterials.length; i++) {
-                                const item = usedMaterials[i];
-                                const materialDoc = materialDocs[i];
-
-                                if (materialDoc.exists()) {
-                                    const newStock = materialDoc.data().stockRemaining + item.quantityUsed;
-                                    transaction.update(materialRefs[i], { stockRemaining: newStock });
-                                }
-                            }
-                        }
-
-                        transaction.delete(braceletRef);
-                        transaction.delete(orderRef);
-                    });
-
-                    alert("ลบออเดอร์สำเร็จแล้ว");
-                } catch (error) {
-                    console.error("Error deleting order: ", error);
-                    alert("เกิดข้อผิดพลาดในการลบออเดอร์: " + error.message);
-                }
-            }
-
+            async function moveOrderToNextMonth(orderId) { if (!confirm('คุณต้องการเลื่อนออเดอร์นี้ไปเดือนถัดไปใช่หรือไม่?\nวันที่จะถูกเปลี่ยนเป็นวันแรกของเดือนถัดไป')) { return; } try { const orderRef = doc(db, "orders", orderId); const orderSnap = await getDoc(orderRef); if (!orderSnap.exists()) { throw new Error("ไม่พบออเดอร์ที่ต้องการเลื่อน"); } const currentOrderDate = orderSnap.data().orderDate.toDate(); const nextMonthDate = new Date(currentOrderDate.getFullYear(), currentOrderDate.getMonth() + 1, 1); await updateDoc(orderRef, { orderDate: Timestamp.fromDate(nextMonthDate) }); alert(`ออเดอร์ได้ถูกย้ายไปที่เดือน ${new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(nextMonthDate)} เรียบร้อยแล้ว`); } catch (error) { console.error("Error moving order: ", error); alert("เกิดข้อผิดพลาดในการเลื่อนออเดอร์: " + error.message); } }
+            async function deleteOrder(orderId, braceletId) { if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์นี้? การกระทำนี้จะคืนสต็อคสินค้าและไม่สามารถย้อนกลับได้')) { return; } try { await runTransaction(db, async (transaction) => { const orderRef = doc(db, "orders", orderId); const braceletRef = doc(db, "bracelets", braceletId); const braceletDoc = await transaction.get(braceletRef); if (!braceletDoc.exists()) { transaction.delete(orderRef); return; } const usedMaterials = braceletDoc.data().usedMaterials; if (usedMaterials && usedMaterials.length > 0) { const materialRefs = usedMaterials.map(item => doc(db, "materials", item.materialId)); const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref))); for (let i = 0; i < usedMaterials.length; i++) { const item = usedMaterials[i]; const materialDoc = materialDocs[i]; if (materialDoc.exists()) { const newStock = materialDoc.data().stockRemaining + item.quantityUsed; transaction.update(materialRefs[i], { stockRemaining: newStock }); } } } transaction.delete(braceletRef); transaction.delete(orderRef); }); alert("ลบออเดอร์สำเร็จแล้ว"); } catch (error) { console.error("Error deleting order: ", error); alert("เกิดข้อผิดพลาดในการลบออเดอร์: " + error.message); } }
+            
             async function initializePage() {
                 updateMonthDisplay();
                 try {
                     const customersSnapshot = await getDocs(collection(db, "customers"));
                     customersMap.clear();
                     customersSnapshot.forEach(doc => customersMap.set(doc.id, doc.data()));
-                    
                     listenForOrders();
-
-                } catch (error) {
-                    console.error("Error initializing page: ", error);
-                    orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาดในการโหลดข้อมูลลูกค้า: ${error.message}</p>`;
-                }
+                } catch (error) { console.error("Error initializing page: ", error); orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาดในการโหลดข้อมูลลูกค้า: ${error.message}</p>`; }
             }
 
-            prevMonthBtn.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                updateMonthDisplay();
-                listenForOrders();
-            });
-            nextMonthBtn.addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                updateMonthDisplay();
-                listenForOrders();
-            });
-
-            searchInput.addEventListener('input', () => renderOrders(allOrdersForMonth));
-
-            orderTableContainer.addEventListener('click', async (e) => {
-                const target = e.target;
-                
-                if (target.closest('.edit-btn')) {
-                    const button = target.closest('.edit-btn');
-                    currentEditingOrderId = button.dataset.orderId;
-                    const orderRef = doc(db, "orders", currentEditingOrderId);
-                    const orderSnap = await getDoc(orderRef);
-                    if (orderSnap.exists()) {
-                        const order = orderSnap.data();
-                        const customer = customersMap.get(order.customerId);
-                        modalCustomerName.textContent = `ลูกค้า: ${customer?.name || 'N/A'}`;
-                        
-                        paymentStatusSelect.value = order.paymentStatus || 'ยังไม่ได้ชำระ';
-                        processingStatusSelect.value = order.processingStatus || 'รอดำเนินการ';
-                        depositAmountInput.value = order.depositAmount || 0;
-                        trackingNumberInput.value = order.trackingNumber || '';
-
-                        paymentStatusSelect.dispatchEvent(new Event('change'));
-                        processingStatusSelect.dispatchEvent(new Event('change'));
-                        
-                        openModal();
-                    }
-                } else if (target.closest('.delete-btn')) {
-                    const button = target.closest('.delete-btn');
-                    const orderId = button.dataset.orderId;
-                    const braceletId = button.dataset.braceletId;
-                    await deleteOrder(orderId, braceletId);
-                } 
-                // NEW: Event listener for the move button
-                else if (target.closest('.move-btn')) {
-                    const button = target.closest('.move-btn');
-                    const orderId = button.dataset.orderId;
-                    await moveOrderToNextMonth(orderId);
-                } 
-                else if (target.closest('th[data-sort-key]')) {
-                    const sortKey = target.closest('th[data-sort-key]').dataset.sortKey;
-                    if (currentSort.key === sortKey) {
-                        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSort.key = sortKey;
-                        currentSort.direction = 'desc';
-                    }
-                    renderOrders(allOrdersForMonth);
-                }
-            });
-
-            orderTableContainer.addEventListener('change', (e) => {
-                if (e.target.classList.contains('filter-select')) {
-                    const filterKey = e.target.dataset.filterKey;
-                    currentFilters[filterKey] = e.target.value;
-                    renderOrders(allOrdersForMonth);
-                }
-            });
-            
-            editOrderForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (!currentEditingOrderId) return;
-                
-                const dataToUpdate = {
-                    paymentStatus: paymentStatusSelect.value,
-                    processingStatus: processingStatusSelect.value,
-                    depositAmount: parseFloat(depositAmountInput.value) || 0,
-                    trackingNumber: trackingNumberInput.value,
-                };
-
-                const orderRef = doc(db, "orders", currentEditingOrderId);
-                await updateDoc(orderRef, dataToUpdate);
-                closeModal();
-            });
-
-            paymentStatusSelect.addEventListener('change', (e) => {
-                depositAmountContainer.classList.toggle('hidden', e.target.value !== 'มัดจำ');
-            });
-
-            processingStatusSelect.addEventListener('change', (e) => {
-                trackingNumberContainer.classList.toggle('hidden', e.target.value !== 'จัดส่งแล้ว');
-            });
-
-            closeModalBtn.addEventListener('click', closeModal);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal();
-            });
-
+            prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); updateMonthDisplay(); listenForOrders(); });
+            nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); updateMonthDisplay(); listenForOrders(); });
+            searchInput.addEventListener('input', () => renderOrders());
+            typeFilterControls.addEventListener('click', (e) => { const button = e.target.closest('.filter-btn'); if (!button) return; currentFilters.productType = button.dataset.filter; document.querySelectorAll('#type-filter-controls .filter-btn').forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderOrders(); });
+            orderTableContainer.addEventListener('change', (e) => { if (e.target.classList.contains('filter-select')) { const filterKey = e.target.dataset.filterKey; currentFilters[filterKey] = e.target.value; renderOrders(); } });
+            orderTableContainer.addEventListener('click', async (e) => { const target = e.target; if (target.closest('.edit-btn')) { const button = target.closest('.edit-btn'); currentEditingOrderId = button.dataset.orderId; const orderRef = doc(db, "orders", currentEditingOrderId); const orderSnap = await getDoc(orderRef); if (orderSnap.exists()) { const order = orderSnap.data(); const customer = customersMap.get(order.customerId); modalCustomerName.textContent = `ลูกค้า: ${customer?.name || 'N/A'}`; paymentStatusSelect.value = order.paymentStatus || 'ยังไม่ได้ชำระ'; processingStatusSelect.value = order.processingStatus || 'รอดำเนินการ'; depositAmountInput.value = order.depositAmount || 0; trackingNumberInput.value = order.trackingNumber || ''; paymentStatusSelect.dispatchEvent(new Event('change')); processingStatusSelect.dispatchEvent(new Event('change')); openModal(); } } else if (target.closest('.delete-btn')) { const button = target.closest('.delete-btn'); const orderId = button.dataset.orderId; const braceletId = button.dataset.braceletId; await deleteOrder(orderId, braceletId); } else if (target.closest('.move-btn')) { const button = target.closest('.move-btn'); const orderId = button.dataset.orderId; await moveOrderToNextMonth(orderId); } else if (target.closest('th[data-sort-key]')) { const sortKey = target.closest('th[data-sort-key]').dataset.sortKey; if (currentSort.key === sortKey) { currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'; } else { currentSort.key = sortKey; currentSort.direction = 'desc'; } renderOrders(); } });
+            editOrderForm.addEventListener('submit', async (e) => { e.preventDefault(); if (!currentEditingOrderId) return; const dataToUpdate = { paymentStatus: paymentStatusSelect.value, processingStatus: processingStatusSelect.value, depositAmount: parseFloat(depositAmountInput.value) || 0, trackingNumber: trackingNumberInput.value, }; const orderRef = doc(db, "orders", currentEditingOrderId); await updateDoc(orderRef, dataToUpdate); closeModal(); });
+            paymentStatusSelect.addEventListener('change', (e) => { depositAmountContainer.classList.toggle('hidden', e.target.value !== 'มัดจำ'); });
+            processingStatusSelect.addEventListener('change', (e) => { trackingNumberContainer.classList.toggle('hidden', e.target.value !== 'จัดส่งแล้ว'); });
+            closeModalBtn.addEventListener('click', closeModal); modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
             initializePage();
         });
     </script>
