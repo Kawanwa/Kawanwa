@@ -530,7 +530,17 @@
                 const necklaceChainTypeOtherValue = necklaceChainTypeOther.value;
                 await runTransaction(db, async (transaction) => {
                     const materialDocs = new Map();
-                    for (const item of usedMaterials) { const materialRef = doc(db, "materials", item.materialId); const materialDoc = await transaction.get(materialRef); if (!materialDoc.exists() || materialDoc.data().stockRemaining < item.quantityUsed) throw new Error(`สินค้าหมดสต็อค: ${item.name}`); materialDocs.set(item.materialId, materialDoc); }
+                    const materialRefs = usedMaterials.map(item => doc(db, "materials", item.materialId));
+                    const fetchedDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
+                    for(let i=0; i < materialRefs.length; i++){
+                        const materialDoc = fetchedDocs[i];
+                        const item = usedMaterials[i];
+                        if (!materialDoc.exists() || materialDoc.data().stockRemaining < item.quantityUsed) {
+                             throw new Error(`สินค้าหมดสต็อค: ${item.name}`);
+                        }
+                        materialDocs.set(item.materialId, materialDoc);
+                    }
+
                     const braceletData = { createdDate: orderDate, usedMaterials, costPrice: finalCostPrice, sellingPrice, shippingCost, note: braceletNote.value, customerId, wireType: wireTypeInput.value, wireCost: isFree ? 0 : (parseFloat(wireCostInput.value) || 0), isFree, productType: productType };
                     if (productType === 'สร้อย') {
                         braceletData.necklaceDetails = { type: necklaceTypeValue, rings: parseInt(necklaceRingsValue, 10), chainType: necklaceChainTypeValue };
