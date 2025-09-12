@@ -8,6 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <style>
         body { font-family: 'Kanit', sans-serif; }
         input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
@@ -26,6 +30,13 @@
             background-color: #f0f9ff; /* sky-50 */
             cursor: pointer;
         }
+        /* Style for Select2 */
+        .select2-container .select2-selection--single { height: 42px !important; border-radius: 0.375rem; border: 1px solid #d1d5db; display: flex; align-items: center; }
+        .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 40px; padding-left: 0.75rem !important; color: #1f2937; }
+        .select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px; }
+        .select2-dropdown { border-radius: 0.375rem; border: 1px solid #d1d5db; }
+        .select2-search__field { font-family: 'Kanit', sans-serif; }
+        .select2-results__option { font-family: 'Kanit', sans-serif; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden bg-slate-50">
@@ -37,7 +48,7 @@
                     <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg relative">
                         
                         <header class="mb-8 border-b pb-4">
-                            <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">สร้างออเดอร์ใหม่</h1>
+                             <h1 class="text-3xl font-bold text-stone-800 hidden lg:block">สร้างออเดอร์ใหม่</h1>
                             <p class="text-stone-600 mt-1">ออกแบบสินค้าและบันทึกการสั่งซื้อ</p>
                         </header>
 
@@ -56,9 +67,8 @@
                                 <div class="flex items-end gap-2">
                                     <div class="flex-grow">
                                         <label for="customer-select" class="block text-sm font-medium text-stone-700 mb-1">เลือกลูกค้า (ผู้สั่ง) *</label>
-                                        <select id="customer-select" name="customerId" required class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
-                                            <option value="">-- กรุณาเลือกลูกค้า --</option>
-                                        </select>
+                                        <select id="customer-select" name="customerId" required class="w-full">
+                                            </select>
                                     </div>
                                     <button type="button" id="add-customer-btn" class="flex-shrink-0 h-10 text-white bg-sky-600 hover:bg-sky-700 font-medium rounded-lg text-sm px-4 text-center transition-colors">
                                         &#43; เพิ่ม
@@ -340,9 +350,8 @@
         const modalCharmSearchInput = document.getElementById('modal-charm-search-input');
         const closeCharmModalBtn = document.getElementById('close-charm-modal-btn');
         let activeCharmRow = null;
-        
         let allCustomers = [], availableStones = [], availableDecorations = [], availableCharms = [], allTemplates = [], materialsMap = new Map();
-
+        
         const openCustomerModal = () => customerModal.classList.remove('hidden');
         const closeCustomerModal = () => customerModal.classList.add('hidden');
 
@@ -378,18 +387,30 @@
             const customersQuery = query(collection(db, "customers"), orderBy("name"));
             const customersSnapshot = await getDocs(customersQuery);
             allCustomers = customersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            customerSelect.innerHTML = '<option value="">-- กรุณาเลือกลูกค้า --</option>';
-            allCustomers.forEach(c => customerSelect.add(new Option(c.name, c.id)));
+            
+            const selectElement = $('#customer-select');
+            selectElement.off('select2:select').off('select2:unselect');
+            selectElement.empty().append(new Option('', ''));
+            
+            allCustomers.forEach(c => {
+                const option = new Option(c.name, c.id, false, false);
+                selectElement.append(option);
+            });
+
             if (selectedId) {
-                customerSelect.value = selectedId;
+                selectElement.val(selectedId).trigger('change.select2');
                 updateCustomerDisplay(selectedId);
             }
+            
+            selectElement.select2({ placeholder: "-- ค้นหาและเลือกลูกค้า --", allowClear: true });
+            selectElement.on('select2:select', function (e) { updateCustomerDisplay(e.params.data.id); });
+            selectElement.on('select2:unselect', function (e) { updateCustomerDisplay(null); });
         }
 
         function calculateTotals() {
             let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
-            document.querySelectorAll('.stone-row').forEach(row => { const stoneId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; if (stoneId && quantity > 0) { const stone = availableStones.find(s => s.id === stoneId); totalStonePrice += (stone.avgPricePerPiece || 0) * quantity; } });
-            document.querySelectorAll('.charm-row').forEach(row => { const charmId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; if (charmId && quantity > 0) { const charm = availableCharms.find(c => c.id === charmId); totalCharmPrice += (charm.avgPricePerPiece || 0) * quantity; } });
+            document.querySelectorAll('.stone-row').forEach(row => { const stoneId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; const subtotalEl = row.querySelector('.item-subtotal'); if (stoneId && quantity > 0) { const stone = availableStones.find(s => s.id === stoneId); const subtotal = (stone.avgPricePerPiece || 0) * quantity; totalStonePrice += subtotal; if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal); } else { if(subtotalEl) subtotalEl.textContent = formatCurrency(0); } });
+            document.querySelectorAll('.charm-row').forEach(row => { const charmId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; const subtotalEl = row.querySelector('.item-subtotal'); if (charmId && quantity > 0) { const charm = availableCharms.find(c => c.id === charmId); const subtotal = (charm.avgPricePerPiece || 0) * quantity; totalCharmPrice += subtotal; if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal); } else { if(subtotalEl) subtotalEl.textContent = formatCurrency(0); } });
             document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => { totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0; });
             const laborCost = parseFloat(laborCostInput.value) || 0;
             const wireCost = parseFloat(wireCostInput.value) || 0;
@@ -415,10 +436,9 @@
             const container = document.createElement('div');
             container.className = `${type}-item-row flex items-center`;
             const checkboxId = `${type}-${item.id}`;
-            const colorClass = 'text-emerald-600 focus:ring-emerald-500';
             const stockColor = item.stockRemaining < 5 ? 'text-red-500' : 'text-gray-500';
             const sizeText = item.size ? `(${item.size}mm)` : '';
-            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer"><img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100"><span>${item.name} ${sizeText} <span class="font-semibold ${stockColor}">(เหลือ ${item.stockRemaining})</span></span></label>`;
+            container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer"><img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100"><span>${item.name} ${sizeText} <span class="font-semibold ${stockColor}">(เหลือ ${item.stockRemaining})</span></span></label>`;
             return container;
         }
 
@@ -428,9 +448,6 @@
             if (customer) { customerNameDisplay.textContent = `ลูกค้า: ${customer.name}`; customerContactDisplay.textContent = `ติดต่อ: ${customer.phone || customer.contactChannel || 'ไม่มีข้อมูล'}`; customerAddressText.textContent = customer.shippingAddress || 'ไม่มีข้อมูลที่อยู่'; customerPhoneText.textContent = `เบอร์โทร: ${customer.phone || '-'}`; customerInfoDisplay.classList.remove('hidden'); recipientAddressDisplay.classList.remove('hidden'); useCustomerAddressCheckbox.checked = true; useCustomerAddressCheckbox.dispatchEvent(new Event('change')); }
         }
         
-        async function populateTemplatesDropdown() { /* ... (same as before) ... */ }
-        function clearDesignForm() { /* ... (same as before) ... */ }
-
         async function initializePage() {
             loadingOverlay.classList.remove('hidden');
             orderDateInput.valueAsDate = new Date();
@@ -448,8 +465,8 @@
                 availableDecorations.forEach(item => decorationCheckboxList.appendChild(createCheckboxItem(item, 'decoration')));
                 const urlParams = new URLSearchParams(window.location.search);
                 const customerIdFromUrl = urlParams.get('customerId');
-                await Promise.all([ refreshCustomerList(customerIdFromUrl), populateTemplatesDropdown() ]);
-                if (customerIdFromUrl) { backLink.href = "customers.html"; backLink.innerHTML = "&larr; กลับไปหน้าข้อมูลลูกค้า"; }
+                await refreshCustomerList(customerIdFromUrl);
+                if (customerIdFromUrl) { document.getElementById('back-link').href = "customers.html"; }
             } catch (error) {
                 console.error("Error loading initial data:", error);
                 showToast("เกิดข้อผิดพลาดในการโหลดข้อมูลเริ่มต้น: " + error.message, true);
@@ -474,7 +491,6 @@
         charmSelectModal.addEventListener('click', (e) => { if (e.target === charmSelectModal) charmSelectModal.classList.add('hidden'); });
         orderForm.addEventListener('change', calculateTotals);
         orderForm.addEventListener('input', calculateTotals);
-        customerSelect.addEventListener('change', (e) => updateCustomerDisplay(e.target.value));
         useCustomerAddressCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; recipientAddressDisplay.classList.toggle('hidden', !isChecked); recipientForm.classList.toggle('hidden', isChecked); if (!isChecked) { const customer = allCustomers.find(c => c.id === customerSelect.value); if (customer) { recipientNameInput.value = customer.name; recipientPhoneInput.value = customer.phone || ''; recipientAddressInput.value = customer.shippingAddress || ''; } } });
         wireTypeInput.addEventListener('change', (e) => { switch(e.target.value) { case 'เงิน 925': wireCostInput.value = 100; break; case 'แสตนเลส': wireCostInput.value = 60; break; case 'ไหมยืด': wireCostInput.value = 20; break; default: wireCostInput.value = 0; } calculateTotals(); });
         shippingMethodInput.addEventListener('change', (e) => { const isDelivery = e.target.value === 'delivery'; shippingCostContainer.classList.toggle('hidden', !isDelivery); shippingCostInput.value = isDelivery ? 40 : 0; calculateTotals(); });
@@ -486,10 +502,7 @@
         
         orderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            submitButton.disabled = true;
-            buttonText.classList.add('hidden');
-            buttonLoader.classList.remove('hidden');
-            buttonLoader.classList.add('flex');
+            submitButton.disabled = true; buttonText.classList.add('hidden'); buttonLoader.classList.remove('hidden'); buttonLoader.classList.add('flex');
             const customerId = customerSelect.value;
             if (!customerId) { showToast("กรุณาเลือกลูกค้า", true); submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return; }
             let recipientName, recipientAddress, recipientPhone;

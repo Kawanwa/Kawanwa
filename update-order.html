@@ -167,6 +167,7 @@
         const productTypeRadios = document.querySelectorAll('input[name="productType"]');
         const necklaceOptionsContainer = document.getElementById('necklace-options');
         const necklaceTypeSelect = document.getElementById('necklaceType');
+        const necklaceRings = document.getElementById('necklaceRings');
         const necklaceRingOptionsContainer = document.getElementById('necklace-ring-options-container');
         const necklaceChainTypeSelect = document.getElementById('necklaceChainType');
         const necklaceChainOtherContainer = document.getElementById('necklace-chain-other-container');
@@ -188,24 +189,6 @@
         let materialsMap = new Map();
         let availableStones = [], availableDecorations = [], availableCharms = [];
         let shippingCostFromDb = 0;
-        
-        function calculateTotals() {
-            let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
-            document.querySelectorAll('.stone-row').forEach(row => { const stoneId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; if (stoneId && quantity > 0) { const stone = materialsMap.get(stoneId); totalStonePrice += (stone.avgPricePerPiece || 0) * quantity; } });
-            document.querySelectorAll('.charm-row').forEach(row => { const charmId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; if (charmId && quantity > 0) { const charm = materialsMap.get(charmId); totalCharmPrice += (charm.avgPricePerPiece || 0) * quantity; } });
-            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => { totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0; });
-            const laborCost = parseFloat(laborCostInput.value) || 0;
-            const wireCost = parseFloat(wireCostInput.value) || 0;
-            const shippingCost = (shippingMethodInput.value === 'delivery') ? shippingCostFromDb : 0;
-            const costPrice = totalStonePrice + totalDecorationPrice + totalCharmPrice + laborCost + wireCost + shippingCost;
-            const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
-            const profit = sellingPrice - costPrice;
-            totalStonePriceEl.textContent = formatCurrency(totalStonePrice);
-            totalDecorationPriceEl.textContent = formatCurrency(totalDecorationPrice);
-            totalCharmPriceEl.textContent = formatCurrency(totalCharmPrice);
-            costPriceEl.textContent = formatCurrency(costPrice);
-            profitPriceEl.textContent = formatCurrency(profit);
-        }
 
         function createSelectionRow(type) {
             const row = document.createElement('div');
@@ -223,9 +206,53 @@
             container.innerHTML = `<input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"><label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer"><img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100"><span>${item.name} ${sizeText} <span class="font-semibold ${stockColor}">(เหลือ ${item.stockRemaining})</span></span></label>`;
             return container;
         }
+
+        function populateStoneModal(searchTerm = '') {
+            modalStoneGrid.innerHTML = '';
+            const filtered = availableStones.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            filtered.forEach(stone => {
+                const item = document.createElement('div');
+                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center text-center';
+                item.dataset.id = stone.id;
+                const stockColor = stone.stockRemaining < 5 ? 'text-red-500' : 'text-gray-500';
+                const supplierText = stone.supplier ? stone.supplier : 'ไม่ระบุ';
+                const priceText = formatCurrency(stone.avgPricePerPiece || 0);
+                item.innerHTML = `<img src="${stone.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img'}" class="w-20 h-20 rounded-md object-cover mb-2"><p class="text-xs font-semibold text-stone-700">${stone.name}</p><p class="text-xs font-medium text-purple-600 truncate w-full">${supplierText}</p><p class="text-xs text-stone-500">${stone.size} mm</p><p class="text-xs font-bold ${stockColor}">เหลือ: ${stone.stockRemaining}</p><p class="text-sm font-bold text-emerald-600 mt-1">${priceText}</p>`;
+                modalStoneGrid.appendChild(item);
+            });
+        }
         
-        function populateStoneModal(searchTerm = '') { /* ... same as new-order ... */ }
-        function populateCharmModal(searchTerm = '') { /* ... same as new-order ... */ }
+        function populateCharmModal(searchTerm = '') {
+            modalCharmGrid.innerHTML = '';
+            const filtered = availableCharms.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            filtered.forEach(charm => {
+                const item = document.createElement('div');
+                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center text-center';
+                item.dataset.id = charm.id;
+                const stockColor = charm.stockRemaining < 5 ? 'text-red-500' : 'text-gray-500';
+                const priceText = formatCurrency(charm.avgPricePerPiece || 0);
+                item.innerHTML = `<img src="${charm.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img'}" class="w-20 h-20 rounded-md object-cover mb-2"><p class="text-xs font-semibold text-stone-700">${charm.name}</p><p class="text-xs text-stone-500">${charm.size || ''} mm</p><p class="text-xs font-bold ${stockColor}">เหลือ: ${charm.stockRemaining}</p><p class="text-sm font-bold text-emerald-600 mt-1">${priceText}</p>`;
+                modalCharmGrid.appendChild(item);
+            });
+        }
+
+        function calculateTotals() {
+            let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
+            document.querySelectorAll('.stone-row').forEach(row => { const stoneId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; const subtotalEl = row.querySelector('.item-subtotal'); if (stoneId && quantity > 0) { const stone = materialsMap.get(stoneId); const subtotal = (stone.avgPricePerPiece || 0) * quantity; totalStonePrice += subtotal; if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal); } else { if(subtotalEl) subtotalEl.textContent = formatCurrency(0); } });
+            document.querySelectorAll('.charm-row').forEach(row => { const charmId = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10) || 0; const subtotalEl = row.querySelector('.item-subtotal'); if (charmId && quantity > 0) { const charm = materialsMap.get(charmId); const subtotal = (charm.avgPricePerPiece || 0) * quantity; totalCharmPrice += subtotal; if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal); } else { if(subtotalEl) subtotalEl.textContent = formatCurrency(0); } });
+            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => { totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0; });
+            const laborCost = parseFloat(laborCostInput.value) || 0;
+            const wireCost = parseFloat(wireCostInput.value) || 0;
+            const shippingCost = (shippingMethodInput.value === 'delivery') ? shippingCostFromDb : 0;
+            const costPrice = totalStonePrice + totalDecorationPrice + totalCharmPrice + laborCost + wireCost + shippingCost;
+            const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
+            const profit = sellingPrice - costPrice;
+            totalStonePriceEl.textContent = formatCurrency(totalStonePrice);
+            totalDecorationPriceEl.textContent = formatCurrency(totalDecorationPrice);
+            totalCharmPriceEl.textContent = formatCurrency(totalCharmPrice);
+            costPriceEl.textContent = formatCurrency(costPrice);
+            profitPriceEl.textContent = formatCurrency(profit);
+        }
 
         async function initializePage() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -236,7 +263,6 @@
             try {
                 const orderRef = doc(db, "orders", orderId);
                 const [orderSnap, materialsSnap] = await Promise.all([ getDoc(orderRef), getDocs(query(collection(db, "materials"), orderBy("name"))) ]);
-
                 if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
                 currentOrderData = { id: orderSnap.id, ...orderSnap.data() };
 
@@ -276,20 +302,19 @@
                 const usedCharms = originalUsedMaterials.filter(m => materialsMap.get(m.materialId)?.type === 'จี้');
                 const usedDecorations = originalUsedMaterials.filter(m => materialsMap.get(m.materialId)?.type === 'อุปกรณ์ตกแต่ง');
 
-                document.querySelectorAll('.stone-row').forEach((row, index) => { const usedStone = usedStones[index]; if (usedStone) { const stoneData = materialsMap.get(usedStone.materialId); row.querySelector('.item-id-input').value = usedStone.materialId; row.querySelector('.selected-item-img').src = stoneData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; row.querySelector('.selected-item-name').textContent = stoneData.name; row.querySelector('.selected-item-name').classList.remove('text-stone-500'); row.querySelector('.selected-item-details').textContent = `${stoneData.supplier || 'N/A'} - ${formatCurrency(stoneData.avgPricePerPiece).replace(' ฿', '')} ฿/เม็ด`; row.querySelector('input[type="number"]').value = usedStone.quantityUsed; } });
-                document.querySelectorAll('.charm-row').forEach((row, index) => { const usedCharm = usedCharms[index]; if (usedCharm) { const charmData = materialsMap.get(usedCharm.materialId); row.querySelector('.item-id-input').value = usedCharm.materialId; row.querySelector('.selected-item-img').src = charmData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; row.querySelector('.selected-item-name').textContent = charmData.name; row.querySelector('.selected-item-name').classList.remove('text-stone-500'); row.querySelector('.selected-item-details').textContent = `${charmData.supplier || 'N/A'} - ${formatCurrency(charmData.avgPricePerPiece).replace(' ฿', '')} ฿/ชิ้น`; row.querySelector('input[type="number"]').value = usedCharm.quantityUsed; } });
+                document.querySelectorAll('.stone-row').forEach((row, index) => { const usedStone = usedStones[index]; if (usedStone) { const stoneData = materialsMap.get(usedStone.materialId); row.querySelector('.item-id-input').value = usedStone.materialId; row.querySelector('.selected-item-img').src = stoneData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; row.querySelector('.selected-item-name').textContent = stoneData.name; row.querySelector('.selected-item-name').classList.remove('text-stone-500'); row.querySelector('.selected-item-details').textContent = `${stoneData.supplier || 'N/A'} - ${formatCurrency(stoneData.avgPricePerPiece || 0).replace(' ฿', '')} ฿/เม็ด`; row.querySelector('input[type="number"]').value = usedStone.quantityUsed; } });
+                document.querySelectorAll('.charm-row').forEach((row, index) => { const usedCharm = usedCharms[index]; if (usedCharm) { const charmData = materialsMap.get(usedCharm.materialId); row.querySelector('.item-id-input').value = usedCharm.materialId; row.querySelector('.selected-item-img').src = charmData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; row.querySelector('.selected-item-name').textContent = charmData.name; row.querySelector('.selected-item-name').classList.remove('text-stone-500'); row.querySelector('.selected-item-details').textContent = `${charmData.supplier || 'N/A'} - ${formatCurrency(charmData.avgPricePerPiece || 0).replace(' ฿', '')} ฿/ชิ้น`; row.querySelector('input[type="number"]').value = usedCharm.quantityUsed; } });
                 usedDecorations.forEach(deco => { const checkbox = document.getElementById(`decoration-${deco.materialId}`); if (checkbox) checkbox.checked = true; });
 
                 braceletNote.value = currentBraceletData.note || '';
+                isFreeCheckbox.checked = currentOrderData.isFree || false;
+                isFreeCheckbox.dispatchEvent(new Event('change'));
                 laborCostInput.value = currentBraceletData.laborCost || 0;
                 sellingPriceInput.value = currentOrderData.totalAmount || 0;
                 wireTypeInput.value = currentBraceletData.wireType || 'เงิน 925';
                 wireCostInput.value = currentBraceletData.wireCost || 0;
                 shippingMethodInput.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
-                shippingMethodInput.dispatchEvent(new Event('change'));
-                isFreeCheckbox.checked = currentOrderData.isFree || false;
-                isFreeCheckbox.dispatchEvent(new Event('change'));
-
+                
                 loadingOverlay.classList.add('hidden');
                 formContent.classList.remove('invisible');
                 calculateTotals();
@@ -304,19 +329,15 @@
             e.preventDefault();
             submitButton.disabled = true; buttonText.classList.add('hidden'); buttonLoader.classList.remove('hidden'); buttonLoader.classList.add('flex');
             const orderId = new URLSearchParams(window.location.search).get('orderId');
-
             let recipientName, recipientAddress, recipientPhone;
             if (useCustomerAddressCheckbox.checked) { recipientName = currentCustomerData.name; recipientAddress = currentCustomerData.shippingAddress; recipientPhone = currentCustomerData.phone; } else { recipientName = recipientNameInput.value.trim(); recipientAddress = recipientAddressInput.value.trim(); recipientPhone = recipientPhoneInput.value.trim(); }
             if (!recipientName || !recipientAddress || !recipientPhone) { showToast("กรุณากรอกข้อมูลผู้รับให้ครบถ้วน", true); submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden'); return; }
-
             const newUsedMaterials = [];
             document.querySelectorAll('.stone-row, .charm-row').forEach(row => { const id = row.querySelector('.item-id-input').value; const quantity = parseInt(row.querySelector('input[type="number"]').value, 10); if (id && quantity > 0) { newUsedMaterials.push({ materialId: id, quantityUsed: quantity, name: materialsMap.get(id).name }); } });
             document.querySelectorAll('.decoration-item-row input:checked').forEach(checkbox => { newUsedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1, name: checkbox.dataset.name }); });
-
             const stockChanges = new Map();
             originalUsedMaterials.forEach(item => { stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) + item.quantityUsed); });
             newUsedMaterials.forEach(item => { stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) - item.quantityUsed); });
-
             try {
                 const isFree = isFreeCheckbox.checked;
                 const newSellingPrice = isFree ? 0 : parseFloat(sellingPriceInput.value) || 0;
@@ -327,7 +348,14 @@
                 const newCostPrice = newTotalStonePrice + newTotalDecorationPrice + newTotalCharmPrice + newLaborCost + newWireCost + shippingCostFromDb;
                 const newProfit = newSellingPrice - newCostPrice;
                 const productType = document.querySelector('input[name="productType"]:checked').value;
-
+                const braceletUpdateData = { usedMaterials: newUsedMaterials, note: braceletNote.value, laborCost: newLaborCost, sellingPrice: newSellingPrice, costPrice: newCostPrice, wireType: wireTypeInput.value, wireCost: newWireCost, isFree, productType };
+                if (productType === 'สร้อย') {
+                    const necklaceDetails = { type: necklaceTypeSelect.value, rings: parseInt(necklaceRings.value, 10), chainType: necklaceChainTypeSelect.value };
+                    if (necklaceChainTypeSelect.value === 'อื่นๆ') { necklaceDetails.chainTypeOther = necklaceChainTypeOther.value; }
+                    braceletUpdateData.necklaceDetails = necklaceDetails;
+                } else {
+                    braceletUpdateData.necklaceDetails = deleteField();
+                }
                 await runTransaction(db, async (transaction) => {
                     for (const [materialId, change] of stockChanges.entries()) {
                         if (change === 0) continue;
@@ -339,7 +367,6 @@
                         transaction.update(materialRef, { stockRemaining: newStock });
                     }
                     const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
-                    const braceletUpdateData = { usedMaterials: newUsedMaterials, note: braceletNote.value, laborCost: newLaborCost, sellingPrice: newSellingPrice, costPrice: newCostPrice, wireType: wireTypeInput.value, wireCost: newWireCost, isFree, productType, necklaceDetails: productType === 'สร้อย' ? { type: necklaceTypeSelect.value, rings: parseInt(necklaceRings.value, 10), chainType: necklaceChainTypeSelect.value, chainTypeOther: necklaceChainTypeSelect.value === 'อื่นๆ' ? necklaceChainTypeOther.value : deleteField() } : deleteField() };
                     transaction.update(braceletRef, braceletUpdateData);
                     const orderRef = doc(db, "orders", orderId);
                     transaction.update(orderRef, { totalAmount: newSellingPrice, paymentStatus: isFree ? "ฟรี" : currentOrderData.paymentStatus, isFree, totalCost: newCostPrice, profit: newProfit, recipientName, recipientAddress, recipientPhone });
@@ -352,17 +379,25 @@
                 submitButton.disabled = false; buttonText.classList.remove('hidden'); buttonLoader.classList.add('hidden');
             }
         });
-        
-        // --- All other event listeners from new-order.html ---
         updateForm.addEventListener('change', calculateTotals);
         updateForm.addEventListener('input', calculateTotals);
-        useCustomerAddressCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; recipientAddressDisplay.classList.toggle('hidden', !isChecked); recipientForm.classList.toggle('hidden', isChecked); if (!isChecked) { recipientNameInput.value = currentCustomerData.name; recipientPhoneInput.value = currentCustomerData.phone || ''; recipientAddressInput.value = currentCustomerData.shippingAddress || ''; } });
+        useCustomerAddressCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; recipientAddressDisplay.classList.toggle('hidden', !isChecked); recipientForm.classList.toggle('hidden', isChecked); if (!isChecked && currentCustomerData) { recipientNameInput.value = currentCustomerData.name; recipientPhoneInput.value = currentCustomerData.phone || ''; recipientAddressInput.value = currentCustomerData.shippingAddress || ''; } });
         wireTypeInput.addEventListener('change', (e) => { switch(e.target.value) { case 'เงิน 925': wireCostInput.value = 100; break; case 'แสตนเลส': wireCostInput.value = 60; break; case 'ไหมยืด': wireCostInput.value = 20; break; default: wireCostInput.value = 0; } calculateTotals(); });
-        shippingMethodInput.addEventListener('change', (e) => { shippingCostFromDb = e.target.value === 'delivery' ? 40 : 0; calculateTotals(); });
-        isFreeCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; const financialInputs = [ sellingPriceInput, laborCostInput, wireCostInput ]; if (isChecked) { financialInputs.forEach(input => { input.dataset.originalValue = input.value; input.value = 0; input.disabled = true; }); } else { financialInputs.forEach(input => { input.value = input.dataset.originalValue || 0; input.disabled = false; }); wireTypeInput.dispatchEvent(new Event('change')); } calculateTotals(); });
+        shippingMethodInput.addEventListener('change', (e) => { calculateTotals(); });
+        isFreeCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; const financialInputs = [ sellingPriceInput, laborCostInput, wireCostInput ]; if (isChecked) { financialInputs.forEach(input => { input.dataset.originalValue = input.value; input.value = 0; input.disabled = true; }); } else { financialInputs.forEach(input => { input.value = input.dataset.originalValue || '0'; input.disabled = false; }); wireTypeInput.dispatchEvent(new Event('change')); } calculateTotals(); });
         productTypeRadios.forEach(radio => { radio.addEventListener('change', (e) => { const isNecklace = e.target.value === 'สร้อย'; necklaceOptionsContainer.classList.toggle('hidden', !isNecklace); }); });
         necklaceTypeSelect.addEventListener('change', (e) => { necklaceRingOptionsContainer.style.display = e.target.value === 'ring' ? 'block' : 'none'; });
         necklaceChainTypeSelect.addEventListener('change', (e) => { necklaceChainOtherContainer.classList.toggle('hidden', e.target.value !== 'อื่นๆ'); });
+        stoneFields.addEventListener('click', (e) => { const button = e.target.closest('.select-item-btn'); if (button) { activeStoneRow = button.closest('.stone-row'); populateStoneModal(); stoneSelectModal.classList.remove('hidden'); } });
+        modalStoneGrid.addEventListener('click', (e) => { const selectedItem = e.target.closest('.modal-item'); if (selectedItem && activeStoneRow) { const stoneId = selectedItem.dataset.id; const stone = availableStones.find(s => s.id === stoneId); activeStoneRow.querySelector('.item-id-input').value = stoneId; activeStoneRow.querySelector('.selected-item-img').src = stone.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; const nameEl = activeStoneRow.querySelector('.selected-item-name'); const detailsEl = activeStoneRow.querySelector('.selected-item-details'); nameEl.textContent = stone.name; nameEl.classList.remove('text-stone-500'); detailsEl.textContent = `${stone.supplier || 'N/A'} - ${formatCurrency(stone.avgPricePerPiece || 0).replace(' ฿', '')} ฿/เม็ด`; stoneSelectModal.classList.add('hidden'); activeStoneRow = null; calculateTotals(); } });
+        charmFields.addEventListener('click', (e) => { const button = e.target.closest('.select-item-btn'); if (button) { activeCharmRow = button.closest('.charm-row'); populateCharmModal(); charmSelectModal.classList.remove('hidden'); } });
+        modalCharmGrid.addEventListener('click', (e) => { const selectedItem = e.target.closest('.modal-item'); if (selectedItem && activeCharmRow) { const charmId = selectedItem.dataset.id; const charm = availableCharms.find(c => c.id === charmId); activeCharmRow.querySelector('.item-id-input').value = charmId; activeCharmRow.querySelector('.selected-item-img').src = charm.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก'; const nameEl = activeCharmRow.querySelector('.selected-item-name'); const detailsEl = activeCharmRow.querySelector('.selected-item-details'); nameEl.textContent = charm.name; nameEl.classList.remove('text-stone-500'); detailsEl.textContent = `${charm.supplier || 'N/A'} - ${formatCurrency(charm.avgPricePerPiece || 0).replace(' ฿', '')} ฿/ชิ้น`; charmSelectModal.classList.add('hidden'); activeCharmRow = null; calculateTotals(); } });
+        modalSearchInput.addEventListener('input', () => populateStoneModal(modalSearchInput.value));
+        closeStoneModalBtn.addEventListener('click', () => stoneSelectModal.classList.add('hidden'));
+        stoneSelectModal.addEventListener('click', (e) => { if (e.target === stoneSelectModal) stoneSelectModal.classList.add('hidden'); });
+        modalCharmSearchInput.addEventListener('input', () => populateCharmModal(modalCharmSearchInput.value));
+        closeCharmModalBtn.addEventListener('click', () => charmSelectModal.classList.add('hidden'));
+        charmSelectModal.addEventListener('click', (e) => { if (e.target === charmSelectModal) charmSelectModal.classList.add('hidden'); });
         
         initializePage();
     </script>

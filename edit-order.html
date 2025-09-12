@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แก้ไขออเดอร์ - ระบบจัดการร้านกำไลหิน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+        input:disabled, select:disabled, textarea:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+        input[type="radio"]:checked + label {
+            border-color: #0ea5e9; /* sky-500 */
+            ring-width: 2px;
+            --tw-ring-color: #0ea5e9; /* sky-500 */
+            box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+        }
+        #stone-select-modal.hidden {
+            display: none;
+        }
+        .modal-item {
+            transition: all 0.15s ease-in-out;
+        }
+        .modal-item:hover {
+            transform: scale(1.05);
+            background-color: #f0f9ff; /* sky-50 */
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <div class="container mx-auto px-4 py-10">
+        <form id="edit-form" class="max-w-4xl mx-auto">
+            <div class="bg-white p-6 md:p-8 rounded-xl shadow-lg relative">
+                
+                <header class="mb-8 border-b pb-4">
+                    <a id="back-link" href="#" class="text-stone-500 hover:text-stone-800 transition-colors mb-2 inline-block text-sm">&larr; กลับไปหน้ารายละเอียดออเดอร์</a>
+                    <div>
+                        <h1 class="text-3xl font-bold text-stone-800">แก้ไขรายการในออเดอร์</h1>
+                        <p id="customer-name-display" class="text-stone-600 mt-1">สำหรับลูกค้า: กำลังโหลด...</p>
+                    </div>
+                </header>
+
+                <div id="loader" class="text-center py-20">
+                    <p class="text-stone-500">กำลังโหลดข้อมูลออเดอร์...</p>
+                </div>
+
+                <div id="form-content" class="hidden">
+                    <section id="recipient-section-edit" class="mb-8 border-b pb-6">
+                         <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">1. ข้อมูลผู้รับ</h2>
+                         <div class="mt-6 space-y-4 p-4">
+                            <div>
+                                <input type="checkbox" id="use-customer-address-checkbox-edit" class="h-4 w-4 rounded border-gray-300 text-sky-600 focus:ring-sky-500">
+                                <label for="use-customer-address-checkbox-edit" class="ml-2 text-sm font-medium text-stone-700">ใช้ที่อยู่และเบอร์โทรเริ่มต้นของลูกค้า</label>
+                            </div>
+                            <div id="recipient-address-display-edit" class="bg-sky-50 p-4 rounded-lg">
+                                <h3 class="font-semibold text-sky-800 mb-1">ข้อมูลจัดส่ง (ค่าเริ่มต้น)</h3>
+                                <p class="text-sm text-sky-700 whitespace-pre-line" id="customer-address-text-edit">กำลังโหลด...</p>
+                                <p class="text-sm text-sky-700 mt-2" id="customer-phone-text-edit"></p>
+                            </div>
+                            <div id="recipient-form-edit" class="hidden space-y-4 bg-amber-50 p-4 rounded-lg border border-amber-200">
+                                 <div>
+                                    <label for="recipientName-edit" class="block text-sm font-medium text-stone-700 mb-1">ชื่อผู้รับ *</label>
+                                    <input type="text" id="recipientName-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                 </div>
+                                 <div>
+                                    <label for="recipientPhone-edit" class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทรผู้รับ *</label>
+                                    <input type="tel" id="recipientPhone-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                 </div>
+                                 <div>
+                                    <label for="recipientAddress-edit" class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่ผู้รับ *</label>
+                                    <textarea id="recipientAddress-edit" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md"></textarea>
+                                 </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="product-type-section-edit" class="mb-8 border-t pt-6">
+                        <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">2. ประเภทสินค้า</h2>
+                        <div class="flex gap-4">
+                            <div>
+                                <input type="radio" name="productType" value="กำไล" id="type-bracelet-edit" class="peer hidden">
+                                <label for="type-bracelet-edit" class="block cursor-pointer rounded-lg border border-stone-300 p-4 transition-all">
+                                    <p class="font-semibold text-stone-700">กำไล</p>
+                                </label>
+                            </div>
+                            <div>
+                                <input type="radio" name="productType" value="สร้อย" id="type-necklace-edit" class="peer hidden">
+                                <label for="type-necklace-edit" class="block cursor-pointer rounded-lg border border-stone-300 p-4 transition-all">
+                                    <p class="font-semibold text-stone-700">สร้อย</p>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="necklace-options-edit" class="hidden mt-4 space-y-4 bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                            <div>
+                                <label for="necklaceRings-edit" class="block text-sm font-medium text-stone-700 mb-1">จำนวนวงแหวน</label>
+                                <select id="necklaceRings-edit" name="necklaceRings" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                    <option value="1">1 วงแหวน</option>
+                                    <option value="2">2 วงแหวน</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="necklaceChainType-edit" class="block text-sm font-medium text-stone-700 mb-1">รูปแบบสร้อย</label>
+                                <select id="necklaceChainType-edit" name="necklaceChainType" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                                    <option value="โซ่ถัก">โซ่ถัก</option>
+                                    <option value="โซ่บาง">โซ่บาง</option>
+                                    <option value="อื่นๆ">อื่นๆ</option>
+                                </select>
+                            </div>
+                            <div id="necklace-chain-other-container-edit" class="hidden">
+                                <label for="necklaceChainTypeOther-edit" class="block text-sm font-medium text-stone-700 mb-1">ระบุรูปแบบสร้อยอื่นๆ</label>
+                                <input type="text" id="necklaceChainTypeOther-edit" name="necklaceChainTypeOther" class="w-full px-3 py-2 border border-stone-300 rounded-md">
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="design-section-edit" class="mb-8 border-t pt-6">
+                        <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">3. ออกแบบสินค้า</h2>
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-stone-600 mb-2">หิน (สูงสุด 9 รายการ)</h3>
+                            <div id="stone-fields-edit" class="space-y-2"></div>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-stone-600 mb-2">อุปกรณ์ตกแต่ง</h3>
+                            <div id="decoration-checkbox-list-edit" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
+                        </div>
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-stone-600 mb-2">จี้ (Charms)</h3>
+                            <div id="charm-checkbox-list-edit" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3"></div>
+                        </div>
+                        <div>
+                            <label for="bracelet-note-edit" class="block text-sm font-medium text-stone-700 mb-1">หมายเหตุ (การเรียง)</label>
+                            <textarea id="bracelet-note-edit" rows="3" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"></textarea>
+                        </div>
+                    </section>
+                    
+                    <div class="mb-8 p-4 bg-rose-50 border border-rose-200 rounded-lg">
+                        <div class="flex items-center">
+                            <input id="is-free-checkbox-edit" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-rose-600 focus:ring-rose-500">
+                            <label for="is-free-checkbox-edit" class="ml-3 block text-lg font-bold text-rose-600">
+                                ทำฟรี (หักสต็อกอย่างเดียว)
+                            </label>
+                        </div>
+                    </div>
+
+                    <section id="pricing-section-edit">
+                         <h2 class="text-xl font-bold text-stone-700 border-b pb-2 mb-4">4. สรุปราคาและรายละเอียด</h2>
+                         <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4">
+                            <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาหินรวม</label><p id="total-stone-price-edit" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                            <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาอุปกรณ์ตกแต่งรวม</label><p id="total-decoration-price-edit" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                            <div class="bg-stone-50 p-4 rounded-lg"><label class="block text-sm font-medium text-stone-500">ราคาจี้รวม</label><p id="total-charm-price-edit" class="text-2xl font-bold text-stone-800">0.00 ฿</p></div>
+                            
+                            <div class="md:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label for="wireType-edit" class="block text-sm font-medium text-stone-700 mb-1">ลวดที่ใช้</label><select id="wireType-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="เงิน 925">เงิน 925</option><option value="แสตนเลส">แสตนเลส</option><option value="ไหมยืด">ไหมยืด</option><option value="อื่นๆ">อื่นๆ</option></select></div>
+                                    <div><label for="wireCost-edit" class="block text-sm font-medium text-stone-700 mb-1">ราคาลวด (บาท)</label><input type="number" id="wireCost-edit" value="0" min="0" step="1" class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                                </div>
+                                <div><label for="laborCost-edit" class="block text-sm font-medium text-stone-700 mb-1">ค่าแรง (บาท)</label><input type="number" id="laborCost-edit" value="0" min="0" step="10" required class="w-full px-3 py-2 border border-stone-300 rounded-md"></div>
+                                <div><label for="shipping-method-edit" class="block text-sm font-medium text-stone-700 mb-1">วิธีการจัดส่ง</label><select id="shipping-method-edit" class="w-full px-3 py-2 border border-stone-300 rounded-md shadow-sm"><option value="self-pickup">ส่งเอง / ไม่คิดค่าส่ง</option><option value="delivery">มีการจัดส่ง (หักจากกำไร)</option></select></div>
+                                <div></div>
+                            </div>
+
+                            <div class="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                                <div class="bg-red-50 p-4 rounded-lg"><label class="block text-sm font-medium text-red-600">ราคาต้นทุน</label><p id="cost-price-edit" class="text-2xl font-bold text-red-700">0.00 ฿</p></div>
+                                <div class="bg-blue-50 p-4 rounded-lg"><label for="selling-price-edit" class="block text-sm font-medium text-blue-600 mb-1">ราคาขาย (รวมส่งถ้ามี) *</label><input type="number" id="selling-price-edit" required min="0" step="1" class="w-full text-2xl font-bold text-blue-700 bg-transparent border-b-2 border-blue-200 focus:outline-none focus:border-blue-500 p-1"></div>
+                                 <div class="bg-green-50 p-4 rounded-lg"><label class="block text-sm font-medium text-green-600">กำไร</label><p id="profit-price-edit" class="text-2xl font-bold text-green-700">0.00 ฿</p></div>
+                            </div>
+                        </div>
+                    </section>
+                    <div class="mt-8 pt-6 border-t flex gap-4">
+                        <button type="submit" id="save-item-changes-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg disabled:bg-gray-400">
+                            บันทึกการแก้ไข
+                        </button>
+                        <a id="cancel-edit-link" href="#" class="w-full text-center bg-gray-200 hover:bg-gray-300 text-stone-800 font-bold py-2 px-4 rounded-lg">
+                            ยกเลิก
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Stone Selection Modal -->
+    <div id="stone-select-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <header class="p-4 border-b flex justify-between items-center">
+                <h2 class="text-xl font-bold text-stone-800">เลือกหิน</h2>
+                <button type="button" id="close-stone-modal-btn" class="p-1 rounded-full hover:bg-stone-200 transition-colors">
+                    <svg class="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </header>
+            <div class="p-4">
+                <input type="text" id="modal-search-input" placeholder="ค้นหาหิน..." class="w-full px-4 py-2 border border-stone-300 rounded-md">
+            </div>
+            <div id="modal-stone-grid" class="p-4 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Stone items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, getDocs, updateDoc, collection, runTransaction, query, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { firebaseConfig } from './config.js';
+        import { showToast } from './utils.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const loader = document.getElementById('loader');
+        const formContent = document.getElementById('form-content');
+        const backLink = document.getElementById('back-link');
+        const cancelEditLink = document.getElementById('cancel-edit-link');
+        const customerNameDisplay = document.getElementById('customer-name-display');
+        const useCustomerAddressCheckbox = document.getElementById('use-customer-address-checkbox-edit');
+        const recipientAddressDisplay = document.getElementById('recipient-address-display-edit');
+        const customerAddressText = document.getElementById('customer-address-text-edit');
+        const customerPhoneText = document.getElementById('customer-phone-text-edit');
+        const recipientForm = document.getElementById('recipient-form-edit');
+        const recipientNameInput = document.getElementById('recipientName-edit');
+        const recipientPhoneInput = document.getElementById('recipientPhone-edit');
+        const recipientAddressInput = document.getElementById('recipientAddress-edit');
+        const editForm = document.getElementById('edit-form');
+        const stoneFieldsEdit = document.getElementById('stone-fields-edit');
+        const decorationCheckboxListEdit = document.getElementById('decoration-checkbox-list-edit');
+        const charmCheckboxListEdit = document.getElementById('charm-checkbox-list-edit');
+        const braceletNoteEdit = document.getElementById('bracelet-note-edit');
+        const laborCostEdit = document.getElementById('laborCost-edit');
+        const sellingPriceEdit = document.getElementById('selling-price-edit');
+        const saveChangesBtn = document.getElementById('save-item-changes-btn');
+        const wireTypeEdit = document.getElementById('wireType-edit');
+        const wireCostEdit = document.getElementById('wireCost-edit');
+        const totalStonePriceEl = document.getElementById('total-stone-price-edit');
+        const totalDecorationPriceEl = document.getElementById('total-decoration-price-edit');
+        const totalCharmPriceEl = document.getElementById('total-charm-price-edit');
+        const costPriceEditEl = document.getElementById('cost-price-edit');
+        const profitPriceEditEl = document.getElementById('profit-price-edit');
+        const shippingMethodEdit = document.getElementById('shipping-method-edit');
+        const isFreeCheckboxEdit = document.getElementById('is-free-checkbox-edit');
+        const productTypeRadios = document.querySelectorAll('input[name="productType"]');
+        const necklaceOptionsContainer = document.getElementById('necklace-options-edit');
+        const designSectionHeader = document.querySelector('#design-section-edit h2');
+        const necklaceChainTypeSelectEdit = document.getElementById('necklaceChainType-edit');
+        const necklaceChainOtherContainerEdit = document.getElementById('necklace-chain-other-container-edit');
+        const necklaceChainTypeOtherEdit = document.getElementById('necklaceChainTypeOther-edit');
+        
+        const stoneSelectModal = document.getElementById('stone-select-modal');
+        const modalStoneGrid = document.getElementById('modal-stone-grid');
+        const modalSearchInput = document.getElementById('modal-search-input');
+        const closeStoneModalBtn = document.getElementById('close-stone-modal-btn');
+        let activeStoneRow = null;
+
+        // --- State Variables ---
+        let currentOrderData = null;
+        let currentBraceletData = null;
+        let currentCustomerData = null;
+        let originalUsedMaterials = [];
+        let materialsMap = new Map();
+        let availableStones = [];
+        let availableDecorations = [];
+        let availableCharms = [];
+        let shippingCostFromDb = 0;
+        
+        // --- Functions ---
+        function calculateTotalsEdit() {
+            let totalStonePrice = 0, totalDecorationPrice = 0, totalCharmPrice = 0;
+            
+            document.querySelectorAll('.stone-row').forEach(row => {
+                const stoneIdInput = row.querySelector('.stone-id-input');
+                const quantityInput = row.querySelector('input[type="number"]');
+                const stoneId = stoneIdInput.value;
+                const quantity = parseInt(quantityInput.value, 10) || 0;
+                if (stoneId && quantity > 0) {
+                    const price = parseFloat(materialsMap.get(stoneId)?.avgPricePerPiece || 0);
+                    totalStonePrice += price * quantity;
+                }
+            });
+            
+            document.querySelectorAll('.decoration-item-row input[type="checkbox"]:checked').forEach(checkbox => {
+                totalDecorationPrice += parseFloat(checkbox.dataset.price) || 0;
+            });
+            document.querySelectorAll('.charm-item-row input[type="checkbox"]:checked').forEach(checkbox => {
+                totalCharmPrice += parseFloat(checkbox.dataset.price) || 0;
+            });
+
+            totalStonePriceEl.textContent = `${totalStonePrice.toFixed(2)} ฿`;
+            totalDecorationPriceEl.textContent = `${totalDecorationPrice.toFixed(2)} ฿`;
+            totalCharmPriceEl.textContent = `${totalCharmPrice.toFixed(2)} ฿`;
+
+            const laborCost = parseFloat(laborCostEdit.value) || 0;
+            const wireCost = parseFloat(wireCostEdit.value) || 0;
+            const shippingMethod = shippingMethodEdit.value;
+            const shippingCostForCalc = (shippingMethod === 'delivery') ? shippingCostFromDb : 0;
+            const costPrice = totalStonePrice + totalDecorationPrice + totalCharmPrice + laborCost + wireCost + shippingCostForCalc;
+            const sellingPrice = parseFloat(sellingPriceEdit.value) || 0;
+            const profit = sellingPrice - costPrice;
+            costPriceEditEl.textContent = `${costPrice.toFixed(2)} ฿`;
+            profitPriceEditEl.textContent = `${profit.toFixed(2)} ฿`;
+        }
+
+        const createMaterialRow = () => {
+            const row = document.createElement('div');
+            row.className = 'stone-row grid grid-cols-12 gap-2 items-center';
+            row.innerHTML = `
+                <div class="col-span-8">
+                    <input type="hidden" class="stone-id-input">
+                    <button type="button" class="select-stone-btn w-full h-12 flex items-center text-left bg-stone-50 border border-stone-300 rounded-md p-2 hover:bg-stone-100 transition-colors">
+                        <img src="https://placehold.co/40x40/e2e8f0/64748b?text=เลือก" class="selected-stone-img w-8 h-8 rounded-md object-cover mr-2">
+                        <span class="selected-stone-name text-sm text-stone-500">-- เลือกหิน --</span>
+                    </button>
+                </div>
+                <div class="col-span-4">
+                    <input type="number" min="1" placeholder="จำนวน" class="stone-quantity w-full text-center px-1 py-2 border border-stone-300 rounded-md shadow-sm text-sm">
+                </div>
+            `;
+            return row;
+        };
+
+        function createCheckboxItem(item, type) {
+            const container = document.createElement('div');
+            container.className = `${type}-item-row flex items-center`;
+            const checkboxId = `${type}-edit-${item.id}`;
+            const colorClass = type === 'charm' ? 'text-rose-600 focus:ring-rose-500' : 'text-emerald-600 focus:ring-emerald-500';
+            
+            // --- โค้ดใหม่: สร้าง HTML สำหรับขนาดแบบมีเงื่อนไข ---
+            const sizeText = item.size ? `(${item.size}mm)` : '';
+
+            container.innerHTML = `
+                <input type="checkbox" id="${checkboxId}" data-id="${item.id}" data-price="${item.avgPricePerPiece}" data-stock="${item.stockRemaining}" data-name="${item.name}" class="h-4 w-4 rounded border-gray-300 ${colorClass}">
+                <label for="${checkboxId}" class="ml-2 text-sm text-stone-700 flex items-center gap-2 cursor-pointer">
+                    <img src="${item.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=No+Img'}" alt="${item.name}" class="w-6 h-6 rounded-md object-cover bg-stone-100">
+                    <span>${item.name} ${sizeText}</span>
+                </label>
+            `;
+            return container;
+        }
+
+        function populateStoneModal(searchTerm = '') {
+            modalStoneGrid.innerHTML = '';
+            const filteredStones = availableStones.filter(stone => 
+                stone.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            filteredStones.forEach(stone => {
+                const item = document.createElement('div');
+                item.className = 'modal-item border rounded-lg p-2 flex flex-col items-center';
+                item.dataset.id = stone.id;
+                const stockNow = stone.stockRemaining;
+                const originalItem = originalUsedMaterials.find(u => u.materialId === stone.id);
+                const currentStock = stockNow + (originalItem ? originalItem.quantityUsed : 0);
+
+                item.innerHTML = `
+                    <img src="${stone.imageUrl || 'https://placehold.co/100x100/e2e8f0/64748b?text=No+Img'}" class="w-20 h-20 rounded-md object-cover mb-2">
+                    <p class="text-xs text-center font-semibold text-stone-700">${stone.name}</p>
+                    <p class="text-xs text-stone-500">${stone.size} mm (เหลือ ${currentStock})</p>
+                `;
+                modalStoneGrid.appendChild(item);
+            });
+        }
+
+        async function initializePage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            if (!orderId) { loader.textContent = "ไม่พบรหัสออเดอร์"; return; }
+
+            try {
+                const orderRef = doc(db, "orders", orderId);
+                const orderSnap = await getDoc(orderRef);
+                if (!orderSnap.exists()) throw new Error("ไม่พบข้อมูลออเดอร์");
+                currentOrderData = orderSnap.data();
+
+                const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
+                const customerRef = doc(db, "customers", currentOrderData.customerId);
+                const materialsQuery = query(collection(db, "materials"));
+
+                const [braceletSnap, customerSnap, materialsSnap] = await Promise.all([
+                    getDoc(braceletRef), getDoc(customerRef), getDocs(materialsQuery)
+                ]);
+
+                if (!braceletSnap.exists() || !customerSnap.exists()) throw new Error("ไม่พบข้อมูลกำไลหรือลูกค้า");
+                currentBraceletData = braceletSnap.data();
+                currentCustomerData = customerSnap.data();
+                originalUsedMaterials = JSON.parse(JSON.stringify(currentBraceletData.usedMaterials || []));
+                
+                customerNameDisplay.textContent = `สำหรับลูกค้า: ${currentCustomerData.name}`;
+                customerAddressText.textContent = currentCustomerData.shippingAddress || 'ไม่มีข้อมูลที่อยู่';
+                customerPhoneText.textContent = `เบอร์โทร: ${currentCustomerData.phone || '-'}`;
+                backLink.href = `order-details.html?orderId=${orderId}`;
+                cancelEditLink.href = `order-details.html?orderId=${orderId}`;
+
+                materialsSnap.forEach(doc => materialsMap.set(doc.id, doc.data()));
+                const allMaterials = Array.from(materialsMap.values()).map((data, i) => ({ id: Array.from(materialsMap.keys())[i], ...data }));
+                availableStones = allMaterials.filter(m => m.type === 'หิน').sort((a,b) => a.name.localeCompare(b.name));
+                availableDecorations = allMaterials.filter(m => m.type === 'อุปกรณ์ตกแต่ง').sort((a,b) => a.name.localeCompare(b.name));
+                availableCharms = allMaterials.filter(m => m.type === 'จี้').sort((a,b) => a.name.localeCompare(b.name));
+
+                if (currentOrderData.recipientName && (currentOrderData.recipientName !== currentCustomerData.name || currentOrderData.recipientAddress !== currentCustomerData.shippingAddress)) {
+                    useCustomerAddressCheckbox.checked = false;
+                    recipientNameInput.value = currentOrderData.recipientName;
+                    recipientPhoneInput.value = currentOrderData.recipientPhone || '';
+                    recipientAddressInput.value = currentOrderData.recipientAddress;
+                } else {
+                    useCustomerAddressCheckbox.checked = true;
+                }
+                useCustomerAddressCheckbox.dispatchEvent(new Event('change'));
+
+                const productType = currentBraceletData.productType || 'กำไล';
+                document.querySelector(`input[name="productType"][value="${productType}"]`).checked = true;
+                if (productType === 'สร้อย') {
+                    necklaceOptionsContainer.classList.remove('hidden');
+                    designSectionHeader.textContent = '3. ออกแบบสร้อย';
+                    if (currentBraceletData.necklaceDetails) {
+                        document.getElementById('necklaceRings-edit').value = currentBraceletData.necklaceDetails.rings;
+                        if (currentBraceletData.necklaceDetails.chainType) {
+                            necklaceChainTypeSelectEdit.value = currentBraceletData.necklaceDetails.chainType;
+                            if (currentBraceletData.necklaceDetails.chainType === 'อื่นๆ') {
+                                necklaceChainOtherContainerEdit.classList.remove('hidden');
+                                necklaceChainTypeOtherEdit.value = currentBraceletData.necklaceDetails.chainTypeOther || '';
+                            }
+                        }
+                    }
+                } else {
+                    designSectionHeader.textContent = '3. ออกแบบสินค้า';
+                }
+
+                braceletNoteEdit.value = currentBraceletData.note || '';
+                laborCostEdit.value = currentBraceletData.laborCost || 0;
+                sellingPriceEdit.value = currentBraceletData.sellingPrice || 0;
+                wireTypeEdit.value = currentBraceletData.wireType || 'เงิน 925';
+                wireCostEdit.value = currentBraceletData.wireCost || 0;
+                shippingCostFromDb = currentBraceletData.shippingCost || 0;
+                shippingMethodEdit.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
+                isFreeCheckboxEdit.checked = currentBraceletData.isFree || false;
+                isFreeCheckboxEdit.dispatchEvent(new Event('change'));
+
+                stoneFieldsEdit.innerHTML = '';
+                for (let i = 0; i < 9; i++) {
+                    const stoneRow = createMaterialRow();
+                    stoneFieldsEdit.appendChild(stoneRow);
+                    const usedStone = originalUsedMaterials.filter(m => materialsMap.get(m.materialId)?.type === 'หิน')[i];
+                    if (usedStone) {
+                        const stoneData = materialsMap.get(usedStone.materialId);
+                        stoneRow.querySelector('.stone-id-input').value = usedStone.materialId;
+                        stoneRow.querySelector('.selected-stone-img').src = stoneData.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
+                        stoneRow.querySelector('.selected-stone-name').textContent = stoneData.name;
+                        stoneRow.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                        stoneRow.querySelector('.stone-quantity').value = usedStone.quantityUsed;
+                    }
+                }
+
+                decorationCheckboxListEdit.innerHTML = '';
+                availableDecorations.forEach(deco => {
+                    const checkboxRow = createCheckboxItem(deco, 'decoration');
+                    decorationCheckboxListEdit.appendChild(checkboxRow);
+                    const checkbox = checkboxRow.querySelector('input');
+                    const usedDeco = originalUsedMaterials.find(m => m.materialId === deco.id);
+                    if (usedDeco) checkbox.checked = true;
+                });
+
+                charmCheckboxListEdit.innerHTML = '';
+                availableCharms.forEach(charm => {
+                    const checkboxRow = createCheckboxItem(charm, 'charm');
+                    charmCheckboxListEdit.appendChild(checkboxRow);
+                    const checkbox = checkboxRow.querySelector('input');
+                    const usedCharm = originalUsedMaterials.find(m => m.materialId === charm.id);
+                    if (usedCharm) checkbox.checked = true;
+                });
+                
+                calculateTotalsEdit();
+                loader.classList.add('hidden');
+                formContent.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error loading order:", error);
+                loader.textContent = `เกิดข้อผิดพลาด: ${error.message}`;
+            }
+        }
+        
+        // --- Event Listeners ---
+        useCustomerAddressCheckbox.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            recipientAddressDisplay.classList.toggle('hidden', !isChecked);
+            recipientForm.classList.toggle('hidden', isChecked);
+        });
+
+        wireTypeEdit.addEventListener('change', (e) => {
+            switch(e.target.value) {
+                case 'เงิน 925': wireCostEdit.value = 100; break;
+                case 'แสตนเลส': wireCostEdit.value = 60; break;
+                case 'ไหมยืด': wireCostEdit.value = 20; break;
+                default: wireCostEdit.value = 0;
+            }
+            calculateTotalsEdit();
+        });
+
+        isFreeCheckboxEdit.addEventListener('change', (e) => {
+            const isChecked = e.target.checked;
+            if (isChecked) {
+                sellingPriceEdit.dataset.originalValue = sellingPriceEdit.value;
+                sellingPriceEdit.value = 0;
+                sellingPriceEdit.disabled = true;
+            } else {
+                sellingPriceEdit.value = sellingPriceEdit.dataset.originalValue || currentBraceletData.sellingPrice || 0;
+                sellingPriceEdit.disabled = false;
+            }
+            calculateTotalsEdit();
+        });
+
+        productTypeRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isNecklace = e.target.value === 'สร้อย';
+                necklaceOptionsContainer.classList.toggle('hidden', !isNecklace);
+                designSectionHeader.textContent = isNecklace ? '3. ออกแบบสร้อย' : '3. ออกแบบสินค้า';
+            });
+        });
+
+        necklaceChainTypeSelectEdit.addEventListener('change', (e) => {
+            necklaceChainOtherContainerEdit.classList.toggle('hidden', e.target.value !== 'อื่นๆ');
+        });
+
+        stoneFieldsEdit.addEventListener('click', (e) => {
+            const button = e.target.closest('.select-stone-btn');
+            if (button) {
+                activeStoneRow = button.closest('.stone-row');
+                populateStoneModal();
+                stoneSelectModal.classList.remove('hidden');
+            }
+        });
+        modalStoneGrid.addEventListener('click', (e) => {
+            const selectedItem = e.target.closest('.modal-item');
+            if (selectedItem && activeStoneRow) {
+                const stoneId = selectedItem.dataset.id;
+                const stone = availableStones.find(s => s.id === stoneId);
+                activeStoneRow.querySelector('.stone-id-input').value = stoneId;
+                activeStoneRow.querySelector('.selected-stone-img').src = stone.imageUrl || 'https://placehold.co/40x40/e2e8f0/64748b?text=เลือก';
+                activeStoneRow.querySelector('.selected-stone-name').textContent = stone.name;
+                activeStoneRow.querySelector('.selected-stone-name').classList.remove('text-stone-500');
+                stoneSelectModal.classList.add('hidden');
+                activeStoneRow = null;
+                calculateTotalsEdit();
+            }
+        });
+        modalSearchInput.addEventListener('input', () => populateStoneModal(modalSearchInput.value));
+        closeStoneModalBtn.addEventListener('click', () => stoneSelectModal.classList.add('hidden'));
+        stoneSelectModal.addEventListener('click', (e) => {
+            if (e.target === stoneSelectModal) stoneSelectModal.classList.add('hidden');
+        });
+
+        editForm.addEventListener('input', calculateTotalsEdit);
+        editForm.addEventListener('change', calculateTotalsEdit);
+
+        editForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveChangesBtn.disabled = true;
+            saveChangesBtn.textContent = 'กำลังบันทึก...';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            const isFree = isFreeCheckboxEdit.checked;
+
+            let recipientName, recipientAddress, recipientPhone;
+            if (useCustomerAddressCheckbox.checked) {
+                recipientName = currentCustomerData.name;
+                recipientAddress = currentCustomerData.shippingAddress;
+                recipientPhone = currentCustomerData.phone;
+            } else {
+                recipientName = recipientNameInput.value.trim();
+                recipientAddress = recipientAddressInput.value.trim();
+                recipientPhone = recipientPhoneInput.value.trim();
+            }
+            if (!recipientName || !recipientAddress || !recipientPhone) {
+                showToast("กรุณากรอกข้อมูลผู้รับ (ชื่อ, ที่อยู่, เบอร์โทร) ให้ครบถ้วน", true);
+                saveChangesBtn.disabled = false;
+                saveChangesBtn.textContent = 'บันทึกการแก้ไข';
+                return;
+            }
+
+            try {
+                const newUsedMaterials = [];
+                document.querySelectorAll('.stone-row').forEach(row => {
+                    const stoneIdInput = row.querySelector('.stone-id-input');
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    const quantity = parseInt(quantityInput.value, 10);
+                    const stoneId = stoneIdInput.value;
+                    if (stoneId && quantity > 0) {
+                        newUsedMaterials.push({ materialId: stoneId, quantityUsed: quantity, name: materialsMap.get(stoneId).name });
+                    }
+                });
+                document.querySelectorAll('.decoration-item-row input:checked, .charm-item-row input:checked').forEach(checkbox => {
+                    newUsedMaterials.push({ materialId: checkbox.dataset.id, quantityUsed: 1, name: checkbox.dataset.name });
+                });
+
+                const stockChanges = new Map();
+                originalUsedMaterials.forEach(item => stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) + item.quantityUsed));
+                newUsedMaterials.forEach(item => stockChanges.set(item.materialId, (stockChanges.get(item.materialId) || 0) - item.quantityUsed));
+
+                let newTotalStonePrice = 0, newTotalDecorationPrice = 0, newTotalCharmPrice = 0;
+                newUsedMaterials.forEach(item => {
+                    const materialInfo = materialsMap.get(item.materialId);
+                    const price = materialInfo.avgPricePerPiece || 0;
+                    if(materialInfo.type === 'หิน') newTotalStonePrice += price * item.quantityUsed;
+                    else if(materialInfo.type === 'อุปกรณ์ตกแต่ง') newTotalDecorationPrice += price * item.quantityUsed;
+                    else if(materialInfo.type === 'จี้') newTotalCharmPrice += price * item.quantityUsed;
+                });
+                
+                const newLaborCost = parseFloat(laborCostEdit.value) || 0;
+                const newWireCost = parseFloat(wireCostEdit.value) || 0;
+                const newWireType = document.getElementById('wireType-edit').value;
+                const newSellingPrice = isFree ? 0 : parseFloat(sellingPriceEdit.value) || 0;
+                const newShippingCost = shippingCostFromDb; 
+                const shippingMethod = shippingMethodEdit.value;
+                const shippingCostForCalc = (shippingMethod === 'delivery') ? shippingCostFromDb : 0;
+                const newCostPrice = newTotalStonePrice + newTotalDecorationPrice + newTotalCharmPrice + newLaborCost + newWireCost + shippingCostForCalc;
+                const newProfit = newSellingPrice - newCostPrice;
+
+                const productType = document.querySelector('input[name="productType"]:checked').value;
+                const necklaceRings = document.getElementById('necklaceRings-edit').value;
+                const necklaceChainType = document.getElementById('necklaceChainType-edit').value;
+                const necklaceChainTypeOther = document.getElementById('necklaceChainTypeOther-edit').value;
+
+                await runTransaction(db, async (transaction) => {
+                    const materialRefs = Array.from(stockChanges.keys()).map(id => doc(db, "materials", id));
+                    const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
+                    for(let i = 0; i < materialRefs.length; i++) {
+                        const materialDoc = materialDocs[i];
+                        const change = stockChanges.get(materialRefs[i].id);
+                        if (!materialDoc.exists()) throw new Error(`ไม่พบวัสดุ ID: ${materialRefs[i].id}`);
+                        const newStock = materialDoc.data().stockRemaining + change;
+                        if (newStock < 0) throw new Error(`สต็อคไม่พอสำหรับ: ${materialDoc.data().name}`);
+                        transaction.update(materialRefs[i], { stockRemaining: newStock });
+                    }
+
+                    const braceletRef = doc(db, "bracelets", currentOrderData.braceletId);
+                    const braceletUpdateData = {
+                        usedMaterials: newUsedMaterials, note: braceletNoteEdit.value, laborCost: newLaborCost,
+                        sellingPrice: newSellingPrice, costPrice: newCostPrice, wireType: newWireType,
+                        wireCost: newWireCost, isFree: isFree, productType: productType,
+                        necklaceDetails: productType === 'สร้อย'
+                            ? {
+                                rings: parseInt(necklaceRings, 10),
+                                chainType: necklaceChainType,
+                                chainTypeOther: necklaceChainType === 'อื่นๆ' ? necklaceChainTypeOther : deleteField()
+                              }
+                            : deleteField()
+                    };
+                    transaction.update(braceletRef, braceletUpdateData);
+                    
+                    const orderRef = doc(db, "orders", orderId);
+                    transaction.update(orderRef, {
+                        totalAmount: newSellingPrice, paymentStatus: isFree ? "ฟรี" : currentOrderData.paymentStatus,
+                        isFree: isFree, totalCost: newCostPrice, profit: newProfit,
+                        recipientName: recipientName, 
+                        recipientAddress: recipientAddress,
+                        recipientPhone: recipientPhone
+                    });
+                });
+
+                showToast("อัปเดตออเดอร์สำเร็จ!");
+                window.location.href = `order-details.html?orderId=${orderId}`;
+
+            } catch (error) {
+                console.error("Failed to update order:", error);
+                showToast(`เกิดข้อผิดพลาด: ${error.message}`, true);
+            } finally {
+                saveChangesBtn.disabled = false;
+                saveChangesBtn.textContent = 'บันทึกการแก้ไข';
+            }
+        });
+
+        initializePage();
+    </script>
+</body>
+</html>
