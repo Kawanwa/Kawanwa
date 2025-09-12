@@ -127,45 +127,60 @@
 
             const renderOrders = () => {
                 let filteredAndSortedOrders = [...allOrdersForMonth];
+                
                 const searchTerm = searchInput.value.toLowerCase();
                 if (searchTerm) { filteredAndSortedOrders = filteredAndSortedOrders.filter(order => (customersMap.get(order.customerId)?.name || '').toLowerCase().includes(searchTerm)); }
+
                 if (currentFilters.productType !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.productType === currentFilters.productType); }
                 if (currentFilters.payment !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.paymentStatus === currentFilters.payment); }
                 if (currentFilters.processing !== 'all') { filteredAndSortedOrders = filteredAndSortedOrders.filter(o => o.processingStatus === currentFilters.processing); }
-                filteredAndSortedOrders.sort((a, b) => { const valA = currentSort.key === 'orderDate' ? a.orderDate.toDate() : a.totalAmount; const valB = currentSort.key === 'orderDate' ? b.orderDate.toDate() : b.totalAmount; if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1; if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1; return 0; });
+
+                filteredAndSortedOrders.sort((a, b) => { const valA = a.orderDate.toDate(); const valB = b.orderDate.toDate(); if (valA < valB) return 1; if (valA > valB) return -1; return 0; });
+
                 orderTableContainer.innerHTML = '';
                 if (filteredAndSortedOrders.length === 0) { orderTableContainer.innerHTML = '<p class="text-center py-10 text-stone-500">ไม่พบข้อมูลออเดอร์ที่ตรงตามเงื่อนไข</p>'; return; }
                 const table = document.createElement('table'); table.className = 'w-full text-sm text-left text-stone-700';
-                table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th scope="col" class="px-4 py-3 cursor-pointer" data-sort-key="orderDate">วันที่ <span class="sort-arrow"></span></th><th scope="col" class="px-4 py-3">ลูกค้า</th><th scope="col" class="px-4 py-3 text-right cursor-pointer" data-sort-key="totalAmount">ยอดรวม <span class="sort-arrow"></span></th><th scope="col" class="px-4 py-3 text-center">ประเภท</th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="payment"><option value="all">สถานะชำระเงิน</option><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option><option value="ฟรี">ฟรี</option></select></th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="processing"><option value="all">สถานะดำเนินการ</option><option value="รอดำเนินการ">รอดำเนินการ</option><option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option><option value="จัดส่งแล้ว">จัดส่งแล้ว</option></select></th><th scope="col" class="px-4 py-3 text-center">จัดการ</th></tr></thead>`;
+                table.innerHTML = `<thead class="text-xs text-stone-700 uppercase bg-stone-50"><tr><th scope="col" class="px-4 py-3">ลำดับ</th><th scope="col" class="px-4 py-3">วันที่</th><th scope="col" class="px-4 py-3">ลูกค้า</th><th scope="col" class="px-4 py-3 text-right">ยอดรวม</th><th scope="col" class="px-4 py-3 text-center">ประเภท</th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="payment"><option value="all">สถานะชำระเงิน</option><option value="ยังไม่ได้ชำระ">ยังไม่ได้ชำระ</option><option value="มัดจำ">มัดจำ</option><option value="ชำระแล้ว">ชำระแล้ว</option><option value="ฟรี">ฟรี</option></select></th><th scope="col" class="px-4 py-3 text-center relative"><select class="filter-select bg-transparent font-semibold" data-filter-key="processing"><option value="all">สถานะดำเนินการ</option><option value="รอดำเนินการ">รอดำเนินการ</option><option value="ดำเนินการเสร็จสิ้น">ดำเนินการเสร็จสิ้น</option><option value="จัดส่งแล้ว">จัดส่งแล้ว</option></select></th><th scope="col" class="px-4 py-3 text-center">จัดการ</th></tr></thead>`;
                 const tbody = document.createElement('tbody');
-                filteredAndSortedOrders.forEach(order => { const row = document.createElement('tr'); row.className = 'bg-white border-b hover:bg-stone-50'; const orderDate = order.orderDate?.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) || 'N/A'; const customerName = customersMap.get(order.customerId)?.name || 'N/A'; row.innerHTML = `<td class="px-4 py-4">${orderDate}</td><td class="px-4 py-4 font-medium text-stone-900">${customerName}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td><td class="px-4 py-4 text-center">${order.productType || 'N/A'}</td><td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td><td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td><td class="px-4 py-4 text-center whitespace-nowrap"><a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a><button data-order-id="${order.id}" class="edit-btn font-medium text-sky-600 hover:underline ml-3">แก้ไขด่วน</button><button data-order-id="${order.id}" class="move-btn font-medium text-orange-600 hover:underline ml-3">เลื่อนเดือน</button><button data-order-id="${order.id}" data-bracelet-id="${order.braceletId}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`; tbody.appendChild(row); });
+                filteredAndSortedOrders.forEach((order, index) => {
+                    const row = document.createElement('tr'); row.className = 'bg-white border-b hover:bg-stone-50';
+                    const orderDate = order.orderDate?.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) || 'N/A';
+                    const customerName = customersMap.get(order.customerId)?.name || 'N/A';
+                    row.innerHTML = `<td class="px-4 py-4 font-semibold">${index + 1}</td><td class="px-4 py-4">${orderDate}</td><td class="px-4 py-4 font-medium text-stone-900">${customerName}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td><td class="px-4 py-4 text-center">${order.productType || 'N/A'}</td><td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td><td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td><td class="px-4 py-4 text-center whitespace-nowrap"><a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a><button data-order-id="${order.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`;
+                    tbody.appendChild(row);
+                });
                 table.appendChild(tbody); orderTableContainer.appendChild(table);
                 document.querySelector('.filter-select[data-filter-key="payment"]').value = currentFilters.payment; document.querySelector('.filter-select[data-filter-key="processing"]').value = currentFilters.processing;
-                document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = ''); const activeSortHeader = document.querySelector(`th[data-sort-key="${currentSort.key}"] .sort-arrow`); if (activeSortHeader) { activeSortHeader.textContent = currentSort.direction === 'asc' ? '▲' : '▼'; }
             };
 
             const listenForOrders = () => {
                 const year = currentDate.getFullYear(); const month = currentDate.getMonth(); const startDate = new Date(year, month, 1); const endDate = new Date(year, month + 1, 1);
                 const q = query(collection(db, "orders"), where("orderDate", ">=", Timestamp.fromDate(startDate)), where("orderDate", "<", Timestamp.fromDate(endDate)), orderBy("orderDate", "desc"));
+                
                 onSnapshot(q, async (snapshot) => {
                     const ordersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     const braceletIds = ordersData.map(o => o.braceletId).filter(id => id);
+
                     let braceletsMap = new Map();
                     if (braceletIds.length > 0) {
                         const braceletsQuery = query(collection(db, "bracelets"), where("__name__", "in", braceletIds));
                         const braceletsSnapshot = await getDocs(braceletsQuery);
-                        braceletsSnapshot.forEach(doc => { braceletsMap.set(doc.id, doc.data()); });
+                        braceletsSnapshot.forEach(doc => {
+                            braceletsMap.set(doc.id, doc.data());
+                        });
                     }
-                    allOrdersForMonth = ordersData.map(order => { const bracelet = braceletsMap.get(order.braceletId); return { ...order, productType: bracelet?.productType || 'กำไล' }; });
+                    
+                    allOrdersForMonth = ordersData.map(order => {
+                        const bracelet = braceletsMap.get(order.braceletId);
+                        return { ...order, productType: bracelet?.productType || 'กำไล' };
+                    });
+                    
                     let totalSum = 0, paidSum = 0, unpaidSum = 0, depositSum = 0, shippingSum = 0;
                     allOrdersForMonth.forEach(order => { const total = order.totalAmount || 0; const deposit = order.depositAmount || 0; totalSum += total; depositSum += deposit; shippingSum += order.shippingCost || 0; if (order.paymentStatus === 'ยังไม่ได้ชำระ') { unpaidSum += total; } else if (order.paymentStatus === 'มัดจำ') { unpaidSum += (total - deposit); paidSum += deposit; } else if (order.paymentStatus === 'ชำระแล้ว') { paidSum += total; } });
                     summaryTotal.textContent = `${formatCurrency(totalSum)} ฿`; summaryPaid.textContent = `${formatCurrency(paidSum)} ฿`; summaryUnpaid.textContent = `${formatCurrency(unpaidSum)} ฿`; summaryDeposit.textContent = `${formatCurrency(depositSum)} ฿`; summaryShipping.textContent = `${formatCurrency(shippingSum)} ฿`;
                     renderOrders();
                 }, (error) => { console.error("Error fetching orders:", error); orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`; });
             };
-
-            async function moveOrderToNextMonth(orderId) { if (!confirm('คุณต้องการเลื่อนออเดอร์นี้ไปเดือนถัดไปใช่หรือไม่?\nวันที่จะถูกเปลี่ยนเป็นวันแรกของเดือนถัดไป')) { return; } try { const orderRef = doc(db, "orders", orderId); const orderSnap = await getDoc(orderRef); if (!orderSnap.exists()) { throw new Error("ไม่พบออเดอร์ที่ต้องการเลื่อน"); } const currentOrderDate = orderSnap.data().orderDate.toDate(); const nextMonthDate = new Date(currentOrderDate.getFullYear(), currentOrderDate.getMonth() + 1, 1); await updateDoc(orderRef, { orderDate: Timestamp.fromDate(nextMonthDate) }); alert(`ออเดอร์ได้ถูกย้ายไปที่เดือน ${new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(nextMonthDate)} เรียบร้อยแล้ว`); } catch (error) { console.error("Error moving order: ", error); alert("เกิดข้อผิดพลาดในการเลื่อนออเดอร์: " + error.message); } }
-            async function deleteOrder(orderId, braceletId) { if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์นี้? การกระทำนี้จะคืนสต็อคสินค้าและไม่สามารถย้อนกลับได้')) { return; } try { await runTransaction(db, async (transaction) => { const orderRef = doc(db, "orders", orderId); const braceletRef = doc(db, "bracelets", braceletId); const braceletDoc = await transaction.get(braceletRef); if (!braceletDoc.exists()) { transaction.delete(orderRef); return; } const usedMaterials = braceletDoc.data().usedMaterials; if (usedMaterials && usedMaterials.length > 0) { const materialRefs = usedMaterials.map(item => doc(db, "materials", item.materialId)); const materialDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref))); for (let i = 0; i < usedMaterials.length; i++) { const item = usedMaterials[i]; const materialDoc = materialDocs[i]; if (materialDoc.exists()) { const newStock = materialDoc.data().stockRemaining + item.quantityUsed; transaction.update(materialRefs[i], { stockRemaining: newStock }); } } } transaction.delete(braceletRef); transaction.delete(orderRef); }); alert("ลบออเดอร์สำเร็จแล้ว"); } catch (error) { console.error("Error deleting order: ", error); alert("เกิดข้อผิดพลาดในการลบออเดอร์: " + error.message); } }
             
             async function initializePage() {
                 updateMonthDisplay();
@@ -182,11 +197,8 @@
             searchInput.addEventListener('input', () => renderOrders());
             typeFilterControls.addEventListener('click', (e) => { const button = e.target.closest('.filter-btn'); if (!button) return; currentFilters.productType = button.dataset.filter; document.querySelectorAll('#type-filter-controls .filter-btn').forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderOrders(); });
             orderTableContainer.addEventListener('change', (e) => { if (e.target.classList.contains('filter-select')) { const filterKey = e.target.dataset.filterKey; currentFilters[filterKey] = e.target.value; renderOrders(); } });
-            orderTableContainer.addEventListener('click', async (e) => { const target = e.target; if (target.closest('.edit-btn')) { const button = target.closest('.edit-btn'); currentEditingOrderId = button.dataset.orderId; const orderRef = doc(db, "orders", currentEditingOrderId); const orderSnap = await getDoc(orderRef); if (orderSnap.exists()) { const order = orderSnap.data(); const customer = customersMap.get(order.customerId); modalCustomerName.textContent = `ลูกค้า: ${customer?.name || 'N/A'}`; paymentStatusSelect.value = order.paymentStatus || 'ยังไม่ได้ชำระ'; processingStatusSelect.value = order.processingStatus || 'รอดำเนินการ'; depositAmountInput.value = order.depositAmount || 0; trackingNumberInput.value = order.trackingNumber || ''; paymentStatusSelect.dispatchEvent(new Event('change')); processingStatusSelect.dispatchEvent(new Event('change')); openModal(); } } else if (target.closest('.delete-btn')) { const button = target.closest('.delete-btn'); const orderId = button.dataset.orderId; const braceletId = button.dataset.braceletId; await deleteOrder(orderId, braceletId); } else if (target.closest('.move-btn')) { const button = target.closest('.move-btn'); const orderId = button.dataset.orderId; await moveOrderToNextMonth(orderId); } else if (target.closest('th[data-sort-key]')) { const sortKey = target.closest('th[data-sort-key]').dataset.sortKey; if (currentSort.key === sortKey) { currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc'; } else { currentSort.key = sortKey; currentSort.direction = 'desc'; } renderOrders(); } });
-            editOrderForm.addEventListener('submit', async (e) => { e.preventDefault(); if (!currentEditingOrderId) return; const dataToUpdate = { paymentStatus: paymentStatusSelect.value, processingStatus: processingStatusSelect.value, depositAmount: parseFloat(depositAmountInput.value) || 0, trackingNumber: trackingNumberInput.value, }; const orderRef = doc(db, "orders", currentEditingOrderId); await updateDoc(orderRef, dataToUpdate); closeModal(); });
-            paymentStatusSelect.addEventListener('change', (e) => { depositAmountContainer.classList.toggle('hidden', e.target.value !== 'มัดจำ'); });
-            processingStatusSelect.addEventListener('change', (e) => { trackingNumberContainer.classList.toggle('hidden', e.target.value !== 'จัดส่งแล้ว'); });
-            closeModalBtn.addEventListener('click', closeModal); modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            orderTableContainer.addEventListener('click', async (e) => { const target = e.target; if (target.closest('.delete-btn')) { const button = target.closest('.delete-btn'); const orderId = button.dataset.orderId; const braceletId = button.dataset.braceletId; await deleteOrder(orderId, braceletId); } });
+            
             initializePage();
         });
     </script>
