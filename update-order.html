@@ -307,13 +307,13 @@
                 usedDecorations.forEach(deco => { const checkbox = document.getElementById(`decoration-${deco.materialId}`); if (checkbox) checkbox.checked = true; });
 
                 braceletNote.value = currentBraceletData.note || '';
-                isFreeCheckbox.checked = currentOrderData.isFree || false;
-                isFreeCheckbox.dispatchEvent(new Event('change'));
                 laborCostInput.value = currentBraceletData.laborCost || 0;
                 sellingPriceInput.value = currentOrderData.totalAmount || 0;
                 wireTypeInput.value = currentBraceletData.wireType || 'เงิน 925';
                 wireCostInput.value = currentBraceletData.wireCost || 0;
                 shippingMethodInput.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
+                isFreeCheckbox.checked = currentOrderData.isFree || false;
+                isFreeCheckbox.dispatchEvent(new Event('change'));
                 
                 loadingOverlay.classList.add('hidden');
                 formContent.classList.remove('invisible');
@@ -357,11 +357,18 @@
                     braceletUpdateData.necklaceDetails = deleteField();
                 }
                 await runTransaction(db, async (transaction) => {
+                    const materialDocs = new Map();
+                    const materialRefs = Array.from(stockChanges.keys()).map(id => doc(db, "materials", id));
+                    const fetchedDocs = await Promise.all(materialRefs.map(ref => transaction.get(ref)));
+                    for(let i = 0; i < materialRefs.length; i++) {
+                        const materialDoc = fetchedDocs[i];
+                        if (!materialDoc.exists()) throw new Error(`ไม่พบวัสดุ ID: ${materialRefs[i].id}`);
+                        materialDocs.set(materialRefs[i].id, materialDoc);
+                    }
                     for (const [materialId, change] of stockChanges.entries()) {
                         if (change === 0) continue;
                         const materialRef = doc(db, "materials", materialId);
-                        const materialDoc = await transaction.get(materialRef);
-                        if (!materialDoc.exists()) throw new Error(`ไม่พบวัสดุ ID: ${materialId}`);
+                        const materialDoc = materialDocs.get(materialId);
                         const newStock = materialDoc.data().stockRemaining - change;
                         if (newStock < 0) throw new Error(`สต็อคไม่พอสำหรับ: ${materialDoc.data().name}`);
                         transaction.update(materialRef, { stockRemaining: newStock });
@@ -383,7 +390,7 @@
         updateForm.addEventListener('input', calculateTotals);
         useCustomerAddressCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; recipientAddressDisplay.classList.toggle('hidden', !isChecked); recipientForm.classList.toggle('hidden', isChecked); if (!isChecked && currentCustomerData) { recipientNameInput.value = currentCustomerData.name; recipientPhoneInput.value = currentCustomerData.phone || ''; recipientAddressInput.value = currentCustomerData.shippingAddress || ''; } });
         wireTypeInput.addEventListener('change', (e) => { switch(e.target.value) { case 'เงิน 925': wireCostInput.value = 100; break; case 'แสตนเลส': wireCostInput.value = 60; break; case 'ไหมยืด': wireCostInput.value = 20; break; default: wireCostInput.value = 0; } calculateTotals(); });
-        shippingMethodInput.addEventListener('change', (e) => { calculateTotals(); });
+        shippingMethodInput.addEventListener('change', (e) => { shippingCostFromDb = e.target.value === 'delivery' ? 40 : 0; calculateTotals(); });
         isFreeCheckbox.addEventListener('change', (e) => { const isChecked = e.target.checked; const financialInputs = [ sellingPriceInput, laborCostInput, wireCostInput ]; if (isChecked) { financialInputs.forEach(input => { input.dataset.originalValue = input.value; input.value = 0; input.disabled = true; }); } else { financialInputs.forEach(input => { input.value = input.dataset.originalValue || '0'; input.disabled = false; }); wireTypeInput.dispatchEvent(new Event('change')); } calculateTotals(); });
         productTypeRadios.forEach(radio => { radio.addEventListener('change', (e) => { const isNecklace = e.target.value === 'สร้อย'; necklaceOptionsContainer.classList.toggle('hidden', !isNecklace); }); });
         necklaceTypeSelect.addEventListener('change', (e) => { necklaceRingOptionsContainer.style.display = e.target.value === 'ring' ? 'block' : 'none'; });
