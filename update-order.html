@@ -309,12 +309,12 @@
                 usedDecorations.forEach(deco => { const checkbox = document.getElementById(`decoration-${deco.materialId}`); if (checkbox) checkbox.checked = true; });
 
                 braceletNote.value = currentBraceletData.note || '';
+                isFreeCheckbox.checked = currentOrderData.isFree || false;
                 laborCostInput.value = currentBraceletData.laborCost || 0;
                 sellingPriceInput.value = currentOrderData.totalAmount || 0;
                 wireTypeInput.value = currentBraceletData.wireType || 'เงิน 925';
                 wireCostInput.value = currentBraceletData.wireCost || 0;
                 shippingMethodInput.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
-                isFreeCheckbox.checked = currentOrderData.isFree || false;
                 isFreeCheckbox.dispatchEvent(new Event('change'));
                 
                 loadingOverlay.classList.add('hidden');
