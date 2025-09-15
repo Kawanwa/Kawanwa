@@ -23,6 +23,7 @@
 </head>
 <body class="flex h-screen overflow-hidden bg-slate-50">
 
+    <!-- Main Content Area -->
     <div class="flex-grow flex flex-col overflow-y-auto">
         <main class="flex-grow p-6">
             <div class="max-w-4xl mx-auto">
@@ -311,7 +312,7 @@
                 braceletNote.value = currentBraceletData.note || '';
                 isFreeCheckbox.checked = currentOrderData.isFree || false;
                 laborCostInput.value = currentBraceletData.laborCost || 0;
-                sellingPriceInput.value = currentOrderData.totalAmount || 0; // CORRECTED LINE
+                sellingPriceInput.value = currentOrderData.totalAmount || 0; 
                 wireTypeInput.value = currentBraceletData.wireType || 'เงิน 925';
                 wireCostInput.value = currentBraceletData.wireCost || 0;
                 shippingMethodInput.value = shippingCostFromDb > 0 ? 'delivery' : 'self-pickup';
