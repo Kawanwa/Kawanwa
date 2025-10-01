@@ -1,16 +1,82 @@
-<!-- ... existing code ... -->
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kawanwa Stone - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Kanit', sans-serif; 
+        }
+        .menu-card { 
+            transition: all 0.2s ease-in-out; 
+            background-color: white;
+        }
+        .menu-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08); 
+        }
+        .stat-card {
+            transition: all 0.2s ease-in-out;
+            border-left-width: 4px;
+        }
+        .stat-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.07);
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden bg-slate-50">
+
+    <div class="flex-grow flex flex-col overflow-y-auto">
+        <main class="flex-grow p-6">
+            <div class="w-full max-w-7xl mx-auto">
+                
+                <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10">
                     <div>
                         <h1 class="text-3xl font-bold text-slate-800 tracking-tight hidden lg:block">Dashboard</h1>
                         <p class="text-slate-500 mt-1">ยินดีต้อนรับ, คุณน็อต!</p>
                     </div>
-                    <button id="create-order-btn" class="mt-4 sm:mt-0 w-full sm:w-auto flex-shrink-0 text-white bg-sky-500 hover:bg-sky-600 font-medium rounded-lg text-sm px-6 py-3 text-center transition-colors shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2">
+                    <a href="new-order.html" class="mt-4 sm:mt-0 w-full sm:w-auto flex-shrink-0 text-white bg-sky-500 hover:bg-sky-600 font-medium rounded-lg text-sm px-6 py-3 text-center transition-colors shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
                         สร้างออเดอร์ใหม่
-                    </button>
+                    </a>
                 </header>
 
                 <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-<!-- ... existing code ... -->
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-sky-400">
+                        <h3 class="font-semibold text-slate-500">ยอดขายเดือนนี้</h3>
+                        <p id="monthly-sales" class="text-3xl font-bold text-slate-800 mt-1">...</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-emerald-400">
+                        <h3 class="font-semibold text-slate-500">กำไรเดือนนี้</h3>
+                        <p id="monthly-profit" class="text-3xl font-bold text-emerald-600 mt-1">...</p>
+                    </div>
+                    <div class="stat-card bg-white p-6 rounded-xl shadow-sm border-l-amber-400">
+                        <h3 class="font-semibold text-slate-500">ออเดอร์ที่ต้องทำ</h3>
+                        <p id="pending-orders-count" class="text-3xl font-bold text-amber-600 mt-1">...</p>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <div class="lg:col-span-2">
+                        <h2 class="text-xl font-semibold text-slate-700 mb-4">เมนูจัดการหลัก</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                            <a href="order-history.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg></div><h3 class="text-md font-semibold text-slate-800">จัดการออเดอร์</h3></a>
+                            <a href="customers.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg></div><h3 class="text-md font-semibold text-slate-800">ข้อมูลลูกค้า</h3></a>
+                            <a href="suppliers.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div><h3 class="text-md font-semibold text-slate-800">จัดการผู้ขาย</h3></a>
+                            <a href="stock.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg></div><h3 class="text-md font-semibold text-slate-800">จัดการสต็อค</h3></a>
+                            <a href="intake.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg></div><h3 class="text-md font-semibold text-slate-800">รับของเข้า</h3></a>
+                            <a href="report.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg></div><h3 class="text-md font-semibold text-slate-800">รายงาน</h3></a>
+                            <a href="expenses.html" class="menu-card p-5 rounded-xl shadow-sm border border-slate-200 text-center flex flex-col items-center justify-center"><div class="h-14 w-14 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mb-3"><svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg></div><h3 class="text-md font-semibold text-slate-800">บัญชี</h3></a>
+                        </div>
+                    </div>
+
                     <div class="lg:col-span-1 space-y-8">
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"><h2 class="text-xl font-semibold text-slate-700 mb-4">ออเดอร์ล่าสุด</h2><div id="recent-orders-container" class="space-y-3"><p class="text-slate-500 text-center py-8">กำลังโหลด...</p></div></div>
                         <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"><h2 class="text-xl font-semibold text-slate-700 mb-4">สินค้าใกล้หมด (<=10)</h2><div id="low-stock-container" class="space-y-3"><p class="text-slate-500 text-center py-8">กำลังโหลด...</p></div></div>
@@ -20,97 +86,79 @@
         </main>
     </div>
 
-    <!-- Order Type Selection Modal -->
-    <div id="order-type-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-        <div id="modal-panel" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all opacity-0 scale-95">
-            <div class="p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-slate-800">เลือกประเภทออเดอร์</h2>
-                    <button id="close-modal-btn" class="text-slate-400 hover:text-slate-600">&times;</button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-semibold text-slate-700 mb-3 text-lg border-b pb-2">ประเภทสร้อยคอ</h3>
-                        <div class="space-y-2">
-                            <a href="new-order.html?type=necklace-ring" class="modal-option-link">สร้อยคอแบบวงแหวน</a>
-                            <a href="new-order.html?type=necklace-stone-round" class="modal-option-link">สร้อยคอแบบหินกลม (6-9 เม็ด)</a>
-                            <a href="new-order.html?type=necklace-stone-mixed" class="modal-option-link">สร้อยคอแบบหินผสม (หินกลม+หินแตก)</a>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-slate-700 mb-3 text-lg border-b pb-2">ประเภทกำไล</h3>
-                        <div class="space-y-2">
-                            <a href="new-order.html?type=bracelet-1-2" class="modal-option-link">กำไล หิน 1-2 เม็ด</a>
-                            <a href="new-order.html?type=bracelet-3-4" class="modal-option-link">กำไล หิน 3-4 เม็ด</a>
-                            <a href="new-order.html?type=bracelet-5-plus" class="modal-option-link">กำไล หิน 5 เม็ดขึ้นไป</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <style>
-        .modal-option-link {
-            display: block;
-            padding: 12px 16px;
-            border-radius: 8px;
-            background-color: #f8fafc; /* slate-50 */
-            color: #475569; /* slate-600 */
-            font-weight: 500;
-            transition: all 0.2s ease-in-out;
-            border: 1px solid #e2e8f0; /* slate-200 */
-        }
-        .modal-option-link:hover {
-            background-color: #e0f2fe; /* sky-100 */
-            color: #0c4a6e; /* sky-800 */
-            border-color: #7dd3fc; /* sky-300 */
-            transform: translateX(4px);
-        }
-        #close-modal-btn {
-            font-size: 2.5rem;
-            line-height: 1;
-            font-weight: 300;
-        }
-    </style>
-
     <script src="layout.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-// ... existing code ... -->
+        import { getFirestore, collection, query, where, onSnapshot, getDocs, limit, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { firebaseConfig } from './config.js';
+        import { formatCurrency, getProcessingStatusBadge } from './utils.js';
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function fetchDashboardData() {
+            const today = new Date();
+            const startOfMonth = Timestamp.fromDate(new Date(today.getFullYear(), today.getMonth(), 1));
+
+            const pendingOrdersQuery = query(collection(db, "orders"), where("processingStatus", "==", "รอดำเนินการ"));
+            onSnapshot(pendingOrdersQuery, (snapshot) => {
+                document.getElementById('pending-orders-count').textContent = snapshot.size;
+            });
+
+            const monthlyOrdersQuery = query(collection(db, "orders"), where("orderDate", ">=", startOfMonth));
+            onSnapshot(monthlyOrdersQuery, (snapshot) => {
+                let totalSales = 0; let totalProfit = 0;
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    if (order.paymentStatus === 'ชำระแล้ว') {
+                        totalSales += order.totalAmount || 0;
+                        totalProfit += order.profit || 0;
+                    } else if (order.paymentStatus === 'มัดจำ') {
+                        totalSales += order.depositAmount || 0; 
+                        totalProfit += order.profit || 0;
+                    }
+                });
+                document.getElementById('monthly-sales').textContent = formatCurrency(totalSales);
+                document.getElementById('monthly-profit').textContent = formatCurrency(totalProfit);
+            });
+
+            const recentOrdersContainer = document.getElementById('recent-orders-container');
+            const recentOrdersQuery = query(collection(db, "orders"), orderBy("orderDate", "desc"), limit(5));
+            const customersSnapshot = await getDocs(collection(db, "customers"));
+            const customersMap = new Map();
+            customersSnapshot.forEach(doc => customersMap.set(doc.id, doc.data()));
+
+            onSnapshot(recentOrdersQuery, (snapshot) => {
+                recentOrdersContainer.innerHTML = '';
+                if (snapshot.empty) { recentOrdersContainer.innerHTML = '<p class="text-slate-500 text-center py-8">ไม่มีออเดอร์ล่าสุด</p>'; return; }
+                snapshot.forEach(doc => {
+                    const order = doc.data();
+                    const customerName = customersMap.get(order.customerId)?.name || 'N/A';
+                    const orderCard = document.createElement('a');
+                    orderCard.href = `order-details.html?orderId=${doc.id}`;
+                    orderCard.className = 'block bg-slate-50 p-4 rounded-lg border border-slate-200 hover:bg-slate-100 transition-colors';
+                    orderCard.innerHTML = `<div class="flex justify-between items-center"><div><p class="font-semibold text-slate-800">${customerName}</p><p class="text-sm text-slate-500">${formatCurrency(order.totalAmount)}</p></div><div>${getProcessingStatusBadge(order.processingStatus)}</div></div>`;
+                    recentOrdersContainer.appendChild(orderCard);
+                });
+            });
+
+            const lowStockContainer = document.getElementById('low-stock-container');
+            const lowStockQuery = query(collection(db, "materials"), where("stockRemaining", "<=", 10), orderBy("stockRemaining", "asc"), limit(5));
+            onSnapshot(lowStockQuery, (snapshot) => {
+                lowStockContainer.innerHTML = '';
+                if (snapshot.empty) { lowStockContainer.innerHTML = '<p class="text-slate-500 text-center py-8">ไม่มีสินค้าใกล้หมด</p>'; return; }
+                snapshot.forEach(doc => {
+                    const item = doc.data();
+                    const itemCard = document.createElement('div');
+                    itemCard.className = 'bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center';
+                    const sizeHtml = item.size ? `<p class="text-sm text-slate-500">${item.size} mm</p>` : '';
+                    itemCard.innerHTML = `<div><p class="font-semibold text-slate-800">${item.name}</p>${sizeHtml}</div><div class="text-right"><p class="font-bold text-lg text-rose-500 mb-1">${item.stockRemaining}</p><a href="intake.html?materialId=${doc.id}" class="text-xs bg-emerald-500 text-white font-semibold py-1 px-2 rounded-md hover:bg-emerald-600 transition-colors">รับของเข้า</a></div>`;
+                    lowStockContainer.appendChild(itemCard);
+                });
+            });
         }
 
         fetchDashboardData();
-
-        // Modal Logic
-        const createOrderBtn = document.getElementById('create-order-btn');
-        const modal = document.getElementById('order-type-modal');
-        const modalPanel = document.getElementById('modal-panel');
-        const closeModalBtn = document.getElementById('close-modal-btn');
-
-        const openModal = () => {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalPanel.classList.remove('opacity-0', 'scale-95');
-                modalPanel.classList.add('opacity-100', 'scale-100');
-            }, 10);
-        };
-
-        const closeModal = () => {
-            modalPanel.classList.remove('opacity-100', 'scale-100');
-            modalPanel.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 200);
-        };
-
-        createOrderBtn.addEventListener('click', openModal);
-        closeModalBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
     </script>
 </body>
 </html>
