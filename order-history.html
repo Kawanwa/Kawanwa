@@ -146,7 +146,8 @@
                     const row = document.createElement('tr'); row.className = 'bg-white border-b hover:bg-stone-50';
                     const orderDate = order.orderDate?.toDate().toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }) || 'N/A';
                     const customerName = customersMap.get(order.customerId)?.name || 'N/A';
-                    row.innerHTML = `<td class="px-4 py-4 font-semibold">${index + 1}</td><td class="px-4 py-4">${orderDate}</td><td class="px-4 py-4 font-medium text-stone-900">${customerName}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td><td class="px-4 py-4 text-center">${order.productType || 'N/A'}</td><td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td><td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td><td class="px-4 py-4 text-center whitespace-nowrap"><a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">ดูรายละเอียด</a><button data-order-id="${order.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`;
+                    // --- ⬇️ แก้ไขบรรทัดนี้: เพิ่มปุ่ม "เลื่อน" เข้ามา ⬇️ ---
+                    row.innerHTML = `<td class="px-4 py-4 font-semibold">${index + 1}</td><td class="px-4 py-4">${orderDate}</td><td class="px-4 py-4 font-medium text-stone-900">${customerName}</td><td class="px-4 py-4 text-right">${formatCurrency(order.totalAmount)} ฿</td><td class="px-4 py-4 text-center">${order.productType || 'N/A'}</td><td class="px-4 py-4 text-center">${getPaymentStatusBadge(order.paymentStatus)}</td><td class="px-4 py-4 text-center">${getProcessingStatusBadge(order.processingStatus)}</td><td class="px-4 py-4 text-center whitespace-nowrap"><a href="order-details.html?orderId=${order.id}" class="font-medium text-indigo-600 hover:underline">รายละเอียด</a><button data-order-id="${order.id}" class="move-month-btn font-medium text-sky-600 hover:underline ml-3">เลื่อน</button><button data-order-id="${order.id}" class="delete-btn font-medium text-rose-600 hover:underline ml-3">ลบ</button></td>`;
                     tbody.appendChild(row);
                 });
                 table.appendChild(tbody); orderTableContainer.appendChild(table);
@@ -182,23 +183,13 @@
                 }, (error) => { console.error("Error fetching orders:", error); orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`; });
             };
             
-            // --- ⬇️ โค้ดส่วนที่เพิ่มเข้ามาสำหรับฟังก์ชันการลบ ⬇️ ---
             async function deleteOrder(orderId) {
-                if (!orderId) {
-                    alert("เกิดข้อผิดพลาด: ไม่พบรหัสออเดอร์");
-                    return;
-                }
-                
-                // ค้นหาชื่อลูกค้าเพื่อใช้ในการยืนยัน
+                if (!orderId) { alert("เกิดข้อผิดพลาด: ไม่พบรหัสออเดอร์"); return; }
                 const orderToDelete = allOrdersForMonth.find(o => o.id === orderId);
                 const customerName = customersMap.get(orderToDelete?.customerId)?.name || 'ไม่ระบุ';
-
-                // แสดงหน้าต่างยืนยันก่อนลบ
                 if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์ของ "${customerName}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
                     try {
-                        const orderRef = doc(db, "orders", orderId);
-                        await deleteDoc(orderRef);
-                        // ไม่ต้องทำอะไรต่อ เพราะ onSnapshot จะอัปเดตหน้าเว็บให้เอง
+                        await deleteDoc(doc(db, "orders", orderId));
                         console.log(`Order ${orderId} has been deleted.`);
                     } catch (error) {
                         console.error("Error removing order: ", error);
@@ -206,7 +197,36 @@
                     }
                 }
             }
-            // --- ⬆️ สิ้นสุดโค้ดส่วนที่เพิ่มเข้ามา ⬆️ ---
+
+            // --- ⬇️ เพิ่มฟังก์ชันใหม่สำหรับ "เลื่อนออเดอร์" ตรงนี้ ⬇️ ---
+            async function moveOrderToNextMonth(orderId) {
+                if (!orderId) {
+                    alert("เกิดข้อผิดพลาด: ไม่พบรหัสออเดอร์");
+                    return;
+                }
+                if (confirm("คุณต้องการเลื่อนออเดอร์นี้ไปเดือนถัดไปใช่หรือไม่?")) {
+                    try {
+                        const orderRef = doc(db, "orders", orderId);
+                        const orderSnap = await getDoc(orderRef);
+
+                        if (orderSnap.exists()) {
+                            const currentOrderDate = orderSnap.data().orderDate.toDate(); // แปลงเป็น JS Date
+                            currentOrderDate.setMonth(currentOrderDate.getMonth() + 1); // บวกไป 1 เดือน
+                            
+                            // อัปเดตข้อมูลกลับไปที่ Firestore
+                            await updateDoc(orderRef, {
+                                orderDate: Timestamp.fromDate(currentOrderDate) // แปลงกลับเป็น Timestamp
+                            });
+                            console.log(`Order ${orderId} has been moved to the next month.`);
+                        } else {
+                            alert("ไม่พบออเดอร์ที่ต้องการเลื่อน");
+                        }
+                    } catch (error) {
+                        console.error("Error moving order: ", error);
+                        alert(`เกิดข้อผิดพลาดในการเลื่อนออเดอร์: ${error.message}`);
+                    }
+                }
+            }
 
             async function initializePage() {
                 updateMonthDisplay();
@@ -224,12 +244,19 @@
             typeFilterControls.addEventListener('click', (e) => { const button = e.target.closest('.filter-btn'); if (!button) return; currentFilters.productType = button.dataset.filter; document.querySelectorAll('#type-filter-controls .filter-btn').forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderOrders(); });
             orderTableContainer.addEventListener('change', (e) => { if (e.target.classList.contains('filter-select')) { const filterKey = e.target.dataset.filterKey; currentFilters[filterKey] = e.target.value; renderOrders(); } });
             
-            // แก้ไข Event Listener ส่วนนี้ให้เรียกใช้ฟังก์ชัน deleteOrder ที่สร้างขึ้นใหม่
+            // --- ⬇️ แก้ไข Event Listener ให้รองรับปุ่ม "เลื่อน" ด้วย ⬇️ ---
             orderTableContainer.addEventListener('click', async (e) => {
                 const deleteButton = e.target.closest('.delete-btn');
                 if (deleteButton) {
                     const orderId = deleteButton.dataset.orderId;
                     await deleteOrder(orderId);
+                    return; // จบการทำงานส่วนนี้
+                }
+
+                const moveButton = e.target.closest('.move-month-btn');
+                if (moveButton) {
+                    const orderId = moveButton.dataset.orderId;
+                    await moveOrderToNextMonth(orderId);
                 }
             });
             
