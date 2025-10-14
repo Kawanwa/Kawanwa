@@ -182,6 +182,32 @@
                 }, (error) => { console.error("Error fetching orders:", error); orderTableContainer.innerHTML = `<p class="text-center py-10 text-rose-500">เกิดข้อผิดพลาด: ${error.message}</p><p class="text-center text-sm text-gray-500">อาจจะต้องสร้าง Index ใน Firebase (ดูที่ Console)</p>`; });
             };
             
+            // --- ⬇️ โค้ดส่วนที่เพิ่มเข้ามาสำหรับฟังก์ชันการลบ ⬇️ ---
+            async function deleteOrder(orderId) {
+                if (!orderId) {
+                    alert("เกิดข้อผิดพลาด: ไม่พบรหัสออเดอร์");
+                    return;
+                }
+                
+                // ค้นหาชื่อลูกค้าเพื่อใช้ในการยืนยัน
+                const orderToDelete = allOrdersForMonth.find(o => o.id === orderId);
+                const customerName = customersMap.get(orderToDelete?.customerId)?.name || 'ไม่ระบุ';
+
+                // แสดงหน้าต่างยืนยันก่อนลบ
+                if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบออเดอร์ของ "${customerName}"?\n\nการกระทำนี้ไม่สามารถย้อนกลับได้`)) {
+                    try {
+                        const orderRef = doc(db, "orders", orderId);
+                        await deleteDoc(orderRef);
+                        // ไม่ต้องทำอะไรต่อ เพราะ onSnapshot จะอัปเดตหน้าเว็บให้เอง
+                        console.log(`Order ${orderId} has been deleted.`);
+                    } catch (error) {
+                        console.error("Error removing order: ", error);
+                        alert(`เกิดข้อผิดพลาดในการลบออเดอร์: ${error.message}`);
+                    }
+                }
+            }
+            // --- ⬆️ สิ้นสุดโค้ดส่วนที่เพิ่มเข้ามา ⬆️ ---
+
             async function initializePage() {
                 updateMonthDisplay();
                 try {
@@ -197,7 +223,15 @@
             searchInput.addEventListener('input', () => renderOrders());
             typeFilterControls.addEventListener('click', (e) => { const button = e.target.closest('.filter-btn'); if (!button) return; currentFilters.productType = button.dataset.filter; document.querySelectorAll('#type-filter-controls .filter-btn').forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderOrders(); });
             orderTableContainer.addEventListener('change', (e) => { if (e.target.classList.contains('filter-select')) { const filterKey = e.target.dataset.filterKey; currentFilters[filterKey] = e.target.value; renderOrders(); } });
-            orderTableContainer.addEventListener('click', async (e) => { const target = e.target; if (target.closest('.delete-btn')) { const button = target.closest('.delete-btn'); const orderId = button.dataset.orderId; const braceletId = button.dataset.braceletId; await deleteOrder(orderId, braceletId); } });
+            
+            // แก้ไข Event Listener ส่วนนี้ให้เรียกใช้ฟังก์ชัน deleteOrder ที่สร้างขึ้นใหม่
+            orderTableContainer.addEventListener('click', async (e) => {
+                const deleteButton = e.target.closest('.delete-btn');
+                if (deleteButton) {
+                    const orderId = deleteButton.dataset.orderId;
+                    await deleteOrder(orderId);
+                }
+            });
             
             initializePage();
         });
